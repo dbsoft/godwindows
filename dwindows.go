@@ -1,9 +1,12 @@
 package main
 
 /*
-#cgo pkg-config: dwindows
+#cgo linux pkg-config: dwindows
+#cgo freebsd pkg-config: dwindows
 #cgo darwin CFLAGS: -I/usr/local/include -g -O2 -D__MAC__
 #cgo darwin LDFLAGS: -L/usr/local/lib -ldwindows -lresolv -framework Cocoa -framework WebKit -lpthread
+#cgo windows CFLAGS: -IC:/Work/Netlabs/dwindows -g -O2 -D__WIN32__ -mthreads
+#cgo windows LDFLAGS: -LC:/Work/Netlabs/dwindows -ldwindows
 #include <dw.h>
 #include <stdlib.h>
 

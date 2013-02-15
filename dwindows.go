@@ -3,6 +3,8 @@ package main
 /*
 #cgo linux CFLAGS: -I/usr/local/include -g -O2 -pthread -I/usr/include/gtk-3.0 -I/usr/include/pango-1.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/freetype2 -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/libpng12 -pthread -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/gtk-3.0 -I/usr/include/libsoup-2.4 -I/usr/include/pango-1.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/freetype2 -I/usr/include/pixman-1 -I/usr/include/libpng12 -I/usr/include/libxml2 -I/usr/include/webkitgtk-3.0 -D__UNIX__
 #cgo linux LDFLAGS: -L/usr/local/lib -ldwindows -lresolv -lgtk-3 -lgdk-3 -latk-1.0 -lgio-2.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo-gobject -lpango-1.0 -lcairo -lgobject-2.0 -lglib-2.0 -lpthread
+#cgo darwin CFLAGS: -I/usr/local/include -g -O2 -D__MAC__
+#cgo darwin LDFLAGS: -L/usr/local/lib -ldwindows -lresolv -framework Cocoa -framework WebKit -lpthread
 #include <dw.h>
 #include <stdlib.h>
 
@@ -28,10 +30,7 @@ const (
    TRUE
 )
 
-type DW struct { 
-//   init func(newthread C.int) C.int
-//   messagebox func(title string, flags C.int, message string) C.int
-}
+type DW struct { }
 
 func (dw DW) init(newthread C.int) C.int {
    return C.go_init(newthread);

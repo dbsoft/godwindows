@@ -149,7 +149,6 @@ var HWND_DESKTOP HWND = nil
 var DW_DESKTOP HWND = nil
 
 func (dw DW) init(newthread C.int) C.int {
-   runtime.LockOSThread();
    return C.go_init(newthread);
 }
 
@@ -282,6 +281,10 @@ func (dw DW) signal_connect(window HWND, signame string, sigfunc unsafe.Pointer,
 
 func exit_handler(window HWND, data unsafe.Pointer) C.int {
    return FALSE;
+}
+
+func init() {
+   runtime.LockOSThread();
 }
 
 func main() {

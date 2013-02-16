@@ -9,6 +9,7 @@ package main
 #cgo windows LDFLAGS: -LC:/Work/Netlabs/dwindows -ldw
 #include <dw.h>
 #include <stdlib.h>
+#include <string.h>
 
 int go_init(int newthread)
 {
@@ -123,14 +124,14 @@ void *go_button_new(char *text, unsigned long id)
    return (void *)dw_button_new(text, id);
 }
 
-extern int go_callback_basic_int(void *pfunc, void* window, void *data);
+extern int go_int_callback_basic(void *pfunc, void* window, void *data);
 
 int DWSIGNAL go_callback_basic(HWND window, void *data)
 {
    if(data)
    {
       void **param = (void **)data;
-      return go_callback_basic_int(param[0], (void *)window, param[1]);
+      return go_int_callback_basic(param[0], (void *)window, param[1]);
    }
    return 0;
 }
@@ -394,7 +395,8 @@ func init() {
    runtime.LockOSThread();
 }
 
-func go_callback_basic_int(pfunc unsafe.Pointer, window unsafe.Pointer, data unsafe.Pointer) C.int {
+// export go_int_callback_basic
+func go_int_callback_basic(pfunc unsafe.Pointer, window unsafe.Pointer, data unsafe.Pointer) C.int {
    thisfunc := *(*func(HWND, unsafe.Pointer) C.int)(pfunc);
    return thisfunc(HWND(window), data);
 }

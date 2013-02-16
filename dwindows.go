@@ -123,14 +123,125 @@ void *go_button_new(char *text, unsigned long id)
    return (void *)dw_button_new(text, id);
 }
 
-void go_signal_connect(void *window, char *signame, void *sigfunc, void *data)
-{
-   dw_signal_connect((HWND)window, signame, sigfunc, data);
-}
+extern int go_callback_basic_int(void *pfunc, void* window, void *data);
 
 int DWSIGNAL go_callback_basic(HWND window, void *data)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_callback_basic_int(param[0], (void *)window, param[1]);
+   }
    return 0;
+}
+
+int DWSIGNAL go_callback_configure(HWND window, int width, int height, void *data)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_keypress(HWND window, char ch, int vk, int state, void *data, char *utf8)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_mouse(HWND window, int x, int y, int mask, void *data)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_expose(HWND window,  DWExpose *exp, void *data)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_string(HWND window, char *str, void *data)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_item_context(HWND window, char *text, int x, int y, void *data, void *itemdata)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_item_select(HWND window, HTREEITEM item, char *text, void *data, void *itemdata)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_numeric(HWND window,  int val, void *data)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_ulong(HWND window, unsigned long val, void *data)
+{
+   return 0;
+}
+
+int DWSIGNAL go_callback_tree(HWND window, HTREEITEM *tree, void *data)
+{
+   return 0;
+}
+
+void go_signal_connect(void *window, char *signame, void *sigfunc, void *data)
+{
+   void **param = malloc(sizeof(void *) * 2);
+   void *func = (void *)go_callback_basic;
+   
+   if(param)
+   {
+      param[0] = sigfunc;
+      param[1] = data;
+      
+      if(strcmp(signame, DW_SIGNAL_CONFIGURE) == 0)
+      {
+         func = (void *)go_callback_configure;
+      }
+      else if(strcmp(signame, DW_SIGNAL_KEY_PRESS) == 0)
+      {
+         func = (void *)go_callback_keypress;
+      }
+      else if(strcmp(signame, DW_SIGNAL_BUTTON_PRESS) == 0 ||
+              strcmp(signame, DW_SIGNAL_BUTTON_RELEASE) == 0 ||
+              strcmp(signame, DW_SIGNAL_MOTION_NOTIFY) == 0)
+      {
+         func = (void *)go_callback_mouse;
+      }
+      else if(strcmp(signame, DW_SIGNAL_EXPOSE) == 0)
+      {
+         func = (void *)go_callback_expose;
+      }
+      else if(strcmp(signame, DW_SIGNAL_ITEM_ENTER) == 0)
+      {
+         func = (void *)go_callback_string;
+      }
+      else if(strcmp(signame, DW_SIGNAL_ITEM_CONTEXT) == 0)
+      {
+         func = (void *)go_callback_item_context;
+      }
+      else if(strcmp(signame, DW_SIGNAL_ITEM_SELECT) == 0)
+      {
+         func = (void *)go_callback_item_select;
+      }
+      else if(strcmp(signame, DW_SIGNAL_LIST_SELECT) == 0 ||
+              strcmp(signame, DW_SIGNAL_VALUE_CHANGED) == 0 ||
+              strcmp(signame, DW_SIGNAL_COLUMN_CLICK) == 0)
+      {
+         func = (void *)go_callback_numeric;
+      }
+      else if(strcmp(signame, DW_SIGNAL_SWITCH_PAGE) == 0)
+      {
+         func = (void *)go_callback_ulong;
+      }
+      else if(strcmp(signame, DW_SIGNAL_TREE_EXPAND) == 0)
+      {
+         func = (void *)go_callback_tree;
+      }
+      
+      dw_signal_connect((HWND)window, signame, func, param);
+   }
 }
 */
 import "C"
@@ -279,16 +390,24 @@ func (dw DW) signal_connect(window HWND, signame string, sigfunc unsafe.Pointer,
    C.go_signal_connect(unsafe.Pointer(window), csigname, sigfunc, data);
 }
 
-func exit_handler(window HWND, data unsafe.Pointer) C.int {
-   return FALSE;
-}
-
 func init() {
    runtime.LockOSThread();
 }
 
+func go_callback_basic_int(pfunc unsafe.Pointer, window unsafe.Pointer, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), data);
+}
+
+var dw DW;
+
+func exit_handler(window HWND, data unsafe.Pointer) C.int {
+   dw.main_quit();
+   return FALSE;
+}
+
 func main() {
-   dw := new(DW);
+   dw = new(DW);
    
    /* Initialize the Dynamic Windows engine */
    dw.init(TRUE);
@@ -385,7 +504,7 @@ func main() {
    /* Set the default field */
    dw.window_default(mainwindow, copypastefield);
 
-   //dw.signal_connect(mainwindow, C.DW_SIGNAL_DELETE, unsafe.Pointer(&exit_callback), unsafe.Pointer(mainwindow));
+   dw.signal_connect(mainwindow, C.DW_SIGNAL_DELETE, unsafe.Pointer(&exit_callback), unsafe.Pointer(mainwindow));
    /*
    * The following is a special case handler for the Mac and other platforms which contain
    * an application object which can be closed.  It function identically to a window delete/close

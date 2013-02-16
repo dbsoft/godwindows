@@ -122,6 +122,16 @@ void *go_button_new(char *text, unsigned long id)
 {
    return (void *)dw_button_new(text, id);
 }
+
+void go_signal_connect(void *window, char *signame, void *sigfunc, void *data)
+{
+   dw_signal_connect((HWND)window, signame, sigfunc, data);
+}
+
+int DWSIGNAL go_callback_basic(HWND window, void *data)
+{
+   return 0;
+}
 */
 import "C"
 import "unsafe"
@@ -261,6 +271,17 @@ func (dw DW) button_new(text string, id C.ulong) HWND {
    return HWND(C.go_button_new(ctext, id));
 }
 
+func (dw DW) signal_connect(window HWND, signame string, sigfunc unsafe.Pointer, data unsafe.Pointer) {
+   csigname := C.CString(signame);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   C.go_signal_connect(unsafe.Pointer(window), csigname, sigfunc, data);
+}
+
+func exit_handler(window HWND, data unsafe.Pointer) C.int {
+   return FALSE;
+}
+
 func main() {
    dw := new(DW);
    
@@ -359,7 +380,7 @@ func main() {
    /* Set the default field */
    dw.window_default(mainwindow, copypastefield);
 
-   //dw.signal_connect(mainwindow, DW_SIGNAL_DELETE, DW_SIGNAL_FUNC(exit_callback), DW_POINTER(mainwindow));
+   //dw.signal_connect(mainwindow, C.DW_SIGNAL_DELETE, unsafe.Pointer(&exit_callback), unsafe.Pointer(mainwindow));
    /*
    * The following is a special case handler for the Mac and other platforms which contain
    * an application object which can be closed.  It function identically to a window delete/close

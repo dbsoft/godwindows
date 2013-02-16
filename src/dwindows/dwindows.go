@@ -24,11 +24,11 @@ const (
 var HWND_DESKTOP HWND = nil
 var DW_DESKTOP HWND = nil
 
-func (dw DW) init(newthread C.int) C.int {
+func (dw DW) Init(newthread C.int) C.int {
    return C.go_init(newthread);
 }
 
-func (dw DW) messagebox(title string, flags C.int, message string) C.int {
+func (dw DW) Messagebox(title string, flags C.int, message string) C.int {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
    cmessage := C.CString(message);
@@ -37,118 +37,118 @@ func (dw DW) messagebox(title string, flags C.int, message string) C.int {
    return C.go_messagebox(ctitle, flags, cmessage);
 }
 
-func (dw DW) window_new(owner HWND, title string, flags C.ulong) HWND {
+func (dw DW) Window_new(owner HWND, title string, flags C.ulong) HWND {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
    
    return HWND(C.go_window_new(unsafe.Pointer(owner), ctitle, flags));
 }
 
-func (dw DW) window_show(handle HWND) C.int {
+func (dw DW) Window_show(handle HWND) C.int {
    return C.go_window_show(unsafe.Pointer(handle));
 }
 
-func (dw DW) window_set_pos(handle HWND, x C.long, y C.long) {
+func (dw DW) Window_set_pos(handle HWND, x C.long, y C.long) {
    C.go_window_set_pos(unsafe.Pointer(handle), x, y);
 }
 
-func (dw DW) window_set_pos_size(handle HWND, x C.long, y C.long, width C.ulong, height C.ulong) {
+func (dw DW) Window_set_pos_size(handle HWND, x C.long, y C.long, width C.ulong, height C.ulong) {
    C.go_window_set_pos_size(unsafe.Pointer(handle), x, y, width, height);
 }
 
-func (dw DW) window_set_size(handle HWND, width C.ulong, height C.ulong) {
+func (dw DW) Window_set_size(handle HWND, width C.ulong, height C.ulong) {
    C.go_window_set_size(unsafe.Pointer(handle), width, height);
 }
 
-func (dw DW) window_set_color(handle HWND, fore C.ulong, back C.ulong) C.int {
+func (dw DW) Window_set_color(handle HWND, fore C.ulong, back C.ulong) C.int {
    return C.go_window_set_color(unsafe.Pointer(handle), fore, back);
 }
 
-func (dw DW) window_set_style(handle HWND, style C.ulong, mask C.ulong) {
+func (dw DW) Window_set_style(handle HWND, style C.ulong, mask C.ulong) {
    C.go_window_set_style(unsafe.Pointer(handle), style, mask);
 }
 
-func (dw DW) window_click_default(window HWND, next HWND) {
+func (dw DW) Window_click_default(window HWND, next HWND) {
    C.go_window_click_default(unsafe.Pointer(window), unsafe.Pointer(next));
 }
 
-func (dw DW) window_default(window HWND, defaultitem HWND) {
+func (dw DW) Window_default(window HWND, defaultitem HWND) {
    C.go_window_default(unsafe.Pointer(window), unsafe.Pointer(defaultitem));
 }
 
-func (dw DW) main() {
+func (dw DW) Main() {
    C.dw_main();
 }
 
-func (dw DW) main_iteration() {
+func (dw DW) Main_iteration() {
    C.dw_main_iteration();
 }
 
-func (dw DW) main_quit() {
+func (dw DW) Main_quit() {
    C.dw_main_quit();
 }
 
-func (dw DW) main_sleep(milliseconds C.int) {
+func (dw DW) Main_sleep(milliseconds C.int) {
    C.dw_main_sleep(milliseconds);
 }
 
-func (dw DW) box_new(btype C.int, pad C.int) HWND {
+func (dw DW) Box_new(btype C.int, pad C.int) HWND {
    return HWND(C.go_box_new(btype, pad));
 }
 
-func (dw DW) box_pack_at_index(box HWND, item HWND, index C.int, width C.int, height C.int, hsize C.int, vsize C.int, pad C.int) {
+func (dw DW) Box_pack_at_index(box HWND, item HWND, index C.int, width C.int, height C.int, hsize C.int, vsize C.int, pad C.int) {
    C.go_box_pack_at_index(unsafe.Pointer(box), unsafe.Pointer(item), index, width, height, hsize, vsize, pad);
 }
 
-func (dw DW) box_pack_end(box HWND, item HWND, width C.int, height C.int, hsize C.int, vsize C.int, pad C.int) {
+func (dw DW) Box_pack_end(box HWND, item HWND, width C.int, height C.int, hsize C.int, vsize C.int, pad C.int) {
    C.go_box_pack_end(unsafe.Pointer(box), unsafe.Pointer(item), width, height, hsize, vsize, pad);
 }
 
-func (dw DW) box_pack_start(box HWND, item HWND, width C.int, height C.int, hsize C.int, vsize C.int, pad C.int) {
+func (dw DW) Box_pack_start(box HWND, item HWND, width C.int, height C.int, hsize C.int, vsize C.int, pad C.int) {
    C.go_box_pack_start(unsafe.Pointer(box), unsafe.Pointer(item), width, height, hsize, vsize, pad);
 }
 
-func (dw DW) box_unpack(handle HWND) C.int {
+func (dw DW) Box_unpack(handle HWND) C.int {
    return C.go_box_unpack(unsafe.Pointer(handle));
 }
 
-func (dw DW) box_unpack_at_index(handle HWND, index C.int) HWND {
+func (dw DW) Box_unpack_at_index(handle HWND, index C.int) HWND {
    return HWND(C.go_box_unpack_at_index(unsafe.Pointer(handle), index));
 }
 
-func (dw DW) text_new(text string, id C.ulong) HWND {
+func (dw DW) Text_new(text string, id C.ulong) HWND {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
    return HWND(C.go_text_new(ctext, id));
 }
 
-func (dw DW) entryfield_new(text string, id C.ulong) HWND {
+func (dw DW) Entryfield_new(text string, id C.ulong) HWND {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
    return HWND(C.go_entryfield_new(ctext, id));
 }
 
-func (dw DW) entryfield_password_new(text string, id C.ulong) HWND {
+func (dw DW) Entryfield_password_new(text string, id C.ulong) HWND {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
    return HWND(C.go_entryfield_password_new(ctext, id));
 }
 
-func (dw DW) entryfield_set_limit(handle HWND, limit C.int) {
+func (dw DW) Entryfield_set_limit(handle HWND, limit C.int) {
    C.go_entryfield_set_limit(unsafe.Pointer(handle), limit);
 }
 
-func (dw DW) button_new(text string, id C.ulong) HWND {
+func (dw DW) Button_new(text string, id C.ulong) HWND {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
    return HWND(C.go_button_new(ctext, id));
 }
 
-func (dw DW) signal_connect(window HWND, signame string, sigfunc unsafe.Pointer, data unsafe.Pointer) {
+func (dw DW) Signal_connect(window HWND, signame string, sigfunc unsafe.Pointer, data unsafe.Pointer) {
    csigname := C.CString(signame);
    defer C.free(unsafe.Pointer(csigname));
    

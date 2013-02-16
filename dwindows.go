@@ -135,6 +135,7 @@ int DWSIGNAL go_callback_basic(HWND window, void *data)
 */
 import "C"
 import "unsafe"
+import "runtime"
 
 type HWND unsafe.Pointer
 type DW struct { }
@@ -148,6 +149,7 @@ var HWND_DESKTOP HWND = nil
 var DW_DESKTOP HWND = nil
 
 func (dw DW) init(newthread C.int) C.int {
+   runtime.LockOSThread();
    return C.go_init(newthread);
 }
 

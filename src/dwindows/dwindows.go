@@ -14,6 +14,7 @@ import "unsafe"
 import "runtime"
 
 type HWND unsafe.Pointer
+type HTREEITEM unsafe.Pointer
 type DW struct { }
 
 const (
@@ -163,5 +164,65 @@ func init() {
 func go_int_callback_basic(pfunc unsafe.Pointer, window unsafe.Pointer, data unsafe.Pointer) C.int {
    thisfunc := *(*func(HWND, unsafe.Pointer) C.int)(pfunc);
    return thisfunc(HWND(window), data);
+}
+
+//export go_int_callback_configure
+func go_int_callback_configure(pfunc unsafe.Pointer, window unsafe.Pointer, width C.int, height C.int, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, C.int, C.int, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), width, height, data);
+}
+
+//export go_int_callback_keypress
+func go_int_callback_keypress(pfunc unsafe.Pointer, window unsafe.Pointer, ch C.char, vk C.int, state C.int, data unsafe.Pointer, utf8 *C.char) C.int {
+   thisfunc := *(*func(HWND, C.char, C.int, C.int, unsafe.Pointer, string) C.int)(pfunc);
+   return thisfunc(HWND(window), ch, vk, state, data, C.GoString(utf8));
+}
+
+//export go_int_callback_mouse
+func go_int_callback_mouse(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int, y C.int, mask C.int, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, C.int, C.int, C.int, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), x, y, mask, data);
+}
+
+//export go_int_callback_expose
+func go_int_callback_expose(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int, y C.int, width C.int, height C.int, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, C.int, C.int, C.int, C.int, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), x, y, width, height, data);
+}
+
+//export go_int_callback_string
+func go_int_callback_string(pfunc unsafe.Pointer, window unsafe.Pointer, str *C.char, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, string, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), C.GoString(str), data);
+}
+
+//export go_int_callback_item_context
+func go_int_callback_item_context(pfunc unsafe.Pointer, window unsafe.Pointer, text *C.char, x C.int, y C.int, data unsafe.Pointer, itemdata unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, string, C.int, C.int, unsafe.Pointer, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), C.GoString(text), x, y, data, itemdata);
+}
+
+//export go_int_callback_item_select
+func go_int_callback_item_select(pfunc unsafe.Pointer, window unsafe.Pointer, item unsafe.Pointer, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, HTREEITEM, string, unsafe.Pointer, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), HTREEITEM(item), C.GoString(text), data, itemdata);
+}
+
+//export go_int_callback_numeric
+func go_int_callback_numeric(pfunc unsafe.Pointer, window unsafe.Pointer, val C.int, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, C.int, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), val, data);
+}
+
+//export go_int_callback_ulong
+func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ulong, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, C.ulong, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), val, data);
+}
+
+//export go_int_callback_tree
+func go_int_callback_tree(pfunc unsafe.Pointer, window unsafe.Pointer, tree unsafe.Pointer, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HWND, HTREEITEM, unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(HWND(window), HTREEITEM(tree), data);
 }
 

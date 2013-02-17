@@ -116,6 +116,16 @@ static void *go_button_new(char *text, unsigned long id)
 }
 
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);
+extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data);
+extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8);
+extern int go_int_callback_mouse(void *pfunc, void* window, int x, int y, int mask, void *data);
+extern int go_int_callback_expose(void *pfunc, void* window, int x, int y, int width, int height, void *data);
+extern int go_int_callback_string(void *pfunc, void* window, char *str, void *data);
+extern int go_int_callback_item_context(void *pfunc, void *window, char *text, int x, int y, void *data, void *itemdata);
+extern int go_int_callback_item_select(void *pfunc, void *window, void *item, char *text, void *data, void *itemdata);
+extern int go_int_callback_numeric(void *pfunc, void* window, int val, void *data);
+extern int go_int_callback_ulong(void *pfunc, void* window, unsigned long val, void *data);
+extern int go_int_callback_tree(void *pfunc, void* window, void *item, void *data);
 
 static int DWSIGNAL go_callback_basic(HWND window, void *data)
 {
@@ -129,51 +139,101 @@ static int DWSIGNAL go_callback_basic(HWND window, void *data)
 
 static int DWSIGNAL go_callback_configure(HWND window, int width, int height, void *data)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_configure(param[0], (void *)window, width, height, param[1]);
+   }
    return 0;
 }
 
 static int DWSIGNAL go_callback_keypress(HWND window, char ch, int vk, int state, void *data, char *utf8)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_keypress(param[0], (void *)window, ch, vk, state, param[1], utf8);
+   }
    return 0;
 }
 
 static int DWSIGNAL go_callback_mouse(HWND window, int x, int y, int mask, void *data)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_mouse(param[0], (void *)window, x, y, mask, param[1]);
+   }
    return 0;
 }
 
 static int DWSIGNAL go_callback_expose(HWND window,  DWExpose *exp, void *data)
 {
+   if(data && exp)
+   {
+      void **param = (void **)data;
+      return go_int_callback_expose(param[0], (void *)window, exp->x, exp->y, exp->width, exp->height, param[1]);
+   }
    return 0;
 }
 
 static int DWSIGNAL go_callback_string(HWND window, char *str, void *data)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_string(param[0], (void *)window, str, param[1]);
+   }
    return 0;
 }
 
 static int DWSIGNAL go_callback_item_context(HWND window, char *text, int x, int y, void *data, void *itemdata)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_item_context(param[0], (void *)window, text, x, y, param[1], itemdata);
+   }
    return 0;
 }
 
 static int DWSIGNAL go_callback_item_select(HWND window, HTREEITEM item, char *text, void *data, void *itemdata)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_item_select(param[0], (void *)window, (void *)item, text, param[1], itemdata);
+   }
    return 0;
 }
 
-static int DWSIGNAL go_callback_numeric(HWND window,  int val, void *data)
+static int DWSIGNAL go_callback_numeric(HWND window, int val, void *data)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_numeric(param[0], (void *)window, val, param[1]);
+   }
    return 0;
 }
 
 static int DWSIGNAL go_callback_ulong(HWND window, unsigned long val, void *data)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_ulong(param[0], (void *)window, val, param[1]);
+   }
    return 0;
 }
 
-static int DWSIGNAL go_callback_tree(HWND window, HTREEITEM *tree, void *data)
+static int DWSIGNAL go_callback_tree(HWND window, HTREEITEM tree, void *data)
 {
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_tree(param[0], (void *)window, (void *)tree, param[1]);
+   }
    return 0;
 }
 

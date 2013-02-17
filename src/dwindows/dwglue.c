@@ -115,15 +115,15 @@ static void *go_button_new(char *text, unsigned long id)
    return (void *)dw_button_new(text, id);
 }
 
-//extern int go_int_callback_basic(void *pfunc, void* window, void *data);
+extern int go_int_callback_basic(void *pfunc, void* window, void *data);
 
 static int DWSIGNAL go_callback_basic(HWND window, void *data)
 {
-   /*if(data)
+   if(data)
    {
       void **param = (void **)data;
       return go_int_callback_basic(param[0], (void *)window, param[1]);
-   }*/
+   }
    return 0;
 }
 

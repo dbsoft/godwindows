@@ -17,12 +17,14 @@ var HWND_DESKTOP dwindows.HWND = nil
 var DW_DESKTOP dwindows.HWND = nil
 var dw *dwindows.DW;
 
-func exit_handler(window dwindows.HWND, data unsafe.Pointer) C.int {
-   dw.Main_quit();
-   return 0;
+func exit_callback(window dwindows.HWND, data unsafe.Pointer) C.int {
+   if dw.Messagebox("dwtest", C.DW_MB_YESNO | C.DW_MB_QUESTION, "Are you sure you want to exit?") != 0 {
+      dw.Main_quit();
+   }
+   return C.TRUE;
 }
 
-var exit_handler_func = exit_handler;
+var exit_callback_func = exit_callback;
 
 func main() {
    dw = new(dwindows.DW);
@@ -122,7 +124,7 @@ func main() {
    /* Set the default field */
    dw.Window_default(mainwindow, copypastefield);
 
-   dw.Signal_connect(mainwindow, C.DW_SIGNAL_DELETE, unsafe.Pointer(&exit_handler_func), unsafe.Pointer(mainwindow));
+   dw.Signal_connect(mainwindow, C.DW_SIGNAL_DELETE, unsafe.Pointer(&exit_callback_func), unsafe.Pointer(mainwindow));
    /*
    * The following is a special case handler for the Mac and other platforms which contain
    * an application object which can be closed.  It function identically to a window delete/close

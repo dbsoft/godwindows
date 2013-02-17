@@ -159,7 +159,7 @@ func init() {
    runtime.LockOSThread();
 }
 
-// export go_int_callback_basic
+//export go_int_callback_basic
 func go_int_callback_basic(pfunc unsafe.Pointer, window unsafe.Pointer, data unsafe.Pointer) C.int {
    thisfunc := *(*func(HWND, unsafe.Pointer) C.int)(pfunc);
    return thisfunc(HWND(window), data);

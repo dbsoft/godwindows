@@ -7,17 +7,13 @@ package main
 #cgo darwin LDFLAGS: -L/usr/local/lib -ldwindows -lresolv -framework Cocoa -framework WebKit -lpthread
 #cgo windows CFLAGS: -IC:/Work/Netlabs/dwindows -g -O2 -D__WIN32__ -mthreads
 #cgo windows LDFLAGS: -LC:/Work/Netlabs/dwindows -ldw
-#include "../dwindows/dwglue.h"
+#include "../dw/dwglue.h"
 */
 import "C"
 import "unsafe"
-import "dwindows"
+import "dw"
 
-var HWND_DESKTOP dwindows.HWND = nil
-var DW_DESKTOP dwindows.HWND = nil
-var dw *dwindows.DW;
-
-func exit_callback(window dwindows.HWND, data unsafe.Pointer) C.int {
+func exit_callback(window dw.HWND, data unsafe.Pointer) C.int {
    if dw.Messagebox("dwtest", C.DW_MB_YESNO | C.DW_MB_QUESTION, "Are you sure you want to exit?") != 0 {
       dw.Main_quit();
    }
@@ -27,61 +23,59 @@ func exit_callback(window dwindows.HWND, data unsafe.Pointer) C.int {
 var exit_callback_func = exit_callback;
 
 func main() {
-   dw = new(dwindows.DW);
-   
    /* Initialize the Dynamic Windows engine */
-   dw.Init(dwindows.TRUE);
+   dw.Init(dw.TRUE);
 
    /* Create our window */
-   mainwindow := dw.Window_new( HWND_DESKTOP, "dwindows test UTF8 中国語 (繁体) cañón", C.DW_FCF_SYSMENU | C.DW_FCF_TITLEBAR | C.DW_FCF_TASKLIST | C.DW_FCF_DLGBORDER | C.DW_FCF_SIZEBORDER | C.DW_FCF_MINMAX);
+   mainwindow := dw.Window_new(dw.DESKTOP, "dwindows test UTF8 中国語 (繁体) cañón", C.DW_FCF_SYSMENU | C.DW_FCF_TITLEBAR | C.DW_FCF_TASKLIST | C.DW_FCF_DLGBORDER | C.DW_FCF_SIZEBORDER | C.DW_FCF_MINMAX);
    
    lbbox := dw.Box_new(C.DW_VERT, 10);
 
-   dw.Box_pack_start(mainwindow, lbbox, 150, 70, dwindows.TRUE, dwindows.TRUE, 0);
+   dw.Box_pack_start(mainwindow, lbbox, 150, 70, dw.TRUE, dw.TRUE, 0);
 
    /* Copy and Paste */
    browsebox := dw.Box_new(C.DW_HORZ, 0);
 
-   dw.Box_pack_start(lbbox, browsebox, 0, 0, dwindows.FALSE, dwindows.FALSE, 0);
+   dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.FALSE, dw.FALSE, 0);
 
    copypastefield := dw.Entryfield_new("", 0);
 
    dw.Entryfield_set_limit(copypastefield, 260);
 
-   dw.Box_pack_start(browsebox, copypastefield, -1, -1, dwindows.TRUE, dwindows.FALSE, 4);
+   dw.Box_pack_start(browsebox, copypastefield, -1, -1, dw.TRUE, dw.FALSE, 4);
 
    copybutton := dw.Button_new("Copy", 0);
 
-   dw.Box_pack_start(browsebox, copybutton, -1, -1, dwindows.FALSE, dwindows.FALSE, 0);
+   dw.Box_pack_start(browsebox, copybutton, -1, -1, dw.FALSE, dw.FALSE, 0);
 
    pastebutton := dw.Button_new("Paste", 0);
 
-   dw.Box_pack_start(browsebox, pastebutton, -1, -1, dwindows.FALSE, dwindows.FALSE, 0);
+   dw.Box_pack_start(browsebox, pastebutton, -1, -1, dw.FALSE, dw.FALSE, 0);
 
    /* Archive Name */
    stext := dw.Text_new("File to browse", 0);
 
    dw.Window_set_style(stext, C.DW_DT_VCENTER, C.DW_DT_VCENTER);
 
-   dw.Box_pack_start(lbbox, stext, 130, 15, dwindows.TRUE, dwindows.TRUE, 2);
+   dw.Box_pack_start(lbbox, stext, 130, 15, dw.TRUE, dw.TRUE, 2);
 
    browsebox = dw.Box_new(C.DW_HORZ, 0);
 
-   dw.Box_pack_start(lbbox, browsebox, 0, 0, dwindows.TRUE, dwindows.TRUE, 0);
+   dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.TRUE, dw.TRUE, 0);
 
    entryfield := dw.Entryfield_new("", 100);
 
    dw.Entryfield_set_limit(entryfield, 260);
 
-   dw.Box_pack_start(browsebox, entryfield, 100, 15, dwindows.TRUE, dwindows.TRUE, 4);
+   dw.Box_pack_start(browsebox, entryfield, 100, 15, dw.TRUE, dw.TRUE, 4);
 
    browsefilebutton := dw.Button_new("Browse File", 1001);
 
-   dw.Box_pack_start(browsebox, browsefilebutton, 40, 15, dwindows.TRUE, dwindows.TRUE, 0);
+   dw.Box_pack_start(browsebox, browsefilebutton, 40, 15, dw.TRUE, dw.TRUE, 0);
 
    browsefolderbutton := dw.Button_new("Browse Folder", 1001);
 
-   dw.Box_pack_start(browsebox, browsefolderbutton, 40, 15, dwindows.TRUE, dwindows.TRUE, 0);
+   dw.Box_pack_start(browsebox, browsefolderbutton, 40, 15, dw.TRUE, dw.TRUE, 0);
 
    dw.Window_set_color(browsebox, C.DW_CLR_PALEGRAY, C.DW_CLR_PALEGRAY);
    dw.Window_set_color(stext, C.DW_CLR_BLACK, C.DW_CLR_PALEGRAY);
@@ -89,23 +83,23 @@ func main() {
    /* Buttons */
    buttonbox := dw.Box_new(C.DW_HORZ, 10);
 
-   dw.Box_pack_start(lbbox, buttonbox, 0, 0, dwindows.TRUE, dwindows.TRUE, 0);
+   dw.Box_pack_start(lbbox, buttonbox, 0, 0, dw.TRUE, dw.TRUE, 0);
 
    cancelbutton := dw.Button_new("Exit", 1002);
-   dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dwindows.TRUE, dwindows.TRUE, 2);
+   dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
 
    cursortogglebutton := dw.Button_new("Set Cursor pointer - CLOCK", 1003);
-   dw.Box_pack_start(buttonbox, cursortogglebutton, 130, 30, dwindows.TRUE, dwindows.TRUE, 2);
+   dw.Box_pack_start(buttonbox, cursortogglebutton, 130, 30, dw.TRUE, dw.TRUE, 2);
 
    okbutton := dw.Button_new("Turn Off Annoying Beep!", 1001);
-   dw.Box_pack_start(buttonbox, okbutton, 130, 30, dwindows.TRUE, dwindows.TRUE, 2);
+   dw.Box_pack_start(buttonbox, okbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
 
    dw.Box_unpack(cancelbutton);
-   dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dwindows.TRUE, dwindows.TRUE, 2);
+   dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
    dw.Window_click_default(mainwindow, cancelbutton);
 
    colorchoosebutton := dw.Button_new("Color Chooser Dialog", 1004);
-   dw.Box_pack_at_index(buttonbox, colorchoosebutton, 1, 130, 30, dwindows.TRUE, dwindows.TRUE, 2);
+   dw.Box_pack_at_index(buttonbox, colorchoosebutton, 1, 130, 30, dw.TRUE, dw.TRUE, 2);
 
    /* Set some nice fonts and colors */
    dw.Window_set_color(lbbox, C.DW_CLR_DARKCYAN, C.DW_CLR_PALEGRAY);

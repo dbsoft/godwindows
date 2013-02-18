@@ -25,6 +25,21 @@ static int go_window_show(void *handle)
    return dw_window_show((HWND)handle);
 }
 
+static int go_window_hide(void *handle)
+{
+   return dw_window_hide((HWND)handle);
+}
+
+static int go_window_lower(void *handle)
+{
+   return dw_window_lower((HWND)handle);
+}
+
+static int go_window_raise(void *handle)
+{
+   return dw_window_raise((HWND)handle);
+}
+
 static void go_window_set_pos(void *handle, long x, long y)
 {
    dw_window_set_pos((HWND)handle, x, y);
@@ -58,6 +73,51 @@ static void go_window_click_default(void *window, void *next)
 static void go_window_default(void *window, void *defaultitem)
 {
    dw_window_default((HWND)window, (HWND)defaultitem);
+}
+
+static int go_window_destroy(void *handle)
+{
+   return dw_window_destroy((HWND)handle);
+}
+
+static void go_window_disable(void *handle)
+{
+   dw_window_disable((HWND)handle);
+}
+
+static void go_window_enable(void *handle)
+{
+   dw_window_enable((HWND)handle);
+}
+
+static HWND go_window_from_id(void *handle, int id)
+{
+   return dw_window_from_id((HWND)handle, id);
+}
+
+static void *go_window_get_data(void *handle, char *dataname)
+{
+   return dw_window_get_data((HWND)handle, dataname);
+}
+
+static char *go_window_get_font(void *handle)
+{
+   return dw_window_get_font((HWND)handle);
+}
+
+static void go_window_get_pos_size(void *handle, long *x, long *y, unsigned long *width, unsigned long *height)
+{
+   dw_window_get_pos_size((HWND)handle, x, y, width, height);
+}
+
+static void go_window_get_preferred_size(void *handle, int *width, int *height)
+{
+   dw_window_get_preferred_size((HWND)handle, width, height);
+}
+
+static char *go_window_get_text(void *handle)
+{
+   return dw_window_get_text((HWND)handle);
 }
 
 static void *go_box_new(int type, int pad)

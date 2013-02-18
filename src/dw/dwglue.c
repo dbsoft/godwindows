@@ -40,6 +40,11 @@ static int go_window_raise(void *handle)
    return dw_window_raise((HWND)handle);
 }
 
+static int go_window_minimize(void *handle)
+{
+   return dw_window_minimize((HWND)handle);
+}
+
 static void go_window_set_pos(void *handle, long x, long y)
 {
    dw_window_set_pos((HWND)handle, x, y);
@@ -105,6 +110,11 @@ static char *go_window_get_font(void *handle)
    return dw_window_get_font((HWND)handle);
 }
 
+static int go_window_set_font(void *handle, char *fontname)
+{
+   return dw_window_set_font((HWND)handle, fontname);
+}
+
 static void go_window_get_pos_size(void *handle, long *x, long *y, unsigned long *width, unsigned long *height)
 {
    dw_window_get_pos_size((HWND)handle, x, y, width, height);
@@ -118,6 +128,56 @@ static void go_window_get_preferred_size(void *handle, int *width, int *height)
 static char *go_window_get_text(void *handle)
 {
    return dw_window_get_text((HWND)handle);
+}
+
+static void go_window_set_text(void *handle, char *text)
+{
+   dw_window_set_text((HWND)handle, text);
+}
+
+static void go_window_set_tooltip(void *handle, char *bubbletext)
+{
+   dw_window_set_tooltip((HWND)handle, bubbletext);
+}
+
+static void go_window_redraw(void *handle)
+{
+   dw_window_redraw((HWND)handle);
+}
+
+static void go_window_capture(void *handle)
+{
+   dw_window_capture((HWND)handle);
+}
+
+static void go_window_set_bitmap(void *handle, unsigned long cid, char *filename)
+{
+   dw_window_set_bitmap((HWND)handle, cid, filename);
+}
+
+static int go_window_set_border(void *handle, int border)
+{
+   return dw_window_set_border((HWND)handle, border);
+}
+
+static void go_window_set_focus(void *handle)
+{
+   dw_window_set_focus((HWND)handle);
+}
+
+static void go_window_set_gravity(void *handle, int horz, int vert)
+{
+   dw_window_set_gravity((HWND)handle, horz, vert);
+}
+
+static void go_window_set_icon(void *handle, void *icon)
+{
+   dw_window_set_icon((HWND)handle, (HICN)icon);
+}
+
+static void go_window_set_pointer(void *handle, int cursortype)
+{
+   dw_window_set_pointer((HWND)handle, cursortype);
 }
 
 static void *go_box_new(int type, int pad)

@@ -15,6 +15,7 @@ import "runtime"
 
 type HWND unsafe.Pointer
 type HTREEITEM unsafe.Pointer
+type HICN unsafe.Pointer
 
 const (
    FALSE C.int = iota
@@ -57,6 +58,10 @@ func Window_lower(handle HWND) C.int {
 
 func Window_raise(handle HWND) C.int {
    return C.go_window_raise(unsafe.Pointer(handle));
+}
+
+func Window_minimize(handle HWND) C.int {
+   return C.go_window_minimize(unsafe.Pointer(handle));
 }
 
 func Window_set_pos(handle HWND, x C.long, y C.long) {
@@ -117,6 +122,13 @@ func Window_get_font(handle HWND) string {
    return fontname;
 }
 
+func Window_set_font(handle HWND, fontname string) C.int {
+   cfontname := C.CString(fontname);
+   defer C.free(unsafe.Pointer(cfontname));
+   
+   return C.go_window_set_font(unsafe.Pointer(handle), cfontname);
+}
+
 func Window_get_pos_size(handle HWND) (C.long, C.long, C.ulong, C.ulong) {
    var x, y C.long;
    var width, height C.ulong;
@@ -135,6 +147,63 @@ func Window_get_text(handle HWND) string {
    text := C.GoString(ctext);
    C.dw_free(unsafe.Pointer(ctext));
    return text;
+}
+
+func Window_set_text(handle HWND, text string) {
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   
+   C.go_window_set_text(unsafe.Pointer(handle), ctext);
+}
+
+func Window_set_tooltip(handle HWND, bubbletext string) {
+   cbubbletext := C.CString(bubbletext);
+   defer C.free(unsafe.Pointer(cbubbletext));
+   
+   C.go_window_set_tooltip(unsafe.Pointer(handle), cbubbletext);
+}
+
+func Window_redraw(handle HWND) {
+   C.go_window_redraw(unsafe.Pointer(handle));
+}
+
+func Window_capture(handle HWND) {
+   C.go_window_capture(unsafe.Pointer(handle));
+}
+
+func Window_release() {
+   C.dw_window_release();
+}
+
+func Window_set_bitmap(window HWND, id C.ulong, filename string) {
+   cfilename := C.CString(filename);
+   defer C.free(unsafe.Pointer(cfilename));
+   
+   C.go_window_set_bitmap(unsafe.Pointer(window), id, cfilename);
+}
+
+func Window_set_border(handle HWND, border C.int) {
+   C.go_window_set_border(unsafe.Pointer(handle), border);
+}
+
+func Window_set_focus(handle HWND) {
+   C.go_window_set_focus(unsafe.Pointer(handle));
+}
+
+func Window_set_gravity(handle HWND, horz C.int, vert C.int) {
+   C.go_window_set_gravity(unsafe.Pointer(handle), horz, vert);
+}
+
+func RESOURCE(id uintptr) unsafe.Pointer {
+   return unsafe.Pointer(id);
+}
+
+func Window_set_icon(handle HWND, icon HICN) {
+   C.go_window_set_icon(unsafe.Pointer(handle), unsafe.Pointer(icon));
+}
+
+func Window_set_pointer(handle HWND, cursortype C.int) {
+   C.go_window_set_pointer(unsafe.Pointer(handle), cursortype);
 }
 
 func Main() {

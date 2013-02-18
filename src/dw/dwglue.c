@@ -235,6 +235,78 @@ static void *go_button_new(char *text, unsigned long id)
    return (void *)dw_button_new(text, id);
 }
 
+static void *go_menu_new(unsigned long cid)
+{
+    return (void *)dw_menu_new(cid);
+}
+
+static void *go_menubar_new(void *location)
+{
+    return (void *)dw_menubar_new((HWND)location);
+}
+
+static void *go_menu_append_item(void *menu, char *title, unsigned long id, unsigned long flags, int end, int check, void *submenu)
+{
+    return dw_menu_append_item((HMENUI)menu, title, id, flags, end, check, submenu);
+}
+
+static int go_menu_delete_item(void *menu, unsigned long cid)
+{
+    return dw_menu_delete_item((HMENUI)menu, cid);
+}
+
+static void go_menu_destroy(void *menu)
+{
+    HMENUI thismenu = (HMENUI)menu;
+    dw_menu_destroy(&thismenu);
+}
+
+static void go_menu_item_set_state(void *menu, unsigned long cid, unsigned long flags)
+{
+    dw_menu_item_set_state((HMENUI)menu, cid, flags);
+}
+
+static void go_menu_popup(void *menu, void *parent, int x, int y)
+{
+    HMENUI thismenu = (HMENUI)menu;
+    dw_menu_popup(&thismenu, (HWND)parent, x, y);
+}
+
+static void *go_notebook_new(unsigned long cid, int top)
+{
+    return (void *)dw_notebook_new(cid, top);
+}
+
+static void go_notebook_pack(void *handle, unsigned long pageid, void *page)
+{
+    dw_notebook_pack((HWND)handle, pageid, (HWND)page);
+}
+
+static void go_notebook_page_destroy(void *handle, unsigned long pageid)
+{
+    dw_notebook_page_destroy((HWND)handle, (unsigned int)pageid);
+}
+
+static unsigned long go_notebook_page_get(void *handle)
+{
+    return dw_notebook_page_get((HWND)handle);
+}
+
+static unsigned long go_notebook_page_new(void *handle, unsigned long flags, int front)
+{
+    return dw_notebook_page_new((HWND)handle, flags, front);
+}
+
+static void go_notebook_page_set(void *handle, unsigned long pageid)
+{
+    dw_notebook_page_set((HWND)handle, (unsigned int)pageid);
+}
+
+static void go_notebook_page_set_text(void *handle, unsigned long pageid, char *text)
+{
+    dw_notebook_page_set_text((HWND)handle, pageid, text);
+}
+
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);
 extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data);
 extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8);
@@ -246,6 +318,7 @@ extern int go_int_callback_item_select(void *pfunc, void *window, void *item, ch
 extern int go_int_callback_numeric(void *pfunc, void* window, int val, void *data);
 extern int go_int_callback_ulong(void *pfunc, void* window, unsigned long val, void *data);
 extern int go_int_callback_tree(void *pfunc, void* window, void *item, void *data);
+extern int go_int_callback_timer(void *pfunc, void *data);
 
 static int DWSIGNAL go_callback_basic(HWND window, void *data)
 {
@@ -357,12 +430,35 @@ static int DWSIGNAL go_callback_tree(HWND window, HTREEITEM tree, void *data)
    return 0;
 }
 
+static int DWSIGNAL go_callback_timer(void *data)
+{
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_timer(param[0], param[1]);
+   }
+   return 0;
+}
+
+static int go_timer_connect(int interval, void *sigfunc, void *data)
+{
+   void **param = malloc(sizeof(void *) * 2);
+   
+   if(param && sigfunc)
+   {
+      param[0] = sigfunc;
+      param[1] = data;
+      return dw_timer_connect(interval, DW_SIGNAL_FUNC(go_callback_timer), param);
+   }
+   return 0;
+}
+
 static void go_signal_connect(void *window, char *signame, void *sigfunc, void *data)
 {
    void **param = malloc(sizeof(void *) * 2);
    void *func = (void *)go_callback_basic;
    
-   if(param)
+   if(param && sigfunc)
    {
       param[0] = sigfunc;
       param[1] = data;

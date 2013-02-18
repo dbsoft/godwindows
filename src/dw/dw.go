@@ -16,7 +16,18 @@ import "runtime"
 type HWND unsafe.Pointer
 type HTREEITEM unsafe.Pointer
 type HICN unsafe.Pointer
+type HTIMER C.int
+type HMENUI unsafe.Pointer
+type HNOTEPAGE C.ulong
 type COLOR C.ulong
+type COLORI C.uchar
+
+type Env struct 
+{
+    OSName, BuildDate, BuildTime string
+    MajorVersion, MinorVersion, MajorBuild, MinorBuild C.short
+    DWMajorVersion, DWMinorVersion, DWSubVersion C.short
+}
 
 const (
    FALSE C.int = iota
@@ -24,9 +35,17 @@ const (
 )
 
 var DESKTOP HWND = nil
+var NOMENU HMENUI = nil
 
 func RESOURCE(id uintptr) unsafe.Pointer {
    return unsafe.Pointer(id);
+}
+
+func RGB(red COLORI, green COLORI, blue COLORI) COLOR {
+    lred := C.ulong(red);
+    lgreen := C.ulong(green);
+    lblue := C.ulong(blue);
+    return COLOR((0xF0000000 | (lred) | (lgreen << 8) | (lblue << 16)));
 }
 
 func Init(newthread C.int) C.int {
@@ -310,11 +329,85 @@ func Color_choose(value COLOR) COLOR {
    return COLOR(C.dw_color_choose(C.ulong(value)));
 }
 
+func Timer_connect(interval C.int, sigfunc unsafe.Pointer, data unsafe.Pointer) HTIMER {
+   return HTIMER(C.go_timer_connect(interval, sigfunc, data));
+}
+
+func Timer_disconnect(id HTIMER) {
+   C.dw_timer_disconnect(C.int(id));
+}
+
 func Signal_connect(window HWND, signame string, sigfunc unsafe.Pointer, data unsafe.Pointer) {
    csigname := C.CString(signame);
    defer C.free(unsafe.Pointer(csigname));
    
    C.go_signal_connect(unsafe.Pointer(window), csigname, sigfunc, data);
+}
+
+func Beep(freq C.int, dur C.int) {
+    C.dw_beep(freq, dur);
+}
+
+func Menu_new(id C.ulong) HMENUI {
+    return HMENUI(C.go_menu_new(id));
+}
+
+func Menubar_new(location HWND) HMENUI {
+    return HMENUI(C.go_menubar_new(unsafe.Pointer(location)));
+}
+
+func Menu_append_item(menu HMENUI, title string, id C.ulong, flags C.ulong, end C.int, check C.int, submenu HMENUI) HWND {
+    ctitle := C.CString(title);
+    defer C.free(unsafe.Pointer(ctitle));
+
+    return HWND(C.go_menu_append_item(unsafe.Pointer(menu), ctitle, id, flags, end, check, unsafe.Pointer(submenu)));
+}
+
+func Menu_delete_item(menu HMENUI, id C.ulong) {
+    C.go_menu_delete_item(unsafe.Pointer(menu), id);
+}
+
+func Menu_destroy(menu HMENUI) {
+    C.go_menu_destroy(unsafe.Pointer(menu));
+}
+
+func Menu_item_set_state(menu HMENUI, id C.ulong, flags C.ulong) {
+    C.go_menu_item_set_state(unsafe.Pointer(menu), id, flags);
+}
+
+func Menu_poup(menu HMENUI, parent HWND, x C.int, y C.int) {
+    C.go_menu_popup(unsafe.Pointer(menu), unsafe.Pointer(parent), x, y);
+}
+
+func Notebook_new(id C.ulong, top C.int) HWND {
+    return HWND(C.go_notebook_new(id, top));
+}
+
+func Notebook_pack(handle HWND, pageid HNOTEPAGE, page HWND) {
+    C.go_notebook_pack(unsafe.Pointer(handle), C.ulong(pageid), unsafe.Pointer(page));
+}
+
+func Notebook_page_destroy(handle HWND, pageid HNOTEPAGE) {
+    C.go_notebook_page_destroy(unsafe.Pointer(handle), C.ulong(pageid));
+}
+
+func Notebook_page_get(handle HWND) HNOTEPAGE {
+    return HNOTEPAGE(C.go_notebook_page_get(unsafe.Pointer(handle)));
+}
+
+func Notebook_page_new(handle HWND, flags C.ulong, front C.int) HNOTEPAGE {
+    return HNOTEPAGE(C.go_notebook_page_new(unsafe.Pointer(handle), flags, front));
+}
+
+func Notebook_page_set(handle HWND, pageid HNOTEPAGE) {
+    C.go_notebook_page_set(unsafe.Pointer(handle), C.ulong(pageid));
+}
+
+func Notebook_page_set_text(handle HWND, pageid HNOTEPAGE, text string) {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    C.go_notebook_page_set_text(unsafe.Pointer(handle), C.ulong(pageid), ctext);
 }
 
 func init() {
@@ -385,5 +478,11 @@ func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ul
 func go_int_callback_tree(pfunc unsafe.Pointer, window unsafe.Pointer, tree unsafe.Pointer, data unsafe.Pointer) C.int {
    thisfunc := *(*func(HWND, HTREEITEM, unsafe.Pointer) C.int)(pfunc);
    return thisfunc(HWND(window), HTREEITEM(tree), data);
+}
+
+//export go_int_callback_timer
+func go_int_callback_timer(pfunc unsafe.Pointer, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(unsafe.Pointer) C.int)(pfunc);
+   return thisfunc(data);
 }
 

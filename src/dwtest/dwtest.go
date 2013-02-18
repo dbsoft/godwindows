@@ -26,10 +26,12 @@ func exit_callback(window dw.HWND, data unsafe.Pointer) C.int {
    return C.TRUE;
 }
 
-var copypastefield, entryfield, cursortogglebutton dw.HWND
+var copypastefield, entryfield, cursortogglebutton, mainwindow, notebookbox1, noncheckable_menuitem, checkable_menuitem dw.HWND
 var current_file string
-var current_color dw.COLOR
-var cursor_arrow bool
+var current_color dw.COLOR = dw.RGB(100, 100, 100)
+var cursor_arrow bool = true
+var menu_enabled bool = true
+var timerid dw.HTIMER
 
 func copy_clicked_callback(button dw.HWND, data unsafe.Pointer) C.int {
    test := dw.Window_get_text(copypastefield);
@@ -88,8 +90,55 @@ func cursortoggle_callback(window dw.HWND, data unsafe.Pointer) C.int {
 }
 
 func beep_callback(window dw.HWND, data unsafe.Pointer) C.int {
-    //dw.Timer_disconnect(timerid);
+    dw.Timer_disconnect(timerid);
     return TRUE;
+}
+
+/* Beep every second */
+func timer_callback(data unsafe.Pointer) C.int {
+    dw.Beep(200, 200);
+
+    /* Return TRUE so we get called again */
+    return TRUE;
+}
+
+func switch_page_callback(window dw.HWND, page_num dw.HNOTEPAGE, itemdata unsafe.Pointer) C.int {
+    fmt.Printf("DW_SIGNAL_SWITCH_PAGE: PageNum: %u\n", uint(page_num));
+    return FALSE;
+}
+
+func menu_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    info:= *(*string)(data);
+    buf := fmt.Sprintf("%s menu item selected", info);
+    dw.Messagebox("Menu Item Callback", C.DW_MB_OK | C.DW_MB_INFORMATION, buf);
+    return 0;
+}
+
+func menutoggle_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    if menu_enabled {
+        dw.Window_set_style(checkable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_DISABLED);
+        dw.Window_set_style(noncheckable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_DISABLED);
+        menu_enabled = false;
+    } else {
+        dw.Window_set_style(checkable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_ENABLED);
+        dw.Window_set_style(noncheckable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_ENABLED);
+        menu_enabled = true;
+    }
+    return FALSE;
+}
+
+func helpabout_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    
+    message := "dwindows text";
+    /*var env dw.Env;
+    
+    dw_environment_query(&env);
+    "dwindows test\n\nOS: %s %s %s Version: %d.%d.%d.%d\n\ndwindows Version: %d.%d.%d",
+                      env.OSName, env.BuildDate, env.buildTime,
+                      env.MajorVersion, env.MinorVersion, env.MajorBuild, env.MinorBuild,
+                      env.DWMajorVersion, env.DWMinorVersion, env.DWSubVersion);*/
+    dw.Messagebox("About dwindows", C.DW_MB_OK | C.DW_MB_INFORMATION, message);
+    return FALSE;
 }
 
 var exit_callback_func = exit_callback;
@@ -100,99 +149,162 @@ var browse_folder_callback_func = browse_folder_callback;
 var colorchoose_callback_func = colorchoose_callback;
 var cursortoggle_callback_func = cursortoggle_callback;
 var beep_callback_func = beep_callback;
+var timer_callback_func = timer_callback;
+var switch_page_callback_func = switch_page_callback;
+var helpabout_callback_func = helpabout_callback;
+var menu_callback_func = menu_callback;
+var menutoggle_callback_func = menutoggle_callback;
+
+var checkable_string = "checkable";
+var noncheckable_string = "non-checkable";
+
+func menu_add() {
+    mainmenubar := dw.Menubar_new(mainwindow);
+    /* add menus to the menubar */
+    menu := dw.Menu_new(0);
+    menuitem := dw.Menu_append_item(menu, "~Quit", C.DW_MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
+    dw.Signal_connect(menuitem, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&exit_callback_func), unsafe.Pointer(mainwindow));
+    /*
+     * Add the "File" menu to the menubar...
+     */
+    dw.Menu_append_item(mainmenubar, "~File", C.DW_MENU_AUTO, 0, dw.TRUE, dw.FALSE, menu);
+
+    changeable_menu := dw.Menu_new(0);
+    checkable_menuitem = dw.Menu_append_item(changeable_menu, "~Checkable Menu Item", C.DW_MENU_AUTO, 0, dw.TRUE, dw.TRUE, dw.NOMENU);
+    dw.Signal_connect(checkable_menuitem, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&menu_callback_func), unsafe.Pointer(&checkable_string));
+    noncheckable_menuitem = dw.Menu_append_item(changeable_menu, "~Non-checkable Menu Item", C.DW_MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
+    dw.Signal_connect(noncheckable_menuitem, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&menu_callback_func), unsafe.Pointer(&noncheckable_string));
+    dw.Menu_append_item(changeable_menu, "~Disabled menu Item", C.DW_MENU_AUTO, C.DW_MIS_DISABLED | C.DW_MIS_CHECKED, dw.TRUE, dw.TRUE, dw.NOMENU);
+    /* seperator */
+    dw.Menu_append_item(changeable_menu, C.DW_MENU_SEPARATOR, C.DW_MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
+    menuitem = dw.Menu_append_item(changeable_menu, "~Menu Items Disabled", C.DW_MENU_AUTO, 0, dw.TRUE, dw.TRUE, dw.NOMENU);
+    dw.Signal_connect(menuitem, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&menutoggle_callback_func), nil);
+    /*
+     * Add the "Menu" menu to the menubar...
+     */
+    dw.Menu_append_item(mainmenubar, "~Menu", C.DW_MENU_AUTO, 0, dw.TRUE, dw.FALSE, changeable_menu);
+
+    menu = dw.Menu_new(0);
+    menuitem = dw.Menu_append_item(menu, "~About", C.DW_MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
+    dw.Signal_connect(menuitem, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&helpabout_callback_func), unsafe.Pointer(mainwindow));
+    /*
+     * Add the "Help" menu to the menubar...
+     */
+    dw.Menu_append_item(mainmenubar, "~Help", C.DW_MENU_AUTO, 0, dw.TRUE, dw.FALSE, menu);
+}
+
+func archive_add() {
+    lbbox := dw.Box_new(C.DW_VERT, 10);
+
+    dw.Box_pack_start(notebookbox1, lbbox, 150, 70, dw.TRUE, dw.TRUE, 0);
+
+    /* Copy and Paste */
+    browsebox := dw.Box_new(C.DW_HORZ, 0);
+
+    dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.FALSE, dw.FALSE, 0);
+
+    copypastefield = dw.Entryfield_new("", 0);
+
+    dw.Entryfield_set_limit(copypastefield, 260);
+
+    dw.Box_pack_start(browsebox, copypastefield, -1, -1, dw.TRUE, dw.FALSE, 4);
+
+    copybutton := dw.Button_new("Copy", 0);
+
+    dw.Box_pack_start(browsebox, copybutton, -1, -1, dw.FALSE, dw.FALSE, 0);
+
+    pastebutton := dw.Button_new("Paste", 0);
+
+    dw.Box_pack_start(browsebox, pastebutton, -1, -1, dw.FALSE, dw.FALSE, 0);
+
+    /* Archive Name */
+    stext := dw.Text_new("File to browse", 0);
+
+    dw.Window_set_style(stext, C.DW_DT_VCENTER, C.DW_DT_VCENTER);
+
+    dw.Box_pack_start(lbbox, stext, 130, 15, dw.TRUE, dw.TRUE, 2);
+
+    browsebox = dw.Box_new(C.DW_HORZ, 0);
+
+    dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.TRUE, dw.TRUE, 0);
+
+    entryfield = dw.Entryfield_new("", 100);
+
+    dw.Entryfield_set_limit(entryfield, 260);
+
+    dw.Box_pack_start(browsebox, entryfield, 100, 15, dw.TRUE, dw.TRUE, 4);
+
+    browsefilebutton := dw.Button_new("Browse File", 1001);
+
+    dw.Box_pack_start(browsebox, browsefilebutton, 40, 15, dw.TRUE, dw.TRUE, 0);
+
+    browsefolderbutton := dw.Button_new("Browse Folder", 1001);
+
+    dw.Box_pack_start(browsebox, browsefolderbutton, 40, 15, dw.TRUE, dw.TRUE, 0);
+
+    dw.Window_set_color(browsebox, C.DW_CLR_PALEGRAY, C.DW_CLR_PALEGRAY);
+    dw.Window_set_color(stext, C.DW_CLR_BLACK, C.DW_CLR_PALEGRAY);
+
+    /* Buttons */
+    buttonbox := dw.Box_new(C.DW_HORZ, 10);
+
+    dw.Box_pack_start(lbbox, buttonbox, 0, 0, dw.TRUE, dw.TRUE, 0);
+
+    cancelbutton := dw.Button_new("Exit", 1002);
+    dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
+
+    cursortogglebutton = dw.Button_new("Set Cursor pointer - CLOCK", 1003);
+    dw.Box_pack_start(buttonbox, cursortogglebutton, 130, 30, dw.TRUE, dw.TRUE, 2);
+
+    okbutton := dw.Button_new("Turn Off Annoying Beep!", 1001);
+    dw.Box_pack_start(buttonbox, okbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
+
+    dw.Box_unpack(cancelbutton);
+    dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
+    dw.Window_click_default(mainwindow, cancelbutton);
+
+    colorchoosebutton := dw.Button_new("Color Chooser Dialog", 1004);
+    dw.Box_pack_at_index(buttonbox, colorchoosebutton, 1, 130, 30, dw.TRUE, dw.TRUE, 2);
+
+    /* Set some nice fonts and colors */
+    dw.Window_set_color(lbbox, C.DW_CLR_DARKCYAN, C.DW_CLR_PALEGRAY);
+    dw.Window_set_color(buttonbox, C.DW_CLR_DARKCYAN, C.DW_CLR_PALEGRAY);
+    dw.Window_set_color(okbutton, C.DW_CLR_PALEGRAY, C.DW_CLR_DARKCYAN);
+
+    dw.Signal_connect(browsefilebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&browse_file_callback_func), nil);
+    dw.Signal_connect(browsefolderbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&browse_folder_callback_func), nil);
+    dw.Signal_connect(copybutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&copy_clicked_callback_func), unsafe.Pointer(copypastefield));
+    dw.Signal_connect(pastebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&paste_clicked_callback_func), unsafe.Pointer(copypastefield));
+    dw.Signal_connect(okbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&beep_callback_func), nil);
+    dw.Signal_connect(cancelbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&exit_callback_func), unsafe.Pointer(mainwindow));
+    dw.Signal_connect(cursortogglebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&cursortoggle_callback_func), unsafe.Pointer(mainwindow));
+    dw.Signal_connect(colorchoosebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&colorchoose_callback_func), unsafe.Pointer(mainwindow));
+}
 
 func main() {
    /* Initialize the Dynamic Windows engine */
    dw.Init(dw.TRUE);
 
    /* Create our window */
-   mainwindow := dw.Window_new(dw.DESKTOP, "dwindows test UTF8 中国語 (繁体) cañón", C.DW_FCF_SYSMENU | C.DW_FCF_TITLEBAR | C.DW_FCF_TASKLIST | C.DW_FCF_DLGBORDER | C.DW_FCF_SIZEBORDER | C.DW_FCF_MINMAX);
+   mainwindow = dw.Window_new(dw.DESKTOP, "dwindows test UTF8 中国語 (繁体) cañón", C.DW_FCF_SYSMENU | C.DW_FCF_TITLEBAR | C.DW_FCF_TASKLIST | C.DW_FCF_DLGBORDER | C.DW_FCF_SIZEBORDER | C.DW_FCF_MINMAX);
    
-   lbbox := dw.Box_new(C.DW_VERT, 10);
+   menu_add();
 
-   dw.Box_pack_start(mainwindow, lbbox, 150, 70, dw.TRUE, dw.TRUE, 0);
+   notebookbox := dw.Box_new(C.DW_VERT, 5);
+   dw.Box_pack_start(mainwindow, notebookbox, 0, 0, dw.TRUE, dw.TRUE, 0);
 
-   /* Copy and Paste */
-   browsebox := dw.Box_new(C.DW_HORZ, 0);
+   //foldericon = dw.Icon_load_from_file(FOLDER_ICON_NAME);
+   //fileicon = dw.Icon_load_from_file(FILE_ICON_NAME);
 
-   dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.FALSE, dw.FALSE, 0);
+   notebook := dw.Notebook_new(1, dw.TRUE);
+   dw.Box_pack_start(notebookbox, notebook, 100, 100, dw.TRUE, dw.TRUE, 0);
+   dw.Signal_connect(notebook, C.DW_SIGNAL_SWITCH_PAGE, unsafe.Pointer(&switch_page_callback_func), nil);
 
-   copypastefield = dw.Entryfield_new("", 0);
-
-   dw.Entryfield_set_limit(copypastefield, 260);
-
-   dw.Box_pack_start(browsebox, copypastefield, -1, -1, dw.TRUE, dw.FALSE, 4);
-
-   copybutton := dw.Button_new("Copy", 0);
-
-   dw.Box_pack_start(browsebox, copybutton, -1, -1, dw.FALSE, dw.FALSE, 0);
-
-   pastebutton := dw.Button_new("Paste", 0);
-
-   dw.Box_pack_start(browsebox, pastebutton, -1, -1, dw.FALSE, dw.FALSE, 0);
-
-   /* Archive Name */
-   stext := dw.Text_new("File to browse", 0);
-
-   dw.Window_set_style(stext, C.DW_DT_VCENTER, C.DW_DT_VCENTER);
-
-   dw.Box_pack_start(lbbox, stext, 130, 15, dw.TRUE, dw.TRUE, 2);
-
-   browsebox = dw.Box_new(C.DW_HORZ, 0);
-
-   dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.TRUE, dw.TRUE, 0);
-
-   entryfield = dw.Entryfield_new("", 100);
-
-   dw.Entryfield_set_limit(entryfield, 260);
-
-   dw.Box_pack_start(browsebox, entryfield, 100, 15, dw.TRUE, dw.TRUE, 4);
-
-   browsefilebutton := dw.Button_new("Browse File", 1001);
-
-   dw.Box_pack_start(browsebox, browsefilebutton, 40, 15, dw.TRUE, dw.TRUE, 0);
-
-   browsefolderbutton := dw.Button_new("Browse Folder", 1001);
-
-   dw.Box_pack_start(browsebox, browsefolderbutton, 40, 15, dw.TRUE, dw.TRUE, 0);
-
-   dw.Window_set_color(browsebox, C.DW_CLR_PALEGRAY, C.DW_CLR_PALEGRAY);
-   dw.Window_set_color(stext, C.DW_CLR_BLACK, C.DW_CLR_PALEGRAY);
-
-   /* Buttons */
-   buttonbox := dw.Box_new(C.DW_HORZ, 10);
-
-   dw.Box_pack_start(lbbox, buttonbox, 0, 0, dw.TRUE, dw.TRUE, 0);
-
-   cancelbutton := dw.Button_new("Exit", 1002);
-   dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
-
-   cursortogglebutton = dw.Button_new("Set Cursor pointer - CLOCK", 1003);
-   dw.Box_pack_start(buttonbox, cursortogglebutton, 130, 30, dw.TRUE, dw.TRUE, 2);
-
-   okbutton := dw.Button_new("Turn Off Annoying Beep!", 1001);
-   dw.Box_pack_start(buttonbox, okbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
-
-   dw.Box_unpack(cancelbutton);
-   dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
-   dw.Window_click_default(mainwindow, cancelbutton);
-
-   colorchoosebutton := dw.Button_new("Color Chooser Dialog", 1004);
-   dw.Box_pack_at_index(buttonbox, colorchoosebutton, 1, 130, 30, dw.TRUE, dw.TRUE, 2);
-
-   /* Set some nice fonts and colors */
-   dw.Window_set_color(lbbox, C.DW_CLR_DARKCYAN, C.DW_CLR_PALEGRAY);
-   dw.Window_set_color(buttonbox, C.DW_CLR_DARKCYAN, C.DW_CLR_PALEGRAY);
-   dw.Window_set_color(okbutton, C.DW_CLR_PALEGRAY, C.DW_CLR_DARKCYAN);
-
-   dw.Signal_connect(browsefilebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&browse_file_callback_func), nil);
-   dw.Signal_connect(browsefolderbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&browse_folder_callback_func), nil);
-   dw.Signal_connect(copybutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&copy_clicked_callback_func), unsafe.Pointer(copypastefield));
-   dw.Signal_connect(pastebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&paste_clicked_callback_func), unsafe.Pointer(copypastefield));
-   dw.Signal_connect(okbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&beep_callback_func), nil);
-   dw.Signal_connect(cancelbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&exit_callback_func), unsafe.Pointer(mainwindow));
-   dw.Signal_connect(cursortogglebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&cursortoggle_callback_func), unsafe.Pointer(mainwindow));
-   dw.Signal_connect(colorchoosebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&colorchoose_callback_func), unsafe.Pointer(mainwindow));
+   notebookbox1 = dw.Box_new(C.DW_VERT, 5);
+   notebookpage1 := dw.Notebook_page_new(notebook, 0, dw.TRUE);
+   dw.Notebook_pack(notebook, notebookpage1, notebookbox1);
+   dw.Notebook_page_set_text(notebook, notebookpage1, "buttons and entry");
+   archive_add();
    
    /* Set the default field */
    dw.Window_default(mainwindow, copypastefield);
@@ -206,10 +318,19 @@ func main() {
    * On platforms which do not have an application object this line will be ignored.
    */
    dw.Signal_connect(dw.DESKTOP, C.DW_SIGNAL_DELETE, unsafe.Pointer(&exit_callback_func), unsafe.Pointer(mainwindow));
-   //timerid = dw.timer_connect(2000, DW_SIGNAL_FUNC(timer_callback), 0);
+   timerid = dw.Timer_connect(2000, unsafe.Pointer(&timer_callback_func), nil);
    dw.Window_set_size(mainwindow, 640, 550);
    dw.Window_show(mainwindow);
    
+  /* Now that the window is created and shown...
+   * run the main loop until we get dw_main_quit()
+   */
    dw.Main();
+   
+   /* Now that the loop is done we can cleanup */
+   //dw.Taskbar_delete(textbox1, fileicon);
+   dw.Window_destroy(mainwindow);
+
+   fmt.Printf("dwtest exiting...\n");
 }
 

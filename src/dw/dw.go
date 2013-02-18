@@ -16,6 +16,7 @@ import "runtime"
 type HWND unsafe.Pointer
 type HTREEITEM unsafe.Pointer
 type HICN unsafe.Pointer
+type COLOR C.ulong
 
 const (
    FALSE C.int = iota
@@ -23,6 +24,10 @@ const (
 )
 
 var DESKTOP HWND = nil
+
+func RESOURCE(id uintptr) unsafe.Pointer {
+   return unsafe.Pointer(id);
+}
 
 func Init(newthread C.int) C.int {
    return C.go_init(newthread);
@@ -76,8 +81,8 @@ func Window_set_size(handle HWND, width C.ulong, height C.ulong) {
    C.go_window_set_size(unsafe.Pointer(handle), width, height);
 }
 
-func Window_set_color(handle HWND, fore C.ulong, back C.ulong) C.int {
-   return C.go_window_set_color(unsafe.Pointer(handle), fore, back);
+func Window_set_color(handle HWND, fore COLOR, back COLOR) C.int {
+   return C.go_window_set_color(unsafe.Pointer(handle), C.ulong(fore), C.ulong(back));
 }
 
 func Window_set_style(handle HWND, style C.ulong, mask C.ulong) {
@@ -194,10 +199,6 @@ func Window_set_gravity(handle HWND, horz C.int, vert C.int) {
    C.go_window_set_gravity(unsafe.Pointer(handle), horz, vert);
 }
 
-func RESOURCE(id uintptr) unsafe.Pointer {
-   return unsafe.Pointer(id);
-}
-
 func Window_set_icon(handle HWND, icon HICN) {
    C.go_window_set_icon(unsafe.Pointer(handle), unsafe.Pointer(icon));
 }
@@ -276,6 +277,37 @@ func Button_new(text string, id C.ulong) HWND {
    defer C.free(unsafe.Pointer(ctext));
    
    return HWND(C.go_button_new(ctext, id));
+}
+
+func Clipboard_get_text() string {
+   ctext := C.dw_clipboard_get_text();
+   text := C.GoString(ctext);
+   C.dw_free(unsafe.Pointer(ctext));
+   return text;
+}
+
+func Clipboard_set_text(text string) {
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   
+   C.dw_clipboard_set_text(ctext, C.int(C.strlen(ctext)));
+}
+
+func File_browse(title string, defpath string, ext string, flags C.int) string {
+   ctitle := C.CString(title);
+   defer C.free(unsafe.Pointer(ctitle));
+   cdefpath := C.CString(defpath);
+   defer C.free(unsafe.Pointer(cdefpath));
+   cext := C.CString(ext);
+   defer C.free(unsafe.Pointer(cext));
+   
+   result := C.dw_file_browse(ctitle, cdefpath, cext, flags);
+   defer C.dw_free(unsafe.Pointer(result));
+   return C.GoString(result);
+}
+
+func Color_choose(value COLOR) COLOR {
+   return COLOR(C.dw_color_choose(C.ulong(value)));
 }
 
 func Signal_connect(window HWND, signame string, sigfunc unsafe.Pointer, data unsafe.Pointer) {

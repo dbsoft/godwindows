@@ -12,6 +12,12 @@ package main
 import "C"
 import "unsafe"
 import "dw"
+import "fmt"
+
+const (
+   FALSE C.int = iota
+   TRUE
+)
 
 func exit_callback(window dw.HWND, data unsafe.Pointer) C.int {
    if dw.Messagebox("dwtest", C.DW_MB_YESNO | C.DW_MB_QUESTION, "Are you sure you want to exit?") != 0 {
@@ -20,7 +26,80 @@ func exit_callback(window dw.HWND, data unsafe.Pointer) C.int {
    return C.TRUE;
 }
 
+var copypastefield, entryfield, cursortogglebutton dw.HWND
+var current_file string
+var current_color dw.COLOR
+var cursor_arrow bool
+
+func copy_clicked_callback(button dw.HWND, data unsafe.Pointer) C.int {
+   test := dw.Window_get_text(copypastefield);
+
+   if len(test) > 0 {
+     dw.Clipboard_set_text(test);
+   }
+   dw.Window_set_focus(entryfield);
+   return TRUE;
+}
+
+func paste_clicked_callback(button dw.HWND, data unsafe.Pointer) C.int {
+    test := dw.Clipboard_get_text();
+    
+    if len(test) > 0 {
+        dw.Window_set_text(copypastefield, test);
+    }
+    return TRUE;
+}
+
+func browse_file_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    tmp := dw.File_browse("Pick a file", "dwtest.c", "c", C.DW_FILE_OPEN);
+    if len(tmp) > 0 {
+        current_file = tmp;
+        dw.Window_set_text(entryfield, current_file);
+        /*read_file();
+        current_col = current_row = 0;
+        update_render();*/
+    }
+    dw.Window_set_focus(copypastefield);
+    return FALSE;
+}
+
+func browse_folder_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    tmp := dw.File_browse("Pick a folder", ".", "c", C.DW_DIRECTORY_OPEN);
+    fmt.Printf("Folder picked: %s\n", tmp);
+    return FALSE;
+}
+
+func colorchoose_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    current_color = dw.Color_choose(current_color);
+    return FALSE;
+}
+
+func cursortoggle_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    if cursor_arrow {
+        dw.Window_set_text(cursortogglebutton, "Set Cursor pointer - ARROW");
+        dw.Window_set_pointer(dw.HWND(data), C.DW_POINTER_CLOCK);
+        cursor_arrow = false;
+    } else {
+        dw.Window_set_text(cursortogglebutton, "Set Cursor pointer - CLOCK");
+        dw.Window_set_pointer(dw.HWND(data), C.DW_POINTER_DEFAULT);
+        cursor_arrow = true;
+    }
+    return FALSE;
+}
+
+func beep_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    //dw.Timer_disconnect(timerid);
+    return TRUE;
+}
+
 var exit_callback_func = exit_callback;
+var copy_clicked_callback_func = copy_clicked_callback;
+var paste_clicked_callback_func = paste_clicked_callback;
+var browse_file_callback_func = browse_file_callback;
+var browse_folder_callback_func = browse_folder_callback;
+var colorchoose_callback_func = colorchoose_callback;
+var cursortoggle_callback_func = cursortoggle_callback;
+var beep_callback_func = beep_callback;
 
 func main() {
    /* Initialize the Dynamic Windows engine */
@@ -38,7 +117,7 @@ func main() {
 
    dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.FALSE, dw.FALSE, 0);
 
-   copypastefield := dw.Entryfield_new("", 0);
+   copypastefield = dw.Entryfield_new("", 0);
 
    dw.Entryfield_set_limit(copypastefield, 260);
 
@@ -63,7 +142,7 @@ func main() {
 
    dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.TRUE, dw.TRUE, 0);
 
-   entryfield := dw.Entryfield_new("", 100);
+   entryfield = dw.Entryfield_new("", 100);
 
    dw.Entryfield_set_limit(entryfield, 260);
 
@@ -88,7 +167,7 @@ func main() {
    cancelbutton := dw.Button_new("Exit", 1002);
    dw.Box_pack_start(buttonbox, cancelbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
 
-   cursortogglebutton := dw.Button_new("Set Cursor pointer - CLOCK", 1003);
+   cursortogglebutton = dw.Button_new("Set Cursor pointer - CLOCK", 1003);
    dw.Box_pack_start(buttonbox, cursortogglebutton, 130, 30, dw.TRUE, dw.TRUE, 2);
 
    okbutton := dw.Button_new("Turn Off Annoying Beep!", 1001);
@@ -106,14 +185,14 @@ func main() {
    dw.Window_set_color(buttonbox, C.DW_CLR_DARKCYAN, C.DW_CLR_PALEGRAY);
    dw.Window_set_color(okbutton, C.DW_CLR_PALEGRAY, C.DW_CLR_DARKCYAN);
 
-   /*dw_signal_connect(browsefilebutton, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(browse_file_callback), DW_POINTER(notebookbox1));
-   dw_signal_connect(browsefolderbutton, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(browse_folder_callback), DW_POINTER(notebookbox1));
-   dw_signal_connect(copybutton, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(copy_clicked_callback), DW_POINTER(copypastefield));
-   dw_signal_connect(pastebutton, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(paste_clicked_callback), DW_POINTER(copypastefield));
-   dw_signal_connect(okbutton, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(beep_callback), DW_POINTER(notebookbox1));*/
+   dw.Signal_connect(browsefilebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&browse_file_callback_func), nil);
+   dw.Signal_connect(browsefolderbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&browse_folder_callback_func), nil);
+   dw.Signal_connect(copybutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&copy_clicked_callback_func), unsafe.Pointer(copypastefield));
+   dw.Signal_connect(pastebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&paste_clicked_callback_func), unsafe.Pointer(copypastefield));
+   dw.Signal_connect(okbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&beep_callback_func), nil);
    dw.Signal_connect(cancelbutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&exit_callback_func), unsafe.Pointer(mainwindow));
-   /*dw_signal_connect(cursortogglebutton, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(cursortoggle_callback), DW_POINTER(mainwindow));
-   dw_signal_connect(colorchoosebutton, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(colorchoose_callback), DW_POINTER(mainwindow));*/
+   dw.Signal_connect(cursortogglebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&cursortoggle_callback_func), unsafe.Pointer(mainwindow));
+   dw.Signal_connect(colorchoosebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&colorchoose_callback_func), unsafe.Pointer(mainwindow));
    
    /* Set the default field */
    dw.Window_default(mainwindow, copypastefield);
@@ -126,7 +205,7 @@ func main() {
    * handled or you allow the default handler to take place the entire application will close.
    * On platforms which do not have an application object this line will be ignored.
    */
-   //dw.signal_connect(DW_DESKTOP, DW_SIGNAL_DELETE, DW_SIGNAL_FUNC(exit_callback), DW_POINTER(mainwindow));
+   dw.Signal_connect(dw.DESKTOP, C.DW_SIGNAL_DELETE, unsafe.Pointer(&exit_callback_func), unsafe.Pointer(mainwindow));
    //timerid = dw.timer_connect(2000, DW_SIGNAL_FUNC(timer_callback), 0);
    dw.Window_set_size(mainwindow, 640, 550);
    dw.Window_show(mainwindow);

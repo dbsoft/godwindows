@@ -397,21 +397,179 @@ static int go_listbox_selected_multi(void *handle, int where)
     return dw_listbox_selected_multi((HWND)handle, where);
 }
 
-/*HWND API dw_spinbutton_new(char *text, unsigned long id);
-HWND API dw_radiobutton_new(char *text, ULONG id);
-HWND API dw_percent_new(unsigned long id);
-HWND API dw_slider_new(int vertical, int increments, ULONG id);
-HWND API dw_scrollbar_new(int vertical, ULONG id);
-HWND API dw_checkbox_new(char *text, unsigned long id);
-unsigned int API dw_slider_get_pos(HWND handle);
-void API dw_slider_set_pos(HWND handle, unsigned int position);
-unsigned int API dw_scrollbar_get_pos(HWND handle);
-void API dw_scrollbar_set_pos(HWND handle, unsigned int position);
-void API dw_scrollbar_set_range(HWND handle, unsigned int range, unsigned int visible);
-HWND API dw_scrollbox_new(int type, int pad);
-int API dw_scrollbox_get_pos( HWND handle, int orient );
-int API dw_scrollbox_get_range( HWND handle, int orient );
-HWND API dw_groupbox_new(int type, int pad, char *title);*/
+static void *go_spinbutton_new(char *text, unsigned long id)
+{
+    return (void *)dw_spinbutton_new(text, id);
+}
+
+static void go_spinbutton_set_pos(void *handle, long position)
+{
+    dw_spinbutton_set_pos((HWND)handle, position);
+}
+static void go_spinbutton_set_limits(void *handle, long upper, long lower)
+{
+    dw_spinbutton_set_limits((HWND)handle, upper, lower);
+}
+
+static long go_spinbutton_get_pos(void *handle)
+{
+    return dw_spinbutton_get_pos((HWND)handle);
+}
+
+static void *go_radiobutton_new(char *text, unsigned long id)
+{
+   return (void *)dw_radiobutton_new(text, id);
+}
+
+static void *go_checkbox_new(char *text, unsigned long id)
+{
+   return (void *)dw_radiobutton_new(text, id);
+}
+
+static int go_checkbox_get(void *handle)
+{
+    return dw_checkbox_get((HWND)handle);
+}
+
+static void go_checkbox_set(void *handle, int value)
+{
+    return dw_checkbox_set((HWND)handle, value);
+}
+
+static void *go_percent_new(unsigned long id)
+{
+   return (void *)dw_percent_new(id);
+}
+
+static void *go_slider_new(int vertical, int increments, unsigned long id)
+{
+   return (void *)dw_slider_new(vertical, increments, id);
+}
+
+static unsigned int go_slider_get_pos(void *handle)
+{
+   return dw_slider_get_pos((HWND)handle);
+}
+
+static void go_slider_set_pos(void *handle, unsigned int pos)
+{
+    dw_slider_set_pos((HWND)handle, pos);
+}
+
+static void *go_scrollbar_new(int vertical, unsigned long id)
+{
+   return (void *)dw_scrollbar_new(vertical, id);
+}
+
+static unsigned int go_scrollbar_get_pos(void *handle)
+{
+   return dw_scrollbar_get_pos((HWND)handle);
+}
+
+static void go_scrollbar_set_pos(void *handle, unsigned int pos)
+{
+    dw_scrollbar_set_pos((HWND)handle, pos);
+}
+
+static void go_scrollbar_set_range(void *handle, unsigned int range, unsigned int visible)
+{
+    dw_scrollbar_set_range((HWND)handle, range, visible);
+}
+
+static void *go_scrollbox_new(int type, int pad)
+{
+   return (void *)dw_scrollbox_new(type, pad);
+}
+
+static int go_scrollbox_get_pos(void *handle, int orient)
+{
+    return dw_scrollbox_get_pos((HWND)handle, orient);
+}
+
+static int go_scrollbox_get_range(void *handle, int orient)
+{
+    return dw_scrollbox_get_range((HWND)handle, orient);
+}
+
+static void *go_groupbox_new(int type, int pad, char *title)
+{
+   return (void *)dw_groupbox_new(type, pad, title);
+}
+
+static void *go_render_new(unsigned long id)
+{
+   return (void *)dw_render_new(id);
+}
+
+static void go_font_text_extents_get(void *handle, void *pixmap, char *text, int *width, int *height)
+{
+   dw_font_text_extents_get((HWND)handle, (HPIXMAP)pixmap, text, width, height);
+}
+
+static void *go_pixmap_new(void *handle, unsigned long width, unsigned long height, unsigned long depth) 
+{
+    return (void *)dw_pixmap_new((HWND)handle, width, height, (int)depth);
+}
+
+static void *go_pixmap_new_from_file(void *handle, char *filename) 
+{
+    return (void *)dw_pixmap_new_from_file((HWND)handle, filename);
+}
+
+static void *go_pixmap_grab(void *handle, unsigned long cid) 
+{
+    return (void *)dw_pixmap_grab((HWND)handle, cid);
+}
+
+static void go_pixmap_bitblt(void *dest, void *destp, int xdest, int ydest, int width, int height, void *src, void *srcp, int xsrc, int ysrc)
+{
+    dw_pixmap_bitblt((HWND)dest, (HPIXMAP)destp, xdest, ydest, width, height, (HWND)src, (HPIXMAP)srcp, xsrc, ysrc);
+}
+
+static int go_pixmap_stretch_bitblt(void *dest, void *destp, int xdest, int ydest, int width, int height, void *src, void *srcp, int xsrc, int ysrc, int srcwidth, int srcheight)
+{
+    return dw_pixmap_stretch_bitblt((HWND)dest, (HPIXMAP)destp, xdest, ydest, width, height, (HWND)src, (HPIXMAP)srcp, xsrc, ysrc, srcwidth, srcheight);
+}
+
+static void go_pixmap_set_transparent_color(void *pixmap, unsigned long color)
+{
+    dw_pixmap_set_transparent_color((HPIXMAP)pixmap, color);
+}
+
+static int go_pixmap_set_font(void *pixmap, char *fontname)
+{
+    return dw_pixmap_set_font((HPIXMAP)pixmap, fontname);
+}
+
+static void go_pixmap_destroy(void *pixmap)
+{
+    dw_pixmap_destroy((HPIXMAP)pixmap);
+}
+
+static void go_draw_point(void *handle, void *pixmap, int x, int y)
+{
+    dw_draw_point((HWND)handle, (HPIXMAP)pixmap, x, y);
+}
+
+static void go_draw_line(void *handle, void *pixmap, int x1, int y1, int x2, int y2)
+{
+    dw_draw_line((HWND)handle, (HPIXMAP)pixmap, x1, y1, x2, y2);
+}
+
+static void go_draw_rect(void *handle, void *pixmap, int fill, int x, int y, int width, int height)
+{
+    dw_draw_rect((HWND)handle, (HPIXMAP)pixmap, fill, x, y, width, height);
+}
+
+static void go_draw_arc(void *handle, void *pixmap, int flags, int xorigin, int yorigin, int x1, int y1, int x2, int y2)
+{
+    dw_draw_arc((HWND)handle, (HPIXMAP)pixmap, flags, xorigin, yorigin, x1, y1, x2, y2);
+}
+
+static void go_draw_text(void *handle, void *pixmap, int x, int y, char *text)
+{
+    dw_draw_text((HWND)handle, (HPIXMAP)pixmap, x, y, text);
+}
 
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);
 extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data);

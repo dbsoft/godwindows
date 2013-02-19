@@ -14,26 +14,34 @@ import "unsafe"
 import "dw"
 import "fmt"
 
+// Global variables
 const (
    FALSE C.int = iota
    TRUE
 )
 
-func exit_callback(window dw.HWND, data unsafe.Pointer) C.int {
-   if dw.Messagebox("dwtest", C.DW_MB_YESNO | C.DW_MB_QUESTION, "Are you sure you want to exit?") != 0 {
-      dw.Main_quit();
-   }
-   return C.TRUE;
-}
-
-var copypastefield, entryfield, cursortogglebutton, mainwindow, notebookbox1, noncheckable_menuitem, checkable_menuitem dw.HWND
-var textbox1, textbox2 dw.HWND
-var fileicon, foldericon dw.HICN
-var current_file string
+// Page 1
+var notebookbox1, copypastefield, entryfield, cursortogglebutton, mainwindow, noncheckable_menuitem, checkable_menuitem dw.HWND
 var current_color dw.COLOR = dw.RGB(100, 100, 100)
 var cursor_arrow bool = true
-var menu_enabled bool = true
 var timerid dw.HTIMER
+
+// Page 2
+var notebookbox2, textbox1, textbox2, status1, status2, vscrollbar, hscrollbar, rendcombo, imagexspin, imageyspin, imagestretchcheck dw.HWND
+var text1pm, text2pm, image dw.HPIXMAP
+var image_x = 20
+var image_y = 20 
+var image_stretch bool = false
+var font_width = 8;
+var font_height = 12;
+var rows = 10
+var width1 = 6
+var cols = 80;
+
+// Miscellaneous
+var fileicon, foldericon dw.HICN
+var current_file string
+var menu_enabled bool = true
 
 var FOLDER_ICON_NAME string = "mac/folder"
 var FILE_ICON_NAME string = "mac/file"
@@ -48,6 +56,52 @@ func copy_clicked_callback(button dw.HWND, data unsafe.Pointer) C.int {
    return TRUE;
 }
 
+// Call back section
+func exit_callback(window dw.HWND, data unsafe.Pointer) C.int {
+   if dw.Messagebox("dwtest", C.DW_MB_YESNO | C.DW_MB_QUESTION, "Are you sure you want to exit?") != 0 {
+      dw.Main_quit();
+   }
+   return C.TRUE;
+}
+
+func switch_page_callback(window dw.HWND, page_num dw.HNOTEPAGE, itemdata unsafe.Pointer) C.int {
+    fmt.Printf("DW_SIGNAL_SWITCH_PAGE: PageNum: %u\n", uint(page_num));
+    return FALSE;
+}
+
+func menu_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    info:= *(*string)(data);
+    buf := fmt.Sprintf("%s menu item selected", info);
+    dw.Messagebox("Menu Item Callback", C.DW_MB_OK | C.DW_MB_INFORMATION, buf);
+    return 0;
+}
+
+func menutoggle_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    if menu_enabled {
+        dw.Window_set_style(checkable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_DISABLED);
+        dw.Window_set_style(noncheckable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_DISABLED);
+        menu_enabled = false;
+    } else {
+        dw.Window_set_style(checkable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_ENABLED);
+        dw.Window_set_style(noncheckable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_ENABLED);
+        menu_enabled = true;
+    }
+    return FALSE;
+}
+
+func helpabout_callback(window dw.HWND, data unsafe.Pointer) C.int {
+    var env dw.Env;
+    
+    dw.Environment_query(&env);
+    message := fmt.Sprintf("dwindows test\n\nOS: %s %s %s Version: %d.%d.%d.%d\n\ndwindows Version: %d.%d.%d",
+                              env.OSName, env.BuildDate, env.BuildTime,
+                              env.MajorVersion, env.MinorVersion, env.MajorBuild, env.MinorBuild,
+                              env.DWMajorVersion, env.DWMinorVersion, env.DWSubVersion);
+    dw.Messagebox("About dwindows", C.DW_MB_OK | C.DW_MB_INFORMATION, message);
+    return FALSE;
+}
+
+// Page 1 Callbacks
 func paste_clicked_callback(button dw.HWND, data unsafe.Pointer) C.int {
     test := dw.Clipboard_get_text();
     
@@ -107,43 +161,6 @@ func timer_callback(data unsafe.Pointer) C.int {
     return TRUE;
 }
 
-func switch_page_callback(window dw.HWND, page_num dw.HNOTEPAGE, itemdata unsafe.Pointer) C.int {
-    fmt.Printf("DW_SIGNAL_SWITCH_PAGE: PageNum: %u\n", uint(page_num));
-    return FALSE;
-}
-
-func menu_callback(window dw.HWND, data unsafe.Pointer) C.int {
-    info:= *(*string)(data);
-    buf := fmt.Sprintf("%s menu item selected", info);
-    dw.Messagebox("Menu Item Callback", C.DW_MB_OK | C.DW_MB_INFORMATION, buf);
-    return 0;
-}
-
-func menutoggle_callback(window dw.HWND, data unsafe.Pointer) C.int {
-    if menu_enabled {
-        dw.Window_set_style(checkable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_DISABLED);
-        dw.Window_set_style(noncheckable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_DISABLED);
-        menu_enabled = false;
-    } else {
-        dw.Window_set_style(checkable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_ENABLED);
-        dw.Window_set_style(noncheckable_menuitem, C.DW_MIS_DISABLED, C.DW_MIS_ENABLED);
-        menu_enabled = true;
-    }
-    return FALSE;
-}
-
-func helpabout_callback(window dw.HWND, data unsafe.Pointer) C.int {
-    var env dw.Env;
-    
-    dw.Environment_query(&env);
-    message := fmt.Sprintf("dwindows test\n\nOS: %s %s %s Version: %d.%d.%d.%d\n\ndwindows Version: %d.%d.%d",
-                              env.OSName, env.BuildDate, env.BuildTime,
-                              env.MajorVersion, env.MinorVersion, env.MajorBuild, env.MinorBuild,
-                              env.DWMajorVersion, env.DWMinorVersion, env.DWSubVersion);
-    dw.Messagebox("About dwindows", C.DW_MB_OK | C.DW_MB_INFORMATION, message);
-    return FALSE;
-}
-
 var exit_callback_func = exit_callback;
 var copy_clicked_callback_func = copy_clicked_callback;
 var paste_clicked_callback_func = paste_clicked_callback;
@@ -161,6 +178,7 @@ var menutoggle_callback_func = menutoggle_callback;
 var checkable_string = "checkable";
 var noncheckable_string = "non-checkable";
 
+// Create the menu
 func menu_add() {
     mainmenubar := dw.Menubar_new(mainwindow);
     /* add menus to the menubar */
@@ -196,6 +214,7 @@ func menu_add() {
     dw.Menu_append_item(mainmenubar, "~Help", C.DW_MENU_AUTO, 0, dw.TRUE, dw.FALSE, menu);
 }
 
+// Create Page 1
 func archive_add() {
     lbbox := dw.Box_new(C.DW_VERT, 10);
 
@@ -284,8 +303,9 @@ func archive_add() {
     dw.Signal_connect(colorchoosebutton, C.DW_SIGNAL_CLICKED, unsafe.Pointer(&colorchoose_callback_func), unsafe.Pointer(mainwindow));
 }
 
+// Create Page 2
 func text_add() {
-    depth := dw_color_depth_get();
+    depth := dw.Color_depth_get();
 
     /* create a box to pack into the notebook page */
     pagebox := dw.Box_new(C.DW_HORZ, 2);
@@ -308,12 +328,12 @@ func text_add() {
     label := dw.Text_new("Image X:", 100);
     dw.Window_set_style(label, C.DW_DT_VCENTER | C.DW_DT_CENTER, C.DW_DT_VCENTER | C.DW_DT_CENTER);
     dw.Box_pack_start( hbox, label, -1, 25, dw.FALSE, dw.FALSE, 0);
-    imagexspin := dw.Spinbutton_new("20", 1021);
+    imagexspin = dw.Spinbutton_new("20", 1021);
     dw.Box_pack_start(hbox, imagexspin, 25, 25, dw.TRUE, dw.FALSE, 0);
     label = dw.Text_new("Y:", 100);
     dw.Window_set_style(label, C.DW_DT_VCENTER | C.DW_DT_CENTER, C.DW_DT_VCENTER | C.DW_DT_CENTER);
     dw.Box_pack_start(hbox, label, -1, 25, dw.FALSE, dw.FALSE, 0);
-    imageyspin := dw.Spinbutton_new("20", 1021);
+    imageyspin = dw.Spinbutton_new("20", 1021);
     dw.Box_pack_start(hbox, imageyspin, 25, 25, dw.TRUE, dw.FALSE, 0);
     dw.Spinbutton_set_limits(imagexspin, 2000, 0);
     dw.Spinbutton_set_limits(imageyspin, 2000, 0);
@@ -322,16 +342,16 @@ func text_add() {
     imagestretchcheck = dw.Checkbox_new("Stretch", 1021);
     dw.Box_pack_start(hbox, imagestretchcheck, -1, 25, dw.FALSE, dw.FALSE, 0);
 
-    button1 = dw.Button_new("Refresh", 1223);
+    button1 := dw.Button_new("Refresh", 1223);
     dw.Box_pack_start(hbox, button1, 100, 25, dw.FALSE, dw.FALSE, 0);
-    button2 = dw.Button_new("Print", 1224);
+    button2 := dw.Button_new("Print", 1224);
     dw.Box_pack_start(hbox, button2, 100, 25, dw.FALSE, dw.FALSE, 0);
 
     /* Pre-create the scrollbars so we can query their sizes */
     vscrollbar = dw.Scrollbar_new(C.DW_VERT, 50);
     hscrollbar = dw.Scrollbar_new(C.DW_HORZ, 50);
-    dw.Window_get_preferred_size(vscrollbar, &vscrollbarwidth, NULL);
-    dw.Window_get_preferred_size(hscrollbar, NULL, &hscrollbarheight);
+    vscrollbarwidth, vscrollbarheight := dw.Window_get_preferred_size(vscrollbar);
+    hscrollbarwidth, hscrollbarheight := dw.Window_get_preferred_size(hscrollbar);
 
     /* On GTK with overlay scrollbars enabled this returns us 0...
      * so in that case we need to give it some real values.
@@ -346,15 +366,15 @@ func text_add() {
     /* create render box for number pixmap */
     textbox1 = dw.Render_new(100);
     //dw.Window_set_font(textbox1, FIXEDFONT);
-    dw.Font_text_extents_get(textbox1, NULL, "(g", &font_width, &font_height);
+    font_width, font_height := dw.Font_text_extents_get(textbox1, nil, "(g");
     font_width = font_width / 2;
-    vscrollbox = dw.Box_new(C.DW_VERT, 0);
-    dw.Box_pack_start(vscrollbox, textbox1, font_width*width1, font_height*rows, dw.FALSE, dw.TRUE, 0);
-    dw.Box_pack_start(vscrollbox, 0, (font_width*(width1+1)), hscrollbarheight, dw.FALSE, dw.FALSE, 0);
+    vscrollbox := dw.Box_new(C.DW_VERT, 0);
+    //dw.Box_pack_start(vscrollbox, textbox1, font_width * width1, font_height * rows, dw.FALSE, dw.TRUE, 0);
+    //dw.Box_pack_start(vscrollbox, nil, font_width * (width1 + 1), hscrollbarheight, dw.FALSE, dw.FALSE, 0);
     dw.Box_pack_start(pagebox, vscrollbox, 0, 0, dw.FALSE, dw.TRUE, 0);
 
     /* pack empty space 1 character wide */
-    dw.Box_pack_start(pagebox, 0, font_width, 0, dw.FALSE, dw.TRUE, 0);
+    //dw.Box_pack_start(pagebox, nil, font_width, 0, dw.FALSE, dw.TRUE, 0);
 
     /* create box for filecontents and horz scrollbar */
     textboxA := dw.Box_new(C.DW_VERT, 0);
@@ -363,7 +383,7 @@ func text_add() {
     /* create render box for filecontents pixmap */
     textbox2 = dw.Render_new(101);
     dw.Box_pack_start(textboxA, textbox2, 10, 10, dw.TRUE, dw.TRUE, 0);
-    dw.Window_set_font(textbox2, FIXEDFONT);
+    //dw.Window_set_font(textbox2, FIXEDFONT);
     /* create horizonal scrollbar */
     dw.Box_pack_start(textboxA, hscrollbar, -1, -1, dw.TRUE, dw.FALSE, 0);
 
@@ -371,7 +391,7 @@ func text_add() {
     vscrollbox = dw.Box_new(C.DW_VERT, 0);
     dw.Box_pack_start(vscrollbox, vscrollbar, -1, -1, dw.FALSE, dw.TRUE, 0);
     /* Pack an area of empty space 14x14 pixels */
-    dw.Box_pack_start(vscrollbox, 0, vscrollbarwidth, hscrollbarheight, dw.FALSE, dw.FALSE, 0);
+    dw.Box_pack_start(vscrollbox, nil, vscrollbarwidth, hscrollbarheight, dw.FALSE, dw.FALSE, 0);
     dw.Box_pack_start(pagebox, vscrollbox, 0, 0, dw.FALSE, dw.TRUE, 0);
 
     text1pm = dw.Pixmap_new(textbox1, font_width*width1, font_height*rows, depth);

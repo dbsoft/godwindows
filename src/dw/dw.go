@@ -18,6 +18,7 @@ type HTREEITEM unsafe.Pointer
 type HICN unsafe.Pointer
 type HTIMER C.int
 type HMENUI unsafe.Pointer
+type HPIXMAP unsafe.Pointer
 type HNOTEPAGE C.ulong
 type COLOR C.ulong
 type COLORI C.uchar
@@ -531,6 +532,187 @@ func Screen_height() C.int {
 
 func Color_depth_get() C.ulong {
     return C.dw_color_depth_get();
+}
+
+func Spinbutton_new(text string, id C.ulong) HWND {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    return HWND(C.go_spinbutton_new(ctext, id));
+}
+
+func Spinbutton_set_pos(handle HWND, position C.long) {
+    C.go_spinbutton_set_pos(unsafe.Pointer(handle), position);
+}
+
+func Spinbutton_set_limits(handle HWND, upper C.long, lower C.long) {
+    C.go_spinbutton_set_limits(unsafe.Pointer(handle), upper, lower);
+}
+
+func Spinbutton_get_pos(handle HWND) C.long {
+    return C.go_spinbutton_get_pos(unsafe.Pointer(handle));
+}
+
+func Radiobutton_new(text string, id C.ulong) HWND {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    return HWND(C.go_radiobutton_new(ctext, id));
+}
+
+func Checkbox_new(text string, id C.ulong) HWND {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    return HWND(C.go_checkbox_new(ctext, id));
+}
+
+func Checkbox_get(handle HWND) C.int {
+    return C.go_checkbox_get(unsafe.Pointer(handle));
+}
+
+func Checkbox_set(handle HWND, value C.int) {
+    C.go_checkbox_set(unsafe.Pointer(handle), value);
+}
+
+func Percent_new(id C.ulong) HWND {
+    return HWND(C.go_percent_new(id));
+}
+
+func Slider_new(vertical C.int, increments C.int, id C.ulong) HWND {
+    return HWND(C.go_slider_new(vertical, increments, id));
+}
+
+func Scrollbar_new(vertical C.int, id C.ulong) HWND {
+    return HWND(C.go_scrollbar_new(vertical, id));
+}
+
+func Slider_get_pos(handle HWND) C.uint {
+    return C.go_slider_get_pos(unsafe.Pointer(handle));
+}
+
+func Slider_set_pos(handle HWND, position C.uint) {
+    C.go_slider_set_pos(unsafe.Pointer(handle), position);
+}
+
+func Scrollbar_get_pos(handle HWND) C.uint {
+    return C.go_scrollbar_get_pos(unsafe.Pointer(handle));
+}
+
+func Scrollbar_set_pos(handle HWND, position C.uint) {
+    C.go_scrollbar_set_pos(unsafe.Pointer(handle), position);
+}
+
+func Scrollbar_set_range(handle HWND, srange C.uint, visible C.uint) {
+    C.go_scrollbar_set_range(unsafe.Pointer(handle), srange, visible);
+}
+
+func Scrollbox_new(btype C.int, pad C.int) HWND {
+    return HWND(C.go_scrollbox_new(btype, pad));
+}
+
+func Scrollbox_get_pos(handle HWND, orient C.int) C.int {
+    return C.go_scrollbox_get_pos(unsafe.Pointer(handle), orient);
+}
+
+func Scrollbox_get_range(handle HWND, orient C.int) C.int {
+    return C.go_scrollbox_get_range(unsafe.Pointer(handle), orient);
+}
+
+func Groupbox_new(btype C.int, pad C.int, title string) HWND {
+    ctitle := C.CString(title);
+    defer C.free(unsafe.Pointer(ctitle));
+    
+    return HWND(C.go_groupbox_new(btype, pad, ctitle));
+}
+
+func Render_new(id C.ulong) HWND {
+    return HWND(C.go_render_new(id));
+}
+
+func Font_choose(currfont string) string {
+    ccurrfont := C.CString(currfont);
+    defer C.free(unsafe.Pointer(ccurrfont));
+    newfont := C.dw_font_choose(ccurrfont);
+    defer C.dw_free(unsafe.Pointer(newfont));
+    return C.GoString(newfont);
+}
+
+func Font_set_default(fontname string) {
+    cfontname := C.CString(fontname);
+    defer C.free(unsafe.Pointer(cfontname));
+    C.dw_font_set_default(cfontname);
+}
+
+func Font_text_extents_get(handle HWND, pixmap HPIXMAP, text string) (C.int, C.int) {
+   var width, height C.int;
+   
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   
+   C.go_font_text_extents_get(unsafe.Pointer(handle), unsafe.Pointer(pixmap), ctext, &width, &height);
+   return width, height;
+}
+
+func Pixmap_new(handle HWND, width C.ulong, height C.ulong, depth C.ulong) HPIXMAP {
+    return HPIXMAP(C.go_pixmap_new(unsafe.Pointer(handle), width, height, depth));
+}
+
+func Pixmap_new_from_file(handle HWND, filename string) HPIXMAP {
+    cfilename := C.CString(filename);
+    defer C.free(unsafe.Pointer(cfilename));
+    
+    return HPIXMAP(C.go_pixmap_new_from_file(unsafe.Pointer(handle), cfilename));
+}
+
+func Pixmap_grab(handle HWND, id C.ulong) HPIXMAP {
+    return HPIXMAP(C.go_pixmap_grab(unsafe.Pointer(handle), id));
+}
+
+func Pixmap_bitblt(dest HWND, destp HPIXMAP, xdest C.int, ydest C.int, width C.int, height C.int, src HWND, srcp HPIXMAP, xsrc C.int, ysrc C.int) {
+    C.go_pixmap_bitblt(unsafe.Pointer(dest), unsafe.Pointer(srcp), xdest, ydest, width, height, unsafe.Pointer(src), unsafe.Pointer(srcp), xsrc, ysrc); 
+}
+
+func Pixmap_stretch_bitblt(dest HWND, destp HPIXMAP, xdest C.int, ydest C.int, width C.int, height C.int, src HWND, srcp HPIXMAP, xsrc C.int, ysrc C.int, srcwidth C.int, srcheight C.int) C.int {
+    return C.go_pixmap_stretch_bitblt(unsafe.Pointer(dest), unsafe.Pointer(srcp), xdest, ydest, width, height, unsafe.Pointer(src), unsafe.Pointer(srcp), xsrc, ysrc, srcwidth, srcheight); 
+}
+
+func Pixmap_set_transparent_color(pixmap HPIXMAP, color COLOR) {
+    C.go_pixmap_set_transparent_color(unsafe.Pointer(pixmap), C.ulong(color));
+}
+
+func Pixmap_set_font(handle HWND, fontname string) C.int {
+    cfontname := C.CString(fontname);
+    defer C.free(unsafe.Pointer(cfontname));
+    
+    return C.go_pixmap_set_font(unsafe.Pointer(handle), cfontname);
+}
+
+func Pixmap_destroy(pixmap HPIXMAP) {
+    C.go_pixmap_destroy(unsafe.Pointer(pixmap));
+}
+
+func Draw_point(handle HWND, pixmap HPIXMAP, x C.int, y C.int) {
+    C.go_draw_point(unsafe.Pointer(handle), unsafe.Pointer(pixmap), x, y);
+}
+
+func Draw_line(handle HWND, pixmap HPIXMAP, x1 C.int, y1 C.int, x2 C.int, y2 C.int) {
+    C.go_draw_line(unsafe.Pointer(handle), unsafe.Pointer(pixmap), x1, y1, x2, y2);
+}
+
+func Draw_rect(handle HWND, pixmap HPIXMAP, fill C.int, x C.int, y C.int, width C.int, height C.int) {
+    C.go_draw_rect(unsafe.Pointer(handle), unsafe.Pointer(pixmap), fill, x, y, width, height);
+}
+
+func Draw_arc(handle HWND, pixmap HPIXMAP, flags C.int, xorigin C.int, yorigin C.int, x1 C.int, y1 C.int, x2 C.int, y2 C.int) {
+    C.go_draw_arc(unsafe.Pointer(handle), unsafe.Pointer(pixmap), flags, xorigin, yorigin, x1, y1, x2, y2);
+}
+
+func Draw_text(handle HWND, pixmap HPIXMAP, x C.int, y C.int, text string) {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    C.go_draw_text(unsafe.Pointer(handle), unsafe.Pointer(pixmap), x, y, ctext);
 }
 
 func init() {

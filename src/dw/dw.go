@@ -52,6 +52,21 @@ func Init(newthread C.int) C.int {
    return C.go_init(newthread);
 }
 
+func Environment_query(env *Env) {
+    var cenv C.DWEnv;
+    C.dw_environment_query(&cenv);
+    env.OSName = C.GoString((*C.char)(unsafe.Pointer(&cenv.osName[0])));
+    env.BuildDate = C.GoString((*C.char)(unsafe.Pointer(&cenv.buildDate[0])));
+    env.BuildTime = C.GoString((*C.char)(unsafe.Pointer(&cenv.buildTime[0])));
+    env.MajorVersion = cenv.MajorVersion;
+    env.MinorVersion = cenv.MajorVersion;
+    env.MajorBuild = cenv.MajorBuild;
+    env.MinorBuild = cenv.MinorBuild;
+    env.DWMajorVersion = cenv.DWMajorVersion;
+    env.DWMinorVersion = cenv.DWMinorVersion;
+    env.DWSubVersion = cenv.DWSubVersion;
+}
+
 func Messagebox(title string, flags C.int, message string) C.int {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
@@ -273,6 +288,13 @@ func Text_new(text string, id C.ulong) HWND {
    return HWND(C.go_text_new(ctext, id));
 }
 
+func Status_text_new(text string, id C.ulong) HWND {
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   
+   return HWND(C.go_status_text_new(ctext, id));
+}
+
 func Entryfield_new(text string, id C.ulong) HWND {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -408,6 +430,107 @@ func Notebook_page_set_text(handle HWND, pageid HNOTEPAGE, text string) {
     defer C.free(unsafe.Pointer(ctext));
     
     C.go_notebook_page_set_text(unsafe.Pointer(handle), C.ulong(pageid), ctext);
+}
+
+func Icon_load_from_file(filename string) HICN {
+    cfilename := C.CString(filename);
+    defer C.free(unsafe.Pointer(cfilename));
+    
+    return HICN(C.go_icon_load_from_file(cfilename));
+}
+
+func Icon_load(id C.ulong) HICN {
+    return HICN(C.go_icon_load(0, id));
+}
+
+func Taskbar_delete(handle HWND, icon HICN) {
+    C.go_taskbar_delete(unsafe.Pointer(handle), unsafe.Pointer(icon));
+}
+
+func Taskbar_insert(handle HWND, icon HICN, bubbletext string) {
+    cbubbletext := C.CString(bubbletext);
+    defer C.free(unsafe.Pointer(cbubbletext));
+    
+    C.go_taskbar_insert(unsafe.Pointer(handle), unsafe.Pointer(icon), cbubbletext);
+}
+
+func Combobox_new(text string, id C.ulong) HWND {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    return HWND(C.go_combobox_new(ctext, id));
+}
+
+func Listbox_new(id C.ulong, multi C.int) HWND {
+    return HWND(C.go_listbox_new(id, multi));
+}
+
+func Listbox_append(handle HWND, text string) {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    C.go_listbox_append(unsafe.Pointer(handle), ctext);
+}
+
+func Listbox_insert(handle HWND, text string, pos C.int) {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    C.go_listbox_insert(unsafe.Pointer(handle), ctext, pos);
+}
+
+func Listbox_clear(handle HWND) {
+    C.go_listbox_clear(unsafe.Pointer(handle));
+}
+
+func Listbox_count(handle HWND) C.int {
+    return C.go_listbox_count(unsafe.Pointer(handle));
+}
+
+func Listbox_set_top(handle HWND, top C.int) {
+    C.go_listbox_set_top(unsafe.Pointer(handle), top);
+}
+
+func Listbox_select(handle HWND, index C.int, state C.int) {
+    C.go_listbox_select(unsafe.Pointer(handle), index, state);
+}
+
+func Listbox_delete(handle HWND, index C.int) {
+    C.go_listbox_delete(unsafe.Pointer(handle), index);
+}
+
+func Listbox_get_text(handle HWND, index C.int) string {
+    var buf [201]C.char;
+    
+    C.go_listbox_get_text(unsafe.Pointer(handle), index, &buf[0], 200);
+    return C.GoString((*C.char)(unsafe.Pointer(&buf[0])));
+}
+
+func Listbox_set_text(handle HWND, index C.int, text string) {
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+    
+    C.go_listbox_set_text(unsafe.Pointer(handle), index, ctext);
+}
+
+func Listbox_selected(handle HWND) C.int {
+    return C.go_listbox_selected(unsafe.Pointer(handle));
+}
+
+func Listbox_selected_multi(handle HWND, where C.int) C.int {
+    return C.go_listbox_selected_multi(unsafe.Pointer(handle), where);
+}
+
+func Screen_width() C.int {
+    return C.dw_screen_width();
+}
+
+func Screen_height() C.int {
+    return C.dw_screen_height();
+}
+
+func Color_depth_get() C.ulong {
+    return C.dw_color_depth_get();
 }
 
 func init() {

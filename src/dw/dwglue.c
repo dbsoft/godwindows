@@ -215,6 +215,11 @@ static void *go_text_new(char *text, unsigned long id)
    return (void *)dw_text_new(text, id);
 }
 
+static void *go_status_text_new(char *text, unsigned long id)
+{
+   return (void *)dw_status_text_new(text, id);
+}
+
 static void *go_entryfield_new(char *text, unsigned long id)
 {
    return (void *)dw_entryfield_new(text, id);
@@ -306,6 +311,107 @@ static void go_notebook_page_set_text(void *handle, unsigned long pageid, char *
 {
     dw_notebook_page_set_text((HWND)handle, pageid, text);
 }
+
+static void *go_icon_load_from_file(char *filename)
+{
+    return (void *)dw_icon_load_from_file(filename);
+}
+
+static void *go_icon_load(unsigned long module, unsigned long cid)
+{
+    return (void *)dw_icon_load(module, cid);
+}
+
+static void go_taskbar_delete(void *handle, void *icon)
+{
+    dw_taskbar_delete((HWND)handle, (HICN)icon);
+}
+
+static void go_taskbar_insert(void *handle, void *icon, char *bubbletext)
+{
+    dw_taskbar_insert((HWND)handle, (HICN)icon, bubbletext);
+}
+
+static void *go_combobox_new(char *text, unsigned long id)
+{
+   return (void *)dw_combobox_new(text, id);
+}
+
+static void *go_listbox_new(unsigned long id, int multi)
+{
+   return (void *)dw_listbox_new(id, multi);
+}
+
+static void go_listbox_append(void *handle, char *text)
+{
+    dw_listbox_append((HWND)handle, text);
+}
+
+static void go_listbox_insert(void *handle, char *text, int pos)
+{
+    dw_listbox_insert((HWND)handle, text, pos);
+}
+
+static void go_listbox_clear(void *handle)
+{
+    dw_listbox_clear((HWND)handle);
+}
+
+static int go_listbox_count(void *handle)
+{
+    return dw_listbox_count((HWND)handle);
+}
+
+static void go_listbox_set_top(void *handle, int top)
+{
+    dw_listbox_set_top((HWND)handle, top);
+}
+
+static void go_listbox_select(void *handle, int index, int state)
+{
+    dw_listbox_select((HWND)handle, index, state);
+}
+
+static void go_listbox_delete(void *handle, int index)
+{
+    dw_listbox_delete((HWND)handle, index);
+}
+
+static void go_listbox_get_text(void *handle, int index, char *text, int length)
+{
+    dw_listbox_get_text((HWND)handle, index, text, length);
+}
+
+static void go_listbox_set_text(void *handle, int index, char *text)
+{
+    dw_listbox_set_text((HWND)handle, index, text);
+}
+
+static int go_listbox_selected(void *handle)
+{
+    return dw_listbox_selected((HWND)handle);
+}
+
+static int go_listbox_selected_multi(void *handle, int where)
+{
+    return dw_listbox_selected_multi((HWND)handle, where);
+}
+
+/*HWND API dw_spinbutton_new(char *text, unsigned long id);
+HWND API dw_radiobutton_new(char *text, ULONG id);
+HWND API dw_percent_new(unsigned long id);
+HWND API dw_slider_new(int vertical, int increments, ULONG id);
+HWND API dw_scrollbar_new(int vertical, ULONG id);
+HWND API dw_checkbox_new(char *text, unsigned long id);
+unsigned int API dw_slider_get_pos(HWND handle);
+void API dw_slider_set_pos(HWND handle, unsigned int position);
+unsigned int API dw_scrollbar_get_pos(HWND handle);
+void API dw_scrollbar_set_pos(HWND handle, unsigned int position);
+void API dw_scrollbar_set_range(HWND handle, unsigned int range, unsigned int visible);
+HWND API dw_scrollbox_new(int type, int pad);
+int API dw_scrollbox_get_pos( HWND handle, int orient );
+int API dw_scrollbox_get_range( HWND handle, int orient );
+HWND API dw_groupbox_new(int type, int pad, char *title);*/
 
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);
 extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data);

@@ -423,7 +423,7 @@ static void *go_radiobutton_new(char *text, unsigned long id)
 
 static void *go_checkbox_new(char *text, unsigned long id)
 {
-   return (void *)dw_radiobutton_new(text, id);
+   return (void *)dw_checkbox_new(text, id);
 }
 
 static int go_checkbox_get(void *handle)

@@ -483,22 +483,22 @@ func resolve_keyname(vk int) string {
 }
 
 func resolve_keymodifiers(mask int) string {
-    var shift, ctrl, alt string;
-    
-    if (mask & dw.KC_SHIFT) == dw.KC_SHIFT {
-        shift = "KC_SHIFT";
+    if (mask & dw.KC_CTRL) == dw.KC_CTRL && (mask & dw.KC_SHIFT) == dw.KC_SHIFT && (mask & dw.KC_ALT) == dw.KC_ALT {
+        return "KC_CTRL KC_SHIFT KC_ALT";
+    } else if (mask & dw.KC_CTRL) == dw.KC_CTRL && (mask & dw.KC_SHIFT) == dw.KC_SHIFT {
+        return "KC_CTRL KC_SHIFT";
+    } else if (mask & dw.KC_CTRL) == dw.KC_CTRL && (mask & dw.KC_ALT) == dw.KC_ALT {
+        return "KC_CTRL KC_ALT";
+    } else if (mask & dw.KC_SHIFT) == dw.KC_SHIFT && (mask & dw.KC_ALT) == dw.KC_ALT {
+        return "KC_SHIFT KC_ALT";
+    } else if (mask & dw.KC_SHIFT) == dw.KC_SHIFT {
+        return "KC_SHIFT";
+    } else if (mask & dw.KC_CTRL) == dw.KC_CTRL {
+        return "KC_CTRL";
+    } else if (mask & dw.KC_ALT) == dw.KC_ALT {
+        return "KC_ALT";
     }
-    if (mask & dw.KC_CTRL) == dw.KC_CTRL {
-        ctrl = "KC_CTRL";
-    }
-    if (mask & dw.KC_ALT) == dw.KC_ALT {
-        alt = "KC_ALT";
-    }
-    result := fmt.Sprintf("%s %s %s", ctrl, shift, alt);
-    if len(result) < 3 {
-      return "none";
-    }
-    return result;
+    return "none";
 }
 
 func keypress_callback(window dw.HWND, ch uint8, vk int, state int, data unsafe.Pointer, utf8 string) int {

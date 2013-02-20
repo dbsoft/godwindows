@@ -357,6 +357,161 @@ func configure_event(hwnd dw.HWND, width int, height int, data unsafe.Pointer) i
     return TRUE;
 }
 
+func refresh_callback(window dw.HWND, data unsafe.Pointer) int {
+    update_render();
+    return FALSE;
+}
+
+func render_select_event_callback(window dw.HWND, index int, data unsafe.Pointer) int {
+    if index != render_type {
+        if index == 2 {
+            dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols));
+            dw.Scrollbar_set_pos(hscrollbar, 0);
+            dw.Scrollbar_set_range(vscrollbar, uint(num_lines), uint(rows));
+            dw.Scrollbar_set_pos(vscrollbar, 0);
+            current_col = 0;
+            current_row = 0;
+        } else {
+            dw.Scrollbar_set_range(hscrollbar, 0, 0);
+            dw.Scrollbar_set_pos(hscrollbar, 0);
+            dw.Scrollbar_set_range(vscrollbar, 0, 0);
+            dw.Scrollbar_set_pos(vscrollbar, 0);
+        }
+        render_type = index;
+        update_render();
+    }
+    return FALSE;
+}
+
+/* Callback to handle user selection of the scrollbar position */
+func scrollbar_valuechanged_callback(hwnd dw.HWND, value int, data unsafe.Pointer) int {
+    if data != nil {
+        stext := dw.HWND(data);
+        
+        if hwnd == vscrollbar {
+            current_row = value;
+        } else {
+            current_col = value;
+        }
+        dw.Window_set_text(stext, fmt.Sprintf("Row:%d Col:%d Lines:%d Cols:%d", current_row, current_col, num_lines, max_linewidth));
+        update_render();
+    }
+    return FALSE;
+}
+
+func resolve_keyname(vk int) string {
+    var keyname string = "<unknown>"
+
+    /*switch vk {
+        case  dw.VK_LBUTTON : keyname =  "VK_LBUTTON"; break;
+        case  dw.VK_RBUTTON : keyname =  "VK_RBUTTON"; break;
+        case  dw.VK_CANCEL  : keyname =  "VK_CANCEL"; break;
+        case  dw.VK_MBUTTON : keyname =  "VK_MBUTTON"; break;
+        case  dw.VK_TAB     : keyname =  "VK_TAB"; break;
+        case  dw.VK_CLEAR   : keyname =  "VK_CLEAR"; break;
+        case  dw.VK_RETURN  : keyname =  "VK_RETURN"; break;
+        case  dw.VK_PAUSE   : keyname =  "VK_PAUSE"; break;
+        case  dw.VK_CAPITAL : keyname =  "VK_CAPITAL"; break;
+        case  dw.VK_ESCAPE  : keyname =  "VK_ESCAPE"; break;
+        case  dw.VK_SPACE   : keyname =  "VK_SPACE"; break;
+        case  dw.VK_PRIOR   : keyname =  "VK_PRIOR"; break;
+        case  dw.VK_NEXT    : keyname =  "VK_NEXT"; break;
+        case  dw.VK_END     : keyname =  "VK_END"; break;
+        case  dw.VK_HOME    : keyname =  "VK_HOME"; break;
+        case  dw.VK_LEFT    : keyname =  "VK_LEFT"; break;
+        case  dw.VK_UP      : keyname =  "VK_UP"; break;
+        case  dw.VK_RIGHT   : keyname =  "VK_RIGHT"; break;
+        case  dw.VK_DOWN    : keyname =  "VK_DOWN"; break;
+        case  dw.VK_SELECT  : keyname =  "VK_SELECT"; break;
+        case  dw.VK_PRINT   : keyname =  "VK_PRINT"; break;
+        case  dw.VK_EXECUTE : keyname =  "VK_EXECUTE"; break;
+        case  dw.VK_SNAPSHOT: keyname =  "VK_SNAPSHOT"; break;
+        case  dw.VK_INSERT  : keyname =  "VK_INSERT"; break;
+        case  dw.VK_DELETE  : keyname =  "VK_DELETE"; break;
+        case  dw.VK_HELP    : keyname =  "VK_HELP"; break;
+        case  dw.VK_LWIN    : keyname =  "VK_LWIN"; break;
+        case  dw.VK_RWIN    : keyname =  "VK_RWIN"; break;
+        case  dw.VK_NUMPAD0 : keyname =  "VK_NUMPAD0"; break;
+        case  dw.VK_NUMPAD1 : keyname =  "VK_NUMPAD1"; break;
+        case  dw.VK_NUMPAD2 : keyname =  "VK_NUMPAD2"; break;
+        case  dw.VK_NUMPAD3 : keyname =  "VK_NUMPAD3"; break;
+        case  dw.VK_NUMPAD4 : keyname =  "VK_NUMPAD4"; break;
+        case  dw.VK_NUMPAD5 : keyname =  "VK_NUMPAD5"; break;
+        case  dw.VK_NUMPAD6 : keyname =  "VK_NUMPAD6"; break;
+        case  dw.VK_NUMPAD7 : keyname =  "VK_NUMPAD7"; break;
+        case  dw.VK_NUMPAD8 : keyname =  "VK_NUMPAD8"; break;
+        case  dw.VK_NUMPAD9 : keyname =  "VK_NUMPAD9"; break;
+        case  dw.VK_MULTIPLY: keyname =  "VK_MULTIPLY"; break;
+        case  dw.VK_ADD     : keyname =  "VK_ADD"; break;
+        case  dw.VK_SEPARATOR: keyname = "VK_SEPARATOR"; break;
+        case  dw.VK_SUBTRACT: keyname =  "VK_SUBTRACT"; break;
+        case  dw.VK_DECIMAL : keyname =  "VK_DECIMAL"; break;
+        case  dw.VK_DIVIDE  : keyname =  "VK_DIVIDE"; break;
+        case  dw.VK_F1      : keyname =  "VK_F1"; break;
+        case  dw.VK_F2      : keyname =  "VK_F2"; break;
+        case  dw.VK_F3      : keyname =  "VK_F3"; break;
+        case  dw.VK_F4      : keyname =  "VK_F4"; break;
+        case  dw.VK_F5      : keyname =  "VK_F5"; break;
+        case  dw.VK_F6      : keyname =  "VK_F6"; break;
+        case  dw.VK_F7      : keyname =  "VK_F7"; break;
+        case  dw.VK_F8      : keyname =  "VK_F8"; break;
+        case  dw.VK_F9      : keyname =  "VK_F9"; break;
+        case  dw.VK_F10     : keyname =  "VK_F10"; break;
+        case  dw.VK_F11     : keyname =  "VK_F11"; break;
+        case  dw.VK_F12     : keyname =  "VK_F12"; break;
+        case  dw.VK_F13     : keyname =  "VK_F13"; break;
+        case  dw.VK_F14     : keyname =  "VK_F14"; break;
+        case  dw.VK_F15     : keyname =  "VK_F15"; break;
+        case  dw.VK_F16     : keyname =  "VK_F16"; break;
+        case  dw.VK_F17     : keyname =  "VK_F17"; break;
+        case  dw.VK_F18     : keyname =  "VK_F18"; break;
+        case  dw.VK_F19     : keyname =  "VK_F19"; break;
+        case  dw.VK_F20     : keyname =  "VK_F20"; break;
+        case  dw.VK_F21     : keyname =  "VK_F21"; break;
+        case  dw.VK_F22     : keyname =  "VK_F22"; break;
+        case  dw.VK_F23     : keyname =  "VK_F23"; break;
+        case  dw.VK_F24     : keyname =  "VK_F24"; break;
+        case  dw.VK_NUMLOCK : keyname =  "VK_NUMLOCK"; break;
+        case  dw.VK_SCROLL  : keyname =  "VK_SCROLL"; break;
+        case  dw.VK_LSHIFT  : keyname =  "VK_LSHIFT"; break;
+        case  dw.VK_RSHIFT  : keyname =  "VK_RSHIFT"; break;
+        case  dw.VK_LCONTROL: keyname =  "VK_LCONTROL"; break;
+        case  dw.VK_RCONTROL: keyname =  "VK_RCONTROL"; break;
+    }*/
+    return keyname;
+}
+
+func resolve_keymodifiers(mask int) string {
+    /*if (mask & dw.KC_CTRL) && (mask & dw.KC_SHIFT) && (mask & dw.KC_ALT) {
+        return "KC_CTRL KC_SHIFT KC_ALT";
+    } else if (mask & dw.KC_CTRL) && (mask & dw.KC_SHIFT) {
+        return "KC_CTRL KC_SHIFT";
+    } else if (mask & dw.KC_CTRL) && (mask & dw.KC_ALT) {
+        return "KC_CTRL KC_ALT";
+    } else if (mask & dw.KC_SHIFT) && (mask & dw.KC_ALT) {
+        return "KC_SHIFT KC_ALT";
+    } else if (mask & dw.KC_SHIFT) {
+        return "KC_SHIFT";
+    } else if (mask & dw.KC_CTRL) {
+        return "KC_CTRL";
+    } else if (mask & dw.KC_ALT) {
+        return "KC_ALT";
+    }*/
+    return "none";
+}
+
+func keypress_callback(window dw.HWND, ch uint8, vk int, state int, data unsafe.Pointer, utf8 string) int {
+    var message string
+    
+    if ch != 0 {
+        message = fmt.Sprintf("Key: %c(%d) Modifiers: %s(%d) utf8 %s", ch, ch, resolve_keymodifiers(state), state,  utf8);
+    } else {
+        message = fmt.Sprintf("Key: %s(%d) Modifiers: %s(%d) utf8 %s", resolve_keyname(vk), vk, resolve_keymodifiers(state), state, utf8);
+    }
+    dw.Window_set_text(status1, message);
+    return FALSE;
+}
+
 var exit_callback_func = exit_callback;
 var copy_clicked_callback_func = copy_clicked_callback;
 var paste_clicked_callback_func = paste_clicked_callback;
@@ -375,6 +530,10 @@ var configure_event_func = configure_event;
 var motion_notify_event_func = motion_notify_event;
 var show_window_callback_func = show_window_callback;
 var context_menu_event_func = context_menu_event;
+var refresh_callback_func = refresh_callback;
+var render_select_event_callback_func = render_select_event_callback;
+var scrollbar_valuechanged_callback_func = scrollbar_valuechanged_callback;
+var keypress_callback_func = keypress_callback;
 
 var checkable_string = "checkable";
 var noncheckable_string = "non-checkable";
@@ -614,13 +773,13 @@ func text_add() {
     dw.Signal_connect(textbox2, dw.SIGNAL_CONFIGURE, unsafe.Pointer(&configure_event_func), unsafe.Pointer(text2pm));
     dw.Signal_connect(textbox2, dw.SIGNAL_MOTION_NOTIFY, unsafe.Pointer(&motion_notify_event_func), unsafe.Pointer(uintptr(1)));
     dw.Signal_connect(textbox2, dw.SIGNAL_BUTTON_PRESS, unsafe.Pointer(&motion_notify_event_func), nil);
-    /*dw.Signal_connect(hscrollbar, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&scrollbar_valuechanged_callback_func), DW_POINTER(status1));
-    dw.Signal_connect(vscrollbar, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&scrollbar_valuechanged_callback_func), DW_POINTER(status1));
+    dw.Signal_connect(hscrollbar, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&scrollbar_valuechanged_callback_func), unsafe.Pointer(status1));
+    dw.Signal_connect(vscrollbar, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&scrollbar_valuechanged_callback_func), unsafe.Pointer(status1));
     dw.Signal_connect(imagestretchcheck, dw.SIGNAL_CLICKED, unsafe.Pointer(&refresh_callback_func), nil);
     dw.Signal_connect(button1, dw.SIGNAL_CLICKED, unsafe.Pointer(&refresh_callback_func), nil);
-    dw.Signal_connect(button2, dw.SIGNAL_CLICKED, unsafe.Pointer(&print_callback_func), nil);
+    //dw.Signal_connect(button2, dw.SIGNAL_CLICKED, unsafe.Pointer(&print_callback_func), nil);
     dw.Signal_connect(rendcombo, dw.SIGNAL_LIST_SELECT, unsafe.Pointer(&render_select_event_callback_func), nil);
-    dw.Signal_connect(mainwindow, dw.SIGNAL_KEY_PRESS, unsafe.Pointer(&keypress_callback_func), nil);*/
+    dw.Signal_connect(mainwindow, dw.SIGNAL_KEY_PRESS, unsafe.Pointer(&keypress_callback_func), nil);
 
     dw.Taskbar_insert(textbox1, fileicon, "DWTest");
 }

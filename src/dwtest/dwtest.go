@@ -60,7 +60,7 @@ func exit_callback(window dw.HWND, data unsafe.Pointer) int {
 }
 
 func switch_page_callback(window dw.HWND, page_num dw.HNOTEPAGE, itemdata unsafe.Pointer) int {
-    fmt.Printf("DW_SIGNAL_SWITCH_PAGE: PageNum: %u\n", uint(page_num));
+    fmt.Printf("DW_SIGNAL_SWITCH_PAGE: PageNum: %d\n", uint(page_num));
     return FALSE;
 }
 
@@ -236,8 +236,6 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
 func draw_shapes(direct int, hpma dw.HPIXMAP) {
     var hpm, pixmap dw.HPIXMAP = nil, nil
     var window dw.HWND = nil
-    width := dw.Pixmap_width(hpm);
-    height := dw.Pixmap_height(hpm);
     if hpma != nil {
         hpm = hpma;
     } else {
@@ -248,6 +246,9 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
     } else {
         pixmap = hpm;
     }
+    
+    width := dw.Pixmap_width(hpm);
+    height := dw.Pixmap_height(hpm);
     
     //x := [7]int{ 20, 180, 180, 230, 180, 180, 20 };
     //y := [7]int{ 50, 50, 20, 70, 120, 90, 90 };
@@ -351,7 +352,7 @@ func configure_event(hwnd dw.HWND, width int, height int, data unsafe.Pointer) i
     /* Update scrollbar ranges with new values */
     dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols));
     dw.Scrollbar_set_range(vscrollbar, uint(num_lines), uint(rows));
-
+    
     /* Redraw the window */
     update_render();
     return TRUE;

@@ -97,7 +97,7 @@ var KC_ALT = C.KC_ALT
 
 var MENU_SEPARATOR = C.DW_MENU_SEPARATOR
 var MENU_AUTO uint = C.DW_MENU_AUTO
-var MENU_POPUP = -1
+var MENU_POPUP uint = ^uint(0)
 
 var PERCENT_INDETERMINATE = -1
 
@@ -544,7 +544,7 @@ func Menu_item_set_state(menu HMENUI, id uint, flags uint) {
     C.go_menu_item_set_state(unsafe.Pointer(menu), C.ulong(id), C.ulong(flags));
 }
 
-func Menu_poup(menu HMENUI, parent HWND, x int, y int) {
+func Menu_popup(menu HMENUI, parent HWND, x int, y int) {
     C.go_menu_popup(unsafe.Pointer(menu), unsafe.Pointer(parent), C.int(x), C.int(y));
 }
 
@@ -678,6 +678,14 @@ func Screen_height() int {
 
 func Color_depth_get() uint {
     return uint(C.dw_color_depth_get());
+}
+
+func Color_foreground_set(color COLOR) {
+    C.dw_color_foreground_set(C.ulong(color));
+}
+
+func Color_background_set(color COLOR) {
+    C.dw_color_background_set(C.ulong(color));
 }
 
 func Spinbutton_new(text string, id C.ulong) HWND {
@@ -838,6 +846,14 @@ func Pixmap_destroy(pixmap HPIXMAP) {
     C.go_pixmap_destroy(unsafe.Pointer(pixmap));
 }
 
+func Pixmap_width(pixmap HPIXMAP) int {
+    return int(C.go_pixmap_width(unsafe.Pointer(pixmap)));
+}
+
+func Pixmap_height(pixmap HPIXMAP) int {
+    return int(C.go_pixmap_height(unsafe.Pointer(pixmap)));
+}
+
 func Draw_point(handle HWND, pixmap HPIXMAP, x int, y int) {
     C.go_draw_point(unsafe.Pointer(handle), unsafe.Pointer(pixmap), C.int(x), C.int(y));
 }
@@ -859,6 +875,20 @@ func Draw_text(handle HWND, pixmap HPIXMAP, x int, y int, text string) {
     defer C.free(unsafe.Pointer(ctext));
     
     C.go_draw_text(unsafe.Pointer(handle), unsafe.Pointer(pixmap), C.int(x), C.int(y), ctext);
+}
+
+func Pointer_query_pos() (int, int) {
+   var x, y C.long;
+   C.dw_pointer_query_pos(&x, &y);
+   return int(x), int(y);
+}
+
+func Pointer_set_pos(x int, y int) {
+   C.dw_pointer_set_pos(C.long(x), C.long(y));
+}
+
+func Flush() {
+    C.dw_flush();
 }
 
 func init() {

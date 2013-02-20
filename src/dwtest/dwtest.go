@@ -21,12 +21,17 @@ var notebookbox2, textbox1, textbox2, status1, status2, vscrollbar, hscrollbar, 
 var text1pm, text2pm, image dw.HPIXMAP
 var image_x = 20
 var image_y = 20 
-var image_stretch bool = false
-var font_width = 8;
-var font_height = 12;
+var image_stretch int = FALSE
+var font_width = 8
+var font_height = 12
 var rows = 10
 var width1 = 6
-var cols = 80;
+var cols = 80
+var num_lines = 0
+var render_type = 0
+var current_row = 0
+var current_col = 0
+var max_linewidth = 0
 
 // Miscellaneous
 var fileicon, foldericon dw.HICN
@@ -151,6 +156,207 @@ func timer_callback(data unsafe.Pointer) int {
     return TRUE;
 }
 
+// Page 2 Callbacks
+func motion_notify_event(window dw.HWND, x int, y int, buttonmask int, data unsafe.Pointer) int {
+    var which = "button_press";
+    
+    if(uintptr(data) > 0) {
+        which = "motion_notify";
+    }
+    dw.Window_set_text(status2, fmt.Sprintf("%s: %dx%d", which, x, y));
+    return FALSE;
+}
+
+func show_window_callback(window dw.HWND, data unsafe.Pointer) int {
+    thiswindow := dw.HWND(data);
+    
+    if thiswindow != nil {
+        dw.Window_show(thiswindow);
+        dw.Window_raise(thiswindow);
+    }
+    return TRUE;
+}
+
+func context_menu_event(window dw.HWND, x int, y int, buttonmask int, data unsafe.Pointer) int {
+    hwndMenu := dw.Menu_new(0);
+    menuitem := dw.Menu_append_item(hwndMenu, "~Quit", dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU);
+
+    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, unsafe.Pointer(&exit_callback_func), unsafe.Pointer(mainwindow));
+    dw.Menu_append_item(hwndMenu, dw.MENU_SEPARATOR, dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU);
+    menuitem = dw.Menu_append_item(hwndMenu, "~Show Window", dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU);
+    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, unsafe.Pointer(&show_window_callback_func), unsafe.Pointer(mainwindow));
+    px, py := dw.Pointer_query_pos();
+    /* Use the toplevel window handle here.... because on the Mac..
+     * using the control itself, when a different tab is active
+     * the control is removed from the window and can no longer
+     * handle the messages.
+     */
+    dw.Menu_popup(hwndMenu, mainwindow, px, py);
+    return TRUE;
+}
+
+/* When hpma is not NULL we are printing.. so handle things differently */
+func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
+    var hpm dw.HPIXMAP
+    
+    if hpma == nil {
+        hpm = text2pm;
+    } else {
+        hpm = hpma;
+    }
+
+    if len(current_file) > 0 {
+        var i int
+        
+        dw.Color_foreground_set(dw.CLR_WHITE);
+        if hpma == nil {
+            dw.Draw_rect(nil, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(text1pm), dw.Pixmap_height(text1pm));
+        }
+        dw.Draw_rect(nil, hpm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(hpm), dw.Pixmap_height(hpm));
+
+        for i = 0; (i < nrows) && (i+row < num_lines); i++ {
+            fileline := i + row - 1;
+            y := i*fheight;
+            dw.Color_background_set(dw.COLOR(1 + (fileline % 15)));
+            dw.Color_foreground_set(dw.COLOR(fileline % 16));
+            if hpma == nil {
+                dw.Draw_text(nil, text1pm, 0, y, fmt.Sprintf("%6.6d", i+row));
+            }
+            /*pLine = lp[i+row];
+            dw.Draw_text(nil, hpm, 0, y, pLine+col);*/
+        }
+        if hpma == nil {
+            text_expose(textbox1, 0, 0, 0, 0, nil);
+            text_expose(textbox2, 0, 0, 0, 0, nil);
+        }
+    }
+}
+
+/* When hpma is not NULL we are printing.. so handle things differently */
+func draw_shapes(direct int, hpma dw.HPIXMAP) {
+    var hpm, pixmap dw.HPIXMAP = nil, nil
+    var window dw.HWND = nil
+    width := dw.Pixmap_width(hpm);
+    height := dw.Pixmap_height(hpm);
+    if hpma != nil {
+        hpm = hpma;
+    } else {
+        hpm = text2pm;
+    }
+    if direct == TRUE {
+        window = textbox2;
+    } else {
+        pixmap = hpm;
+    }
+    
+    //x := [7]int{ 20, 180, 180, 230, 180, 180, 20 };
+    //y := [7]int{ 50, 50, 20, 70, 120, 90, 90 };
+
+    image_x = dw.Spinbutton_get_pos(imagexspin);
+    image_y = dw.Spinbutton_get_pos(imageyspin);
+    image_stretch = dw.Checkbox_get(imagestretchcheck);
+
+    dw.Color_foreground_set(dw.CLR_WHITE);
+    dw.Draw_rect(window, pixmap, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, width, height);
+    dw.Color_foreground_set(dw.CLR_DARKPINK);
+    dw.Draw_rect(window, pixmap, dw.DRAW_FILL | dw.DRAW_NOAA, 10, 10, width - 20, height - 20);
+    dw.Color_foreground_set(dw.CLR_GREEN);
+    dw.Color_background_set(dw.CLR_DARKRED);
+    dw.Draw_text(window, pixmap, 10, 10, "This should be aligned with the edges.");
+    dw.Color_foreground_set(dw.CLR_YELLOW);
+    dw.Draw_line(window, pixmap, width - 10, 10, 10, height - 10);
+    //dw.Color_foreground_set(dw.CLR_BLUE);
+    //dw.Draw_polygon(window, pixmap, dw.DRAW_FILL, 7, x, y);
+    dw.Color_foreground_set(dw.CLR_BLACK);
+    dw.Draw_rect(window, pixmap, dw.DRAW_FILL | dw.DRAW_NOAA, 80, 80, 80, 40);
+    dw.Color_foreground_set(dw.CLR_CYAN);
+    /* Bottom right corner */
+    dw.Draw_arc(window, pixmap, 0, width - 30, height - 30, width - 10, height - 30, width - 30, height - 10);
+    /* Top right corner */
+    dw.Draw_arc(window, pixmap, 0, width - 30, 30, width - 30, 10, width - 10, 30);
+    /* Bottom left corner */
+    dw.Draw_arc(window, pixmap, 0, 30, height - 30, 30, height - 10, 10, height - 30);
+    /* Full circle in the left top area */
+    dw.Draw_arc(window, pixmap, dw.DRAW_FULL, 120, 100, 80, 80, 160, 120);
+    if image != nil {
+        if image_stretch == TRUE {
+            dw.Pixmap_stretch_bitblt(window, pixmap, 10, 10, width - 20, height - 20, nil, image, 0, 0, dw.Pixmap_width(image), dw.Pixmap_height(image));
+        } else {
+            dw.Pixmap_bitblt(window, pixmap, image_x, image_y, dw.Pixmap_width(image), dw.Pixmap_height(image), nil, image, 0, 0);
+        }
+    }
+
+    /* If we aren't drawing direct do a bitblt */
+    if direct == FALSE && hpma == nil {
+        text_expose(textbox2, 0, 0, 0, 0, nil);
+    }
+}
+
+func update_render() {
+    switch render_type {
+        case 0:
+            draw_shapes(FALSE, nil);
+        case 1:
+            draw_shapes(TRUE, nil);
+        case 2:
+            draw_file(current_row, current_col, rows, font_height, nil);
+    }
+}
+
+/* This gets called when a part of the graph needs to be repainted. */
+func text_expose(hwnd dw.HWND, x int, y int, width int, height int, data unsafe.Pointer) int {
+    if render_type != 1 {
+        var hpm dw.HPIXMAP
+        
+        if hwnd == textbox1 {
+            hpm = text1pm;
+        } else if hwnd == textbox2 {
+            hpm = text2pm;
+        } else {
+            return TRUE;
+        }
+
+        width = dw.Pixmap_width(hpm);
+        height = dw.Pixmap_height(hpm);
+
+        dw.Pixmap_bitblt(hwnd, nil, 0, 0, width, height, nil, hpm, 0, 0);
+        dw.Flush();
+    } else {
+        update_render();
+    }
+    return TRUE;
+}
+
+/* Handle size change of the main render window */
+func configure_event(hwnd dw.HWND, width int, height int, data unsafe.Pointer) int {
+    old1 := text1pm;
+    old2 := text2pm;
+    depth := dw.Color_depth_get();
+
+    rows := height / font_height;
+    cols := width / font_width;
+
+    /* Create new pixmaps with the current sizes */
+    text1pm = dw.Pixmap_new(textbox1, uint(font_width*(width1)), uint(height), depth);
+    text2pm = dw.Pixmap_new(textbox2, uint(width), uint(height), depth);
+
+    /* Make sure the side area is cleared */
+    dw.Color_foreground_set(dw.CLR_WHITE);
+    dw.Draw_rect(nil, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(text1pm), dw.Pixmap_height(text1pm));
+
+   /* Destroy the old pixmaps */
+    dw.Pixmap_destroy(old1);
+    dw.Pixmap_destroy(old2);
+
+    /* Update scrollbar ranges with new values */
+    dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols));
+    dw.Scrollbar_set_range(vscrollbar, uint(num_lines), uint(rows));
+
+    /* Redraw the window */
+    update_render();
+    return TRUE;
+}
+
 var exit_callback_func = exit_callback;
 var copy_clicked_callback_func = copy_clicked_callback;
 var paste_clicked_callback_func = paste_clicked_callback;
@@ -164,6 +370,11 @@ var switch_page_callback_func = switch_page_callback;
 var helpabout_callback_func = helpabout_callback;
 var menu_callback_func = menu_callback;
 var menutoggle_callback_func = menutoggle_callback;
+var text_expose_func = text_expose;
+var configure_event_func = configure_event;
+var motion_notify_event_func = motion_notify_event;
+var show_window_callback_func = show_window_callback;
+var context_menu_event_func = context_menu_event;
 
 var checkable_string = "checkable";
 var noncheckable_string = "non-checkable";
@@ -397,13 +608,13 @@ func text_add() {
     dw.Messagebox("DWTest", dw.MB_OK | dw.MB_INFORMATION, fmt.Sprintf("Width: %d Height: %d\n", font_width, font_height));
     dw.Draw_rect(nil, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * width1, font_height * rows);
     dw.Draw_rect(nil, text2pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * cols, font_height * rows);
-    /*dw.Signal_connect(textbox1, dw.SIGNAL_BUTTON_PRESS, unsafe.Pointer(&context_menu_event_func), nil);
+    dw.Signal_connect(textbox1, dw.SIGNAL_BUTTON_PRESS, unsafe.Pointer(&context_menu_event_func), nil);
     dw.Signal_connect(textbox1, dw.SIGNAL_EXPOSE, unsafe.Pointer(&text_expose_func), nil);
     dw.Signal_connect(textbox2, dw.SIGNAL_EXPOSE, unsafe.Pointer(&text_expose_func), nil);
-    dw.Signal_connect(textbox2, dw.SIGNAL_CONFIGURE, unsafe.Pointer(&configure_event_func), text2pm);
-    dw.Signal_connect(textbox2, dw.SIGNAL_MOTION_NOTIFY, unsafe.Pointer(&motion_notify_event_func), DW_INT_TO_POINTER(1));
-    dw.Signal_connect(textbox2, dw.SIGNAL_BUTTON_PRESS, unsafe.Pointer(&motion_notify_event_func), DW_INT_TO_POINTER(0));
-    dw.Signal_connect(hscrollbar, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&scrollbar_valuechanged_callback_func), DW_POINTER(status1));
+    dw.Signal_connect(textbox2, dw.SIGNAL_CONFIGURE, unsafe.Pointer(&configure_event_func), unsafe.Pointer(text2pm));
+    dw.Signal_connect(textbox2, dw.SIGNAL_MOTION_NOTIFY, unsafe.Pointer(&motion_notify_event_func), unsafe.Pointer(uintptr(1)));
+    dw.Signal_connect(textbox2, dw.SIGNAL_BUTTON_PRESS, unsafe.Pointer(&motion_notify_event_func), nil);
+    /*dw.Signal_connect(hscrollbar, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&scrollbar_valuechanged_callback_func), DW_POINTER(status1));
     dw.Signal_connect(vscrollbar, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&scrollbar_valuechanged_callback_func), DW_POINTER(status1));
     dw.Signal_connect(imagestretchcheck, dw.SIGNAL_CLICKED, unsafe.Pointer(&refresh_callback_func), nil);
     dw.Signal_connect(button1, dw.SIGNAL_CLICKED, unsafe.Pointer(&refresh_callback_func), nil);

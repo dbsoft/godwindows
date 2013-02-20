@@ -546,6 +546,16 @@ static void go_pixmap_destroy(void *pixmap)
     dw_pixmap_destroy((HPIXMAP)pixmap);
 }
 
+static int go_pixmap_width(void *pixmap)
+{
+    return (int)DW_PIXMAP_WIDTH(((HPIXMAP)pixmap));
+}
+
+static int go_pixmap_height(void *pixmap)
+{
+    return (int)DW_PIXMAP_HEIGHT(((HPIXMAP)pixmap));
+}
+
 static void go_draw_point(void *handle, void *pixmap, int x, int y)
 {
     dw_draw_point((HWND)handle, (HPIXMAP)pixmap, x, y);

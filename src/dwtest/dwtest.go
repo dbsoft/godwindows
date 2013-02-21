@@ -1,14 +1,22 @@
 package main
 
-import "unsafe"
-import "dw"
-import "fmt"
+import (
+   "unsafe"
+   "dw"
+   "fmt"
+   "os"
+   "bufio"
+   "bytes"
+   "io"
+)
 
 // Global variables
 const (
    FALSE int = iota
    TRUE
 )
+
+var FIXEDFONT = "10.Lucida Console"
 
 // Page 1
 var notebookbox1, copypastefield, entryfield, cursortogglebutton, mainwindow, noncheckable_menuitem, checkable_menuitem dw.HWND
@@ -27,7 +35,6 @@ var font_height = 12
 var rows = 10
 var width1 = 6
 var cols = 80
-var num_lines = 0
 var render_type = 0
 var current_row = 0
 var current_col = 0
@@ -36,19 +43,51 @@ var max_linewidth = 0
 // Miscellaneous
 var fileicon, foldericon dw.HICN
 var current_file string
+var lines []string
 var menu_enabled bool = true
 
 var FOLDER_ICON_NAME string = "mac/folder"
 var FILE_ICON_NAME string = "mac/file"
 
-func copy_clicked_callback(button dw.HWND, data unsafe.Pointer) int {
-   test := dw.Window_get_text(copypastefield);
-
-   if len(test) > 0 {
-     dw.Clipboard_set_text(test);
-   }
-   dw.Window_set_focus(entryfield);
-   return TRUE;
+func read_file() {
+    var (
+        file *os.File
+        part []byte
+        prefix bool
+        length int
+        err error
+    )
+    
+    lines = nil;
+    max_linewidth = 0;
+    
+    if file, err = os.Open(current_file); err != nil {
+        return;
+    }
+    reader := bufio.NewReader(file);
+    buffer := bytes.NewBuffer(make([]byte, 1024));
+    buffer.Reset();
+    for {
+        if part, prefix, err = reader.ReadLine(); err != nil {
+            break;
+        }
+        buffer.Write(part);
+        if !prefix {
+            lines = append(lines, buffer.String());
+            length = len(buffer.String());
+            if length > max_linewidth {
+               max_linewidth = length;
+            }
+            buffer.Reset();
+        }
+    }
+    if err == io.EOF {
+        err = nil;
+    }
+    dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols));
+    dw.Scrollbar_set_pos(hscrollbar, 0);
+    dw.Scrollbar_set_range(vscrollbar, uint(len(lines)), uint(rows));
+    dw.Scrollbar_set_pos(vscrollbar, 0);
 }
 
 // Call back section
@@ -106,14 +145,25 @@ func paste_clicked_callback(button dw.HWND, data unsafe.Pointer) int {
     return TRUE;
 }
 
+func copy_clicked_callback(button dw.HWND, data unsafe.Pointer) int {
+   test := dw.Window_get_text(copypastefield);
+
+   if len(test) > 0 {
+     dw.Clipboard_set_text(test);
+   }
+   dw.Window_set_focus(entryfield);
+   return TRUE;
+}
+
 func browse_file_callback(window dw.HWND, data unsafe.Pointer) int {
     tmp := dw.File_browse("Pick a file", "dwtest.c", "c", dw.FILE_OPEN);
     if len(tmp) > 0 {
         current_file = tmp;
         dw.Window_set_text(entryfield, current_file);
-        /*read_file();
-        current_col = current_row = 0;
-        update_render();*/
+        read_file();
+        current_col = 0;
+        current_row = 0;
+        update_render();
     }
     dw.Window_set_focus(copypastefield);
     return FALSE;
@@ -214,7 +264,7 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
         }
         dw.Draw_rect(nil, hpm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(hpm), dw.Pixmap_height(hpm));
 
-        for i = 0; (i < nrows) && (i+row < num_lines); i++ {
+        for i = 0; (i < nrows) && (i+row < len(lines)); i++ {
             fileline := i + row - 1;
             y := i*fheight;
             dw.Color_background_set(dw.COLOR(1 + (fileline % 15)));
@@ -222,8 +272,10 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
             if hpma == nil {
                 dw.Draw_text(nil, text1pm, 0, y, fmt.Sprintf("%6.6d", i+row));
             }
-            /*pLine = lp[i+row];
-            dw.Draw_text(nil, hpm, 0, y, pLine+col);*/
+            thisline := lines[i+row];
+            if len(thisline) > col {
+               dw.Draw_text(nil, hpm, 0, y, thisline[col:]);
+            }
         }
         if hpma == nil {
             text_expose(textbox1, 0, 0, 0, 0, nil);
@@ -334,8 +386,8 @@ func configure_event(hwnd dw.HWND, width int, height int, data unsafe.Pointer) i
     old2 := text2pm;
     depth := dw.Color_depth_get();
 
-    rows := height / font_height;
-    cols := width / font_width;
+    rows = height / font_height;
+    cols = width / font_width;
 
     /* Create new pixmaps with the current sizes */
     text1pm = dw.Pixmap_new(textbox1, uint(font_width*(width1)), uint(height), depth);
@@ -351,7 +403,7 @@ func configure_event(hwnd dw.HWND, width int, height int, data unsafe.Pointer) i
 
     /* Update scrollbar ranges with new values */
     dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols));
-    dw.Scrollbar_set_range(vscrollbar, uint(num_lines), uint(rows));
+    dw.Scrollbar_set_range(vscrollbar, uint(len(lines)), uint(rows));
 
     /* Redraw the window */
     update_render();
@@ -368,7 +420,7 @@ func render_select_event_callback(window dw.HWND, index int, data unsafe.Pointer
         if index == 2 {
             dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols));
             dw.Scrollbar_set_pos(hscrollbar, 0);
-            dw.Scrollbar_set_range(vscrollbar, uint(num_lines), uint(rows));
+            dw.Scrollbar_set_range(vscrollbar, uint(len(lines)), uint(rows));
             dw.Scrollbar_set_pos(vscrollbar, 0);
             current_col = 0;
             current_row = 0;
@@ -394,7 +446,7 @@ func scrollbar_valuechanged_callback(hwnd dw.HWND, value int, data unsafe.Pointe
         } else {
             current_col = value;
         }
-        dw.Window_set_text(stext, fmt.Sprintf("Row:%d Col:%d Lines:%d Cols:%d", current_row, current_col, num_lines, max_linewidth));
+        dw.Window_set_text(stext, fmt.Sprintf("Row:%d Col:%d Lines:%d Cols:%d", current_row, current_col, len(lines), max_linewidth));
         update_render();
     }
     return FALSE;
@@ -726,7 +778,7 @@ func text_add() {
 
     /* create render box for number pixmap */
     textbox1 = dw.Render_new(100);
-    //dw.Window_set_font(textbox1, FIXEDFONT);
+    dw.Window_set_font(textbox1, FIXEDFONT);
     font_width, font_height := dw.Font_text_extents_get(textbox1, nil, "(g");
     font_width = font_width / 2;
     vscrollbox := dw.Box_new(dw.VERT, 0);
@@ -744,7 +796,7 @@ func text_add() {
     /* create render box for filecontents pixmap */
     textbox2 = dw.Render_new(101);
     dw.Box_pack_start(textboxA, textbox2, 10, 10, dw.TRUE, dw.TRUE, 0);
-    //dw.Window_set_font(textbox2, FIXEDFONT);
+    dw.Window_set_font(textbox2, FIXEDFONT);
     /* create horizonal scrollbar */
     dw.Box_pack_start(textboxA, hscrollbar, -1, -1, dw.TRUE, dw.FALSE, 0);
 

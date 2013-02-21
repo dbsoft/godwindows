@@ -8,6 +8,7 @@ import (
    "bufio"
    "bytes"
    "io"
+   "runtime"
 )
 
 // Global variables
@@ -16,7 +17,7 @@ const (
    TRUE
 )
 
-var FIXEDFONT = "10.Lucida Console"
+var FIXEDFONT = "10.monospace"
 
 // Page 1
 var notebookbox1, copypastefield, entryfield, cursortogglebutton, mainwindow, noncheckable_menuitem, checkable_menuitem dw.HWND
@@ -838,6 +839,13 @@ func text_add() {
 }
 
 func main() {
+   /* Pick an approriate font for our platform */
+   if runtime.GOOS == "windows" {
+      FIXEDFONT = "10.Lucida Console";
+   } else if runtime.GOOS == "darwin" {
+      FIXEDFONT = "9.Monaco";
+   }
+    
    /* Initialize the Dynamic Windows engine */
    dw.Init(dw.TRUE);
 

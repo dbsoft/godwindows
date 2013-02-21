@@ -780,7 +780,7 @@ func text_add() {
     /* create render box for number pixmap */
     textbox1 = dw.Render_new(100);
     dw.Window_set_font(textbox1, FIXEDFONT);
-    font_width, font_height := dw.Font_text_extents_get(textbox1, nil, "(g");
+    font_width, font_height = dw.Font_text_extents_get(textbox1, nil, "(g");
     font_width = font_width / 2;
     vscrollbox := dw.Box_new(dw.VERT, 0);
     dw.Box_pack_start(vscrollbox, textbox1, font_width * width1, font_height * rows, dw.FALSE, dw.TRUE, 0);

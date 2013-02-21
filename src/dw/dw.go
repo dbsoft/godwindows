@@ -899,11 +899,11 @@ func Pixmap_grab(handle HWND, id uint) HPIXMAP {
 }
 
 func Pixmap_bitblt(dest HWND, destp HPIXMAP, xdest int, ydest int, width int, height int, src HWND, srcp HPIXMAP, xsrc int, ysrc int) {
-    C.go_pixmap_bitblt(unsafe.Pointer(dest), unsafe.Pointer(srcp), C.int(xdest), C.int(ydest), C.int(width), C.int(height), unsafe.Pointer(src), unsafe.Pointer(srcp), C.int(xsrc), C.int(ysrc)); 
+    C.go_pixmap_bitblt(unsafe.Pointer(dest), unsafe.Pointer(destp), C.int(xdest), C.int(ydest), C.int(width), C.int(height), unsafe.Pointer(src), unsafe.Pointer(srcp), C.int(xsrc), C.int(ysrc)); 
 }
 
 func Pixmap_stretch_bitblt(dest HWND, destp HPIXMAP, xdest int, ydest int, width int, height int, src HWND, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) C.int {
-    return C.go_pixmap_stretch_bitblt(unsafe.Pointer(dest), unsafe.Pointer(srcp), C.int(xdest), C.int(ydest), C.int(width), C.int(height), unsafe.Pointer(src), unsafe.Pointer(srcp), C.int(xsrc), C.int(ysrc), C.int(srcwidth), C.int(srcheight)); 
+    return C.go_pixmap_stretch_bitblt(unsafe.Pointer(dest), unsafe.Pointer(destp), C.int(xdest), C.int(ydest), C.int(width), C.int(height), unsafe.Pointer(src), unsafe.Pointer(srcp), C.int(xsrc), C.int(ysrc), C.int(srcwidth), C.int(srcheight)); 
 }
 
 func Pixmap_set_transparent_color(pixmap HPIXMAP, color COLOR) {

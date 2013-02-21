@@ -586,6 +586,66 @@ static void go_draw_text(void *handle, void *pixmap, int x, int y, char *text)
     dw_draw_text((HWND)handle, (HPIXMAP)pixmap, x, y, text);
 }
 
+static void *go_tree_new(unsigned long id)
+{
+   return (void *)dw_tree_new(id);
+}
+
+static void *go_tree_insert(void *handle, char *title, void *icon, void *parent, void *itemdata)
+{
+    return (void *)dw_tree_insert((HWND)handle, title, (HICN)icon, (HTREEITEM)parent, itemdata);
+}
+
+static void *go_tree_insert_after(void *handle, void *item, char *title, void *icon, void *parent, void *itemdata)
+{
+    return (void *)dw_tree_insert_after((HWND)handle, (HTREEITEM)item, title, (HICN)icon, (HTREEITEM)parent, itemdata);
+}
+
+static void go_tree_clear(void *handle)
+{
+    dw_tree_clear((HWND)handle);
+}
+
+static void go_tree_item_delete(void *handle, void *item)
+{
+    dw_tree_item_delete((HWND)handle, (HTREEITEM)item);
+}
+
+static void go_tree_item_change(void *handle, void *item, char *title, void *icon)
+{
+    dw_tree_item_change((HWND)handle, (HTREEITEM)item, title, (HICN)icon);
+}
+
+static void go_tree_item_expand(void *handle, void *item)
+{
+    dw_tree_item_expand((HWND)handle, (HTREEITEM)item);
+}
+
+static void go_tree_item_collapse(void *handle, void *item)
+{
+    dw_tree_item_collapse((HWND)handle, (HTREEITEM)item);
+}
+
+static void go_tree_item_select(void *handle, void *item)
+{
+    dw_tree_item_select((HWND)handle, (HTREEITEM)item);
+}
+
+static void go_tree_item_set_data(void *handle, void *item, void *itemdata)
+{
+    dw_tree_item_set_data((HWND)handle, (HTREEITEM)item, itemdata);
+}
+
+static void *go_tree_item_get_data(void *handle, void *item)
+{
+    return dw_tree_item_get_data((HWND)handle, (HTREEITEM)item);
+}
+
+static char *go_tree_get_title(void *handle, void *item)
+{
+    return dw_tree_get_title((HWND)handle, (HTREEITEM)item);
+}
+
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);
 extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data);
 extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8);

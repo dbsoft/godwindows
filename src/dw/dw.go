@@ -983,6 +983,66 @@ func Flush() {
     C.dw_flush();
 }
 
+func Tree_new(id uint) HWND {
+    return HWND(C.go_tree_new(C.ulong(id)));
+}
+
+func Tree_insert(handle HWND, title string, icon HICN, parent HTREEITEM, itemdata unsafe.Pointer) HTREEITEM {
+   ctitle := C.CString(title);
+   defer C.free(unsafe.Pointer(ctitle));
+   
+   return HTREEITEM(C.go_tree_insert(unsafe.Pointer(handle), ctitle, unsafe.Pointer(icon), unsafe.Pointer(parent), itemdata));
+}
+
+func Tree_insert_after(handle HWND, item HTREEITEM, title string, icon HICN, parent HTREEITEM, itemdata unsafe.Pointer) HTREEITEM {
+   ctitle := C.CString(title);
+   defer C.free(unsafe.Pointer(ctitle));
+   
+   return HTREEITEM(C.go_tree_insert_after(unsafe.Pointer(handle), unsafe.Pointer(item), ctitle, unsafe.Pointer(icon), unsafe.Pointer(parent), itemdata));
+}
+
+func Tree_clear(handle HWND) {
+   C.go_tree_clear(unsafe.Pointer(handle));
+}
+
+func Tree_item_delete(handle HWND, item HTREEITEM) {
+   C.go_tree_item_delete(unsafe.Pointer(handle), unsafe.Pointer(item));
+}
+
+func Tree_item_change(handle HWND, item HTREEITEM, title string, icon HICN) {
+   ctitle := C.CString(title);
+   defer C.free(unsafe.Pointer(ctitle));
+   
+   C.go_tree_item_change(unsafe.Pointer(handle), unsafe.Pointer(item), ctitle, unsafe.Pointer(icon));
+}
+
+func Tree_item_expand(handle HWND, item HTREEITEM) {
+   C.go_tree_item_expand(unsafe.Pointer(handle), unsafe.Pointer(item));
+}
+
+func Tree_item_collapse(handle HWND, item HTREEITEM) {
+   C.go_tree_item_collapse(unsafe.Pointer(handle), unsafe.Pointer(item));
+}
+
+func Tree_item_select(handle HWND, item HTREEITEM) {
+   C.go_tree_item_select(unsafe.Pointer(handle), unsafe.Pointer(item));
+}
+
+func Tree_item_set_data(handle HWND, item HTREEITEM, itemdata unsafe.Pointer) {
+   C.go_tree_item_set_data(unsafe.Pointer(handle), unsafe.Pointer(item), itemdata);
+}
+
+func Tree_item_get_data(handle HWND, item HTREEITEM) unsafe.Pointer {
+   return unsafe.Pointer(C.go_tree_item_get_data(unsafe.Pointer(handle), unsafe.Pointer(item)));
+}
+
+func Tree_get_title(handle HWND, item HTREEITEM) string {
+   ctitle := C.go_tree_get_title(unsafe.Pointer(handle), unsafe.Pointer(item));
+   title := C.GoString(ctitle);
+   C.dw_free(unsafe.Pointer(ctitle));
+   return title;
+}
+
 func init() {
    runtime.LockOSThread();
 }

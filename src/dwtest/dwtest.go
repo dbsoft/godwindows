@@ -41,6 +41,9 @@ var current_row = 0
 var current_col = 0
 var max_linewidth = 0
 
+// Page 3
+var notebookbox3, tree dw.HWND
+
 // Miscellaneous
 var fileicon, foldericon dw.HICN
 var current_file string
@@ -566,6 +569,58 @@ func keypress_callback(window dw.HWND, ch uint8, vk int, state int, data unsafe.
     return FALSE;
 }
 
+// Page 3 and 4 Callbacks
+func item_enter_cb(window dw.HWND, text string, data unsafe.Pointer) int {
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_ENTER: Window: %x Text: %s", uintptr(unsafe.Pointer(window)), text);
+    dw.Window_set_text(dw.HWND(data), message);
+    return FALSE;
+}
+
+func item_context_cb(window dw.HWND, text string, x int, y int, data unsafe.Pointer, itemdata unsafe.Pointer) int {
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_CONTEXT: Window: %x Text: %s x: %d y: %d Itemdata: %x", uintptr(unsafe.Pointer(window)), 
+          text, x, y, uintptr(itemdata));
+    dw.Window_set_text(dw.HWND(data), message);
+    return FALSE;
+}
+
+func list_select_cb(window dw.HWND, item int, data unsafe.Pointer) int {
+    message := fmt.Sprintf("DW_SIGNAL_LIST_SELECT: Window: %x Item: %d", uintptr(unsafe.Pointer(window)), item);
+    dw.Window_set_text(dw.HWND(data), message);
+    return FALSE;
+}
+
+func item_select_cb(window dw.HWND, item dw.HTREEITEM, text string, data unsafe.Pointer, itemdata unsafe.Pointer) int {
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x", uintptr(unsafe.Pointer(window)),
+            uintptr(unsafe.Pointer(item)), text, uintptr(itemdata));
+    dw.Window_set_text(dw.HWND(data), message);
+    return FALSE;
+}
+
+/*func column_click_cb(window HWND, column_num int, data unsafe.Pointer) int {
+    var stype = "Unknown";
+
+    if column_num == 0 {
+        stype = "Filename";
+    } else {
+        column_type := dw.Filesystem_get_column_type(window, column_num-1);
+        if column_type == DW_CFA_STRING {
+            stype = "String";
+        } else if column_type == DW_CFA_ULONG) {
+            stype = "ULong";
+        } else if column_type == DW_CFA_DATE) {
+            stype = "Date";
+        } else if  column_type == DW_CFA_TIME {
+            stype = "Time";
+        } else if column_type == DW_CFA_BITMAPORICON {
+            stype = "BitmapOrIcon";
+        }
+    }
+    message := fmt.Sprintf("DW_SIGNAL_COLUMN_CLICK: Window: %x Column: %d Type: %s Itemdata: %x", uintptr(unsafe,Pointer(window)),
+            column_num, stype, uintptr(itemdata));
+    dw.Window_set_text(dw.HWND(data), message);
+    return FALSE;
+}*/
+
 var exit_callback_func = exit_callback;
 var copy_clicked_callback_func = copy_clicked_callback;
 var paste_clicked_callback_func = paste_clicked_callback;
@@ -588,6 +643,10 @@ var refresh_callback_func = refresh_callback;
 var render_select_event_callback_func = render_select_event_callback;
 var scrollbar_valuechanged_callback_func = scrollbar_valuechanged_callback;
 var keypress_callback_func = keypress_callback;
+var item_enter_cb_func = item_enter_cb;
+var item_context_cb_func = item_context_cb;
+var list_select_cb_func = list_select_cb; 
+var item_select_cb_func = item_select_cb;
 
 var checkable_string = "checkable";
 var noncheckable_string = "non-checkable";
@@ -838,6 +897,38 @@ func text_add() {
     dw.Taskbar_insert(textbox1, fileicon, "DWTest");
 }
 
+func tree_add() {
+    /* create a box to pack into the notebook page */
+    listbox := dw.Listbox_new(1024, TRUE);
+    dw.Box_pack_start(notebookbox3, listbox, 500, 200, TRUE, TRUE, 0);
+    dw.Listbox_append(listbox, "Test 1");
+    dw.Listbox_append(listbox, "Test 2");
+    dw.Listbox_append(listbox, "Test 3");
+    dw.Listbox_append(listbox, "Test 4");
+    dw.Listbox_append(listbox, "Test 5");
+
+    /* now a tree area under this box */
+    tree = dw.Tree_new(101);
+    dw.Box_pack_start(notebookbox3, tree, 500, 200, TRUE, TRUE, 1);
+
+    /* and a status area to see whats going on */
+    tree_status := dw.Status_text_new("", 0);
+    dw.Box_pack_start(notebookbox3, tree_status, 100, -1, TRUE, FALSE, 1);
+
+    /* set up our signal trappers... */
+    dw.Signal_connect(tree, dw.SIGNAL_ITEM_CONTEXT, unsafe.Pointer(&item_context_cb_func), unsafe.Pointer(tree_status));
+    dw.Signal_connect(tree, dw.SIGNAL_ITEM_SELECT, unsafe.Pointer(&item_select_cb_func), unsafe.Pointer(tree_status));
+
+    t1 := dw.Tree_insert(tree, "tree folder 1", foldericon, nil, unsafe.Pointer(uintptr(1)));
+    t2 := dw.Tree_insert(tree, "tree folder 2", foldericon, nil, unsafe.Pointer(uintptr(2)));
+    dw.Tree_insert(tree, "tree file 1", fileicon, t1, unsafe.Pointer(uintptr(3)));
+    dw.Tree_insert(tree, "tree file 2", fileicon, t1, unsafe.Pointer(uintptr(4)));
+    dw.Tree_insert(tree, "tree file 3", fileicon, t2, unsafe.Pointer(uintptr(5)));
+    dw.Tree_insert(tree, "tree file 4", fileicon, t2, unsafe.Pointer(uintptr(6)));
+    dw.Tree_item_change(tree, t1, "tree folder 1", foldericon);
+    dw.Tree_item_change(tree, t2, "tree folder 2", foldericon);
+}
+
 func main() {
    /* Pick an approriate font for our platform */
    if runtime.GOOS == "windows" {
@@ -876,6 +967,12 @@ func main() {
    dw.Notebook_page_set_text(notebook, notebookpage2, "render");
    text_add();
 
+   notebookbox3 = dw.Box_new(dw.VERT, 5);
+   notebookpage3 := dw.Notebook_page_new(notebook, 1, dw.FALSE);
+   dw.Notebook_pack(notebook, notebookpage3, notebookbox3);
+   dw.Notebook_page_set_text(notebook, notebookpage3, "tree");
+   tree_add();
+   
    /* Set the default field */
    dw.Window_default(mainwindow, copypastefield);
 

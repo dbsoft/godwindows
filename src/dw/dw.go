@@ -12,6 +12,7 @@ package dw
 import "C"
 import "unsafe"
 import "runtime"
+import "reflect"
 
 type HWND unsafe.Pointer
 type HTREEITEM unsafe.Pointer
@@ -934,6 +935,23 @@ func Draw_point(handle HWND, pixmap HPIXMAP, x int, y int) {
 
 func Draw_line(handle HWND, pixmap HPIXMAP, x1 int, y1 int, x2 int, y2 int) {
     C.go_draw_line(unsafe.Pointer(handle), unsafe.Pointer(pixmap), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
+}
+
+func Draw_polygon(handle HWND, pixmap HPIXMAP, flags int, x []int, y []int) {
+    count := len(x);
+    if len(y) < count {
+      count = len(y);
+    }
+    cx := make([]C.int, count);
+    cy := make([]C.int, count);
+    for n := 0; n < count; n++ {
+      cx[n] = C.int(x[n]);
+      cy[n] = C.int(y[n]);
+    }
+    xHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cx)));
+    yHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cy)));
+
+    C.go_draw_polygon(unsafe.Pointer(handle), unsafe.Pointer(pixmap), C.int(flags), C.int(count), (*C.int)(unsafe.Pointer(xHeader.Data)), (*C.int)(unsafe.Pointer(yHeader.Data)));
 }
 
 func Draw_rect(handle HWND, pixmap HPIXMAP, fill int, x int, y int, width int, height int) {

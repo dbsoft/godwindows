@@ -20,7 +20,7 @@ var timerid dw.HTIMER
 var notebookbox2, textbox1, textbox2, status1, status2, vscrollbar, hscrollbar, rendcombo, imagexspin, imageyspin, imagestretchcheck dw.HWND
 var text1pm, text2pm, image dw.HPIXMAP
 var image_x = 20
-var image_y = 20 
+var image_y = 20
 var image_stretch int = FALSE
 var font_width = 8
 var font_height = 12
@@ -86,7 +86,7 @@ func menutoggle_callback(window dw.HWND, data unsafe.Pointer) int {
 
 func helpabout_callback(window dw.HWND, data unsafe.Pointer) int {
     var env dw.Env;
-    
+
     dw.Environment_query(&env);
     message := fmt.Sprintf("dwindows test\n\nOS: %s %s %s Version: %d.%d.%d.%d\n\ndwindows Version: %d.%d.%d",
                               env.OSName, env.BuildDate, env.BuildTime,
@@ -99,7 +99,7 @@ func helpabout_callback(window dw.HWND, data unsafe.Pointer) int {
 // Page 1 Callbacks
 func paste_clicked_callback(button dw.HWND, data unsafe.Pointer) int {
     test := dw.Clipboard_get_text();
-    
+
     if len(test) > 0 {
         dw.Window_set_text(copypastefield, test);
     }
@@ -159,7 +159,7 @@ func timer_callback(data unsafe.Pointer) int {
 // Page 2 Callbacks
 func motion_notify_event(window dw.HWND, x int, y int, buttonmask int, data unsafe.Pointer) int {
     var which = "button_press";
-    
+
     if(uintptr(data) > 0) {
         which = "motion_notify";
     }
@@ -169,7 +169,7 @@ func motion_notify_event(window dw.HWND, x int, y int, buttonmask int, data unsa
 
 func show_window_callback(window dw.HWND, data unsafe.Pointer) int {
     thiswindow := dw.HWND(data);
-    
+
     if thiswindow != nil {
         dw.Window_show(thiswindow);
         dw.Window_raise(thiswindow);
@@ -198,7 +198,7 @@ func context_menu_event(window dw.HWND, x int, y int, buttonmask int, data unsaf
 /* When hpma is not NULL we are printing.. so handle things differently */
 func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
     var hpm dw.HPIXMAP
-    
+
     if hpma == nil {
         hpm = text2pm;
     } else {
@@ -207,7 +207,7 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
 
     if len(current_file) > 0 {
         var i int
-        
+
         dw.Color_foreground_set(dw.CLR_WHITE);
         if hpma == nil {
             dw.Draw_rect(nil, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(text1pm), dw.Pixmap_height(text1pm));
@@ -246,12 +246,12 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
     } else {
         pixmap = hpm;
     }
-    
+
     width := dw.Pixmap_width(hpm);
     height := dw.Pixmap_height(hpm);
-    
-    //x := [7]int{ 20, 180, 180, 230, 180, 180, 20 };
-    //y := [7]int{ 50, 50, 20, 70, 120, 90, 90 };
+
+    x := []int{ 20, 180, 180, 230, 180, 180, 20 };
+    y := []int{ 50, 50, 20, 70, 120, 90, 90 };
 
     image_x = dw.Spinbutton_get_pos(imagexspin);
     image_y = dw.Spinbutton_get_pos(imageyspin);
@@ -266,8 +266,8 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
     dw.Draw_text(window, pixmap, 10, 10, "This should be aligned with the edges.");
     dw.Color_foreground_set(dw.CLR_YELLOW);
     dw.Draw_line(window, pixmap, width - 10, 10, 10, height - 10);
-    //dw.Color_foreground_set(dw.CLR_BLUE);
-    //dw.Draw_polygon(window, pixmap, dw.DRAW_FILL, 7, x, y);
+    dw.Color_foreground_set(dw.CLR_BLUE);
+    dw.Draw_polygon(window, pixmap, dw.DRAW_FILL, x, y);
     dw.Color_foreground_set(dw.CLR_BLACK);
     dw.Draw_rect(window, pixmap, dw.DRAW_FILL | dw.DRAW_NOAA, 80, 80, 80, 40);
     dw.Color_foreground_set(dw.CLR_CYAN);
@@ -308,7 +308,7 @@ func update_render() {
 func text_expose(hwnd dw.HWND, x int, y int, width int, height int, data unsafe.Pointer) int {
     if render_type != 1 {
         var hpm dw.HPIXMAP
-        
+
         if hwnd == textbox1 {
             hpm = text1pm;
         } else if hwnd == textbox2 {
@@ -352,7 +352,7 @@ func configure_event(hwnd dw.HWND, width int, height int, data unsafe.Pointer) i
     /* Update scrollbar ranges with new values */
     dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols));
     dw.Scrollbar_set_range(vscrollbar, uint(num_lines), uint(rows));
-    
+
     /* Redraw the window */
     update_render();
     return TRUE;
@@ -388,7 +388,7 @@ func render_select_event_callback(window dw.HWND, index int, data unsafe.Pointer
 func scrollbar_valuechanged_callback(hwnd dw.HWND, value int, data unsafe.Pointer) int {
     if data != nil {
         stext := dw.HWND(data);
-        
+
         if hwnd == vscrollbar {
             current_row = value;
         } else {
@@ -503,7 +503,7 @@ func resolve_keymodifiers(mask int) string {
 
 func keypress_callback(window dw.HWND, ch uint8, vk int, state int, data unsafe.Pointer, utf8 string) int {
     var message string
-    
+
     if ch != 0 {
         message = fmt.Sprintf("Key: %c(%d) Modifiers: %s(%d) utf8 %s", ch, ch, resolve_keymodifiers(state), state,  utf8);
     } else {
@@ -791,7 +791,7 @@ func main() {
 
    /* Create our window */
    mainwindow = dw.Window_new(dw.DESKTOP, "dwindows test UTF8 中国語 (繁体) cañón", dw.FCF_SYSMENU | dw.FCF_TITLEBAR | dw.FCF_TASKLIST | dw.FCF_DLGBORDER | dw.FCF_SIZEBORDER | dw.FCF_MINMAX);
-   
+
    menu_add();
 
    notebookbox := dw.Box_new(dw.VERT, 5);
@@ -809,7 +809,7 @@ func main() {
    dw.Notebook_pack(notebook, notebookpage1, notebookbox1);
    dw.Notebook_page_set_text(notebook, notebookpage1, "buttons and entry");
    archive_add();
-   
+
    notebookbox2 = dw.Box_new(dw.VERT, 5);
    notebookpage2 := dw.Notebook_page_new(notebook, 1, dw.FALSE);
    dw.Notebook_pack(notebook, notebookpage2, notebookbox2);
@@ -831,16 +831,15 @@ func main() {
    timerid = dw.Timer_connect(2000, unsafe.Pointer(&timer_callback_func), nil);
    dw.Window_set_size(mainwindow, 640, 550);
    dw.Window_show(mainwindow);
-   
+
   /* Now that the window is created and shown...
    * run the main loop until we get dw_main_quit()
    */
    dw.Main();
-   
+
    /* Now that the loop is done we can cleanup */
    dw.Taskbar_delete(textbox1, fileicon);
    dw.Window_destroy(mainwindow);
 
    fmt.Printf("dwtest exiting...\n");
 }
-

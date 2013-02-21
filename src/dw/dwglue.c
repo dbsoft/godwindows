@@ -566,6 +566,11 @@ static void go_draw_line(void *handle, void *pixmap, int x1, int y1, int x2, int
     dw_draw_line((HWND)handle, (HPIXMAP)pixmap, x1, y1, x2, y2);
 }
 
+static void go_draw_polygon(void *handle, void *pixmap, int fill, int count, int x[], int y[])
+{
+    dw_draw_polygon((HWND)handle, (HPIXMAP)pixmap, fill, count, x, y);
+}
+
 static void go_draw_rect(void *handle, void *pixmap, int fill, int x, int y, int width, int height)
 {
     dw_draw_rect((HWND)handle, (HPIXMAP)pixmap, fill, x, y, width, height);

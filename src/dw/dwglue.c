@@ -781,9 +781,81 @@ static void go_container_set_item(void *handle, void *pointer, int column, int r
     dw_container_set_item((HWND)handle, pointer, column, row, data);
 }
 
+static void go_container_set_item_ulong(void *handle, void *pointer, int column, int row, unsigned long val)
+{
+    if(dw_container_get_column_type((HWND)handle, column) == DW_CFA_ULONG)
+        dw_container_set_item((HWND)handle, pointer, column, row, &val);
+}
+
+static void go_container_set_item_icon(void *handle, void *pointer, int column, int row, void *icon)
+{
+    if(dw_container_get_column_type((HWND)handle, column) == DW_CFA_BITMAPORICON)
+        dw_container_set_item((HWND)handle, pointer, column, row, &icon);
+}
+
+static void go_container_set_item_time(void *handle, void *pointer, int column, int row, int seconds, int minutes, int hours)
+{
+    CTIME time;
+    
+    time.seconds = seconds;
+    time.minutes = minutes;
+    time.hours = hours;
+    
+    if(dw_container_get_column_type((HWND)handle, column) == DW_CFA_TIME)
+        dw_container_set_item((HWND)handle, pointer, column, row, &time);
+}
+
+static void go_container_set_item_date(void *handle, void *pointer, int column, int row, int day, int month, int year)
+{
+    CDATE date;
+    
+    date.day = day;
+    date.month = month;
+    date.year = year;
+    
+    if(dw_container_get_column_type((HWND)handle, column) == DW_CFA_DATE)
+        dw_container_set_item((HWND)handle, pointer, column, row, &date);
+}
+
 static void go_container_change_item(void *handle, int column, int row, void *data)
 {
     dw_container_change_item((HWND)handle, column, row, data);
+}
+
+static void go_container_change_item_ulong(void *handle, int column, int row, unsigned long val)
+{
+    if(dw_container_get_column_type((HWND)handle, column) == DW_CFA_ULONG)
+        dw_container_change_item((HWND)handle, column, row, &val);
+}
+
+static void go_container_change_item_icon(void *handle, int column, int row, void *icon)
+{
+    if(dw_container_get_column_type((HWND)handle, column) == DW_CFA_BITMAPORICON)
+        dw_container_change_item((HWND)handle, column, row, &icon);
+}
+
+static void go_container_change_item_time(void *handle, int column, int row, int seconds, int minutes, int hours)
+{
+    CTIME time;
+    
+    time.seconds = seconds;
+    time.minutes = minutes;
+    time.hours = hours;
+    
+    if(dw_container_get_column_type((HWND)handle, column) == DW_CFA_TIME)
+        dw_container_change_item((HWND)handle, column, row, &time);
+}
+
+static void go_container_change_item_date(void *handle, int column, int row, int day, int month, int year)
+{
+    CDATE date;
+    
+    date.day = day;
+    date.month = month;
+    date.year = year;
+    
+    if(dw_container_get_column_type((HWND)handle, column) == DW_CFA_DATE)
+        dw_container_change_item((HWND)handle, column, row, &date);
 }
 
 static void go_container_set_column_width(void *handle, int column, int width)
@@ -912,6 +984,42 @@ static void go_filesystem_change_item(void *handle, int column, int row, void *d
     dw_filesystem_change_item((HWND)handle, column, row, data);
 }
 
+static void go_filesystem_change_item_ulong(void *handle, int column, int row, unsigned long val)
+{
+    if(dw_filesystem_get_column_type((HWND)handle, column) == DW_CFA_ULONG)
+        dw_filesystem_change_item((HWND)handle, column, row, &val);
+}
+
+static void go_filesystem_change_item_icon(void *handle, int column, int row, void *icon)
+{
+    if(dw_filesystem_get_column_type((HWND)handle, column) == DW_CFA_BITMAPORICON)
+        dw_filesystem_change_item((HWND)handle, column, row, &icon);
+}
+
+static void go_filesystem_change_item_time(void *handle, int column, int row, int seconds, int minutes, int hours)
+{
+    CTIME time;
+    
+    time.seconds = seconds;
+    time.minutes = minutes;
+    time.hours = hours;
+    
+    if(dw_filesystem_get_column_type((HWND)handle, column) == DW_CFA_TIME)
+        dw_filesystem_change_item((HWND)handle, column, row, &time);
+}
+
+static void go_filesystem_change_item_date(void *handle, int column, int row, int day, int month, int year)
+{
+    CDATE date;
+    
+    date.day = day;
+    date.month = month;
+    date.year = year;
+    
+    if(dw_filesystem_get_column_type((HWND)handle, column) == DW_CFA_DATE)
+        dw_filesystem_change_item((HWND)handle, column, row, &date);
+}
+
 static void go_filesystem_change_file(void *handle, int row, char *filename, void *icon)
 {
     dw_filesystem_change_file((HWND)handle, row, filename, (HICN)icon);
@@ -954,6 +1062,21 @@ static void *go_bitmapbutton_new(char *text, unsigned long id)
 static void *go_bitmapbutton_new_from_file(char *text, unsigned long id, char *filename)
 {
    return (void *)dw_bitmapbutton_new_from_file(text, id, filename);
+}
+
+static void *go_splitbar_new(int type, void *topleft, void *bottomright, unsigned long cid)
+{
+   return (void *)dw_splitbar_new(type, (HWND)topleft, (HWND)bottomright, cid);
+}
+
+static void go_splitbar_set(void *handle, float position)
+{
+    dw_splitbar_set((HWND)handle, position);
+}
+
+static float go_splitbar_get(void *handle)
+{
+    return dw_splitbar_get((HWND)handle);
 }
 
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);

@@ -1224,8 +1224,40 @@ func Container_set_item(handle HWND, ptr unsafe.Pointer, column int, row int, da
    C.go_container_set_item(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), data);
 }
 
+func Container_set_item_ulong(handle HWND, ptr unsafe.Pointer, column int, row int, val uint) {
+   C.go_container_set_item_ulong(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), C.ulong(val));
+}
+
+func Container_set_item_icon(handle HWND, ptr unsafe.Pointer, column int, row int, icon HICN) {
+   C.go_container_set_item_icon(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), unsafe.Pointer(icon));
+}
+
+func Container_set_item_time(handle HWND, ptr unsafe.Pointer, column int, row int, seconds int, minutes int, hours int) {
+   C.go_container_set_item_time(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+}
+
+func Container_set_item_date(handle HWND, ptr unsafe.Pointer, column int, row int, day int, month int, year int) {
+   C.go_container_set_item_date(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
+}
+
 func Container_change_item(handle HWND, column int, row int, data unsafe.Pointer) {
    C.go_container_change_item(unsafe.Pointer(handle), C.int(column), C.int(row), data);
+}
+
+func Container_change_item_ulong(handle HWND, column int, row int, val uint) {
+   C.go_container_change_item_ulong(unsafe.Pointer(handle), C.int(column), C.int(row), C.ulong(val));
+}
+
+func Container_change_item_icon(handle HWND, column int, row int, icon HICN) {
+   C.go_container_change_item_icon(unsafe.Pointer(handle), C.int(column), C.int(row), unsafe.Pointer(icon));
+}
+
+func Container_change_item_time(handle HWND, column int, row int, seconds int, minutes int, hours int) {
+   C.go_container_change_item_time(unsafe.Pointer(handle), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+}
+
+func Container_change_item_date(handle HWND, column int, row int, day int, month int, year int) {
+   C.go_container_change_item_date(unsafe.Pointer(handle), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
 }
 
 func Container_set_column_width(handle HWND, column int, width int) {
@@ -1349,6 +1381,22 @@ func Filesystem_change_item(handle HWND, column int, row int, data unsafe.Pointe
    C.go_filesystem_change_item(unsafe.Pointer(handle), C.int(column), C.int(row), data);
 }
 
+func Filesystem_change_item_ulong(handle HWND, column int, row int, val uint) {
+   C.go_filesystem_change_item_ulong(unsafe.Pointer(handle), C.int(column), C.int(row), C.ulong(val));
+}
+
+func Filesystem_change_item_icon(handle HWND, column int, row int, icon HICN) {
+   C.go_filesystem_change_item_icon(unsafe.Pointer(handle), C.int(column), C.int(row), unsafe.Pointer(icon));
+}
+
+func Filesystem_change_item_time(handle HWND, column int, row int, seconds int, minutes int, hours int) {
+   C.go_filesystem_change_item_time(unsafe.Pointer(handle), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+}
+
+func Filesystem_change_item_date(handle HWND, column int, row int, day int, month int, year int) {
+   C.go_filesystem_change_item_date(unsafe.Pointer(handle), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
+}
+
 func Filesystem_change_file(handle HWND, row int, filename string, icon HICN) {
    cfilename := C.CString(filename);
    defer C.free(unsafe.Pointer(cfilename));
@@ -1389,6 +1437,18 @@ func Bitmapbutton_new_from_file(text string, id uint, filename string) HWND {
    defer C.free(unsafe.Pointer(cfilename));
    
    return HWND(C.go_bitmapbutton_new_from_file(ctext, C.ulong(id), cfilename));
+}
+
+func Splitbar_new(btype int, topleft HWND, bottomright HWND, id uint) HWND {
+    return HWND(C.go_splitbar_new(C.int(btype), unsafe.Pointer(topleft), unsafe.Pointer(bottomright), C.ulong(id)));
+}
+
+func Splitbar_set(handle HWND, position float32) {
+   C.go_splitbar_set(unsafe.Pointer(handle), C.float(position));
+}
+
+func Splitbar_get(handle HWND) float32 {
+   return float32(C.go_splitbar_get(unsafe.Pointer(handle)));
 }
 
 func init() {

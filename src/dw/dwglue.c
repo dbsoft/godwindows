@@ -866,6 +866,42 @@ static void go_filesystem_set_item(void *handle, void *pointer, int column, int 
     dw_filesystem_set_item((HWND)handle, pointer, column, row, data);
 }
 
+static void go_filesystem_set_item_ulong(void *handle, void *pointer, int column, int row, unsigned long val)
+{
+    if(dw_filesystem_get_column_type((HWND)handle, column) == DW_CFA_ULONG)
+        dw_filesystem_set_item((HWND)handle, pointer, column, row, &val);
+}
+
+static void go_filesystem_set_item_icon(void *handle, void *pointer, int column, int row, void *icon)
+{
+    if(dw_filesystem_get_column_type((HWND)handle, column) == DW_CFA_BITMAPORICON)
+        dw_filesystem_set_item((HWND)handle, pointer, column, row, &icon);
+}
+
+static void go_filesystem_set_item_time(void *handle, void *pointer, int column, int row, int seconds, int minutes, int hours)
+{
+    CTIME time;
+    
+    time.seconds = seconds;
+    time.minutes = minutes;
+    time.hours = hours;
+    
+    if(dw_filesystem_get_column_type((HWND)handle, column) == DW_CFA_TIME)
+        dw_filesystem_set_item((HWND)handle, pointer, column, row, &time);
+}
+
+static void go_filesystem_set_item_date(void *handle, void *pointer, int column, int row, int day, int month, int year)
+{
+    CDATE date;
+    
+    date.day = day;
+    date.month = month;
+    date.year = year;
+    
+    if(dw_filesystem_get_column_type((HWND)handle, column) == DW_CFA_DATE)
+        dw_filesystem_set_item((HWND)handle, pointer, column, row, &date);
+}
+
 static void go_filesystem_set_file(void *handle, void *pointer, int row, char *filename, void *icon)
 {
     dw_filesystem_set_file((HWND)handle, pointer, row, filename, (HICN)icon);

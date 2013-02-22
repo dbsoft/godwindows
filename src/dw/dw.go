@@ -1322,6 +1322,22 @@ func Filesystem_set_item(handle HWND, ptr unsafe.Pointer, column int, row int, d
    C.go_filesystem_set_item(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), data);
 }
 
+func Filesystem_set_item_ulong(handle HWND, ptr unsafe.Pointer, column int, row int, val uint) {
+   C.go_filesystem_set_item_ulong(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), C.ulong(val));
+}
+
+func Filesystem_set_item_icon(handle HWND, ptr unsafe.Pointer, column int, row int, icon HICN) {
+   C.go_filesystem_set_item_icon(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), unsafe.Pointer(icon));
+}
+
+func Filesystem_set_item_time(handle HWND, ptr unsafe.Pointer, column int, row int, seconds int, minutes int, hours int) {
+   C.go_filesystem_set_item_time(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+}
+
+func Filesystem_set_item_date(handle HWND, ptr unsafe.Pointer, column int, row int, day int, month int, year int) {
+   C.go_filesystem_set_item_date(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
+}
+
 func Filesystem_set_file(handle HWND, ptr unsafe.Pointer, row int, filename string, icon HICN) {
    cfilename := C.CString(filename);
    defer C.free(unsafe.Pointer(cfilename));

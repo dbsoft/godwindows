@@ -1051,7 +1051,7 @@ func tree_add() {
 
 // Page 4
 func container_add() {
-    //var z int
+    var z int
     titles := []string{ "Type", "Size", "Time", "Date" };
     flags := []uint{   dw.CFA_BITMAPORICON | dw.CFA_LEFT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
                          dw.CFA_ULONG | dw.CFA_RIGHT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
@@ -1074,49 +1074,37 @@ func container_add() {
     dw.Filesystem_set_column_title(container, "Test");
     dw.Filesystem_setup(container, flags, titles);
     dw.Container_set_stripe(container, dw.CLR_DEFAULT, dw.CLR_DEFAULT);
-    /*containerinfo := dw.Container_alloc(container, 3);
+    containerinfo := dw.Container_alloc(container, 3);
 
     for z=0; z<3; z++ {
-        sprintf(names[z],"Don't allocate from stack: Item: %d",z);
-        size = z*100;
-        sprintf(buffer, "Filename %d",z+1);
-        if (z == 0 ) thisicon = foldericon;
-        else thisicon = fileicon;
-        fmt.Printf("Initial: container: %x containerinfo: %x icon: %x\n", DW_POINTER_TO_INT(container),
-                  DW_POINTER_TO_INT(containerinfo), DW_POINTER_TO_INT(thisicon));
-        dw_filesystem_set_file(container, containerinfo, z, buffer, thisicon);
-        dw_filesystem_set_item(container, containerinfo, 0, z, &thisicon);
-        dw_filesystem_set_item(container, containerinfo, 1, z, &size);
-
-        time.seconds = z+10;
-        time.minutes = z+10;
-        time.hours = z+10;
-        dw_filesystem_set_item(container, containerinfo, 2, z, &time);
-
-        date.day = z+10;
-        date.month = z+10;
-        date.year = z+2000;
-        dw.Filesystem_set_item(container, containerinfo, 3, z, &date);
-
-        dw.Container_set_row_title(containerinfo, z, names[z]);
+        var thisicon dw.HICN = fileicon; 
+        
+        if z == 0 {
+             thisicon = foldericon;
+        } 
+        fmt.Printf("Initial: container: %x containerinfo: %x icon: %x\n", uintptr(unsafe.Pointer(container)),
+                  uintptr(containerinfo), uintptr(unsafe.Pointer(thisicon)));
+        dw.Filesystem_set_file(container, containerinfo, z, fmt.Sprintf("Filename %d", z+1), thisicon);
+        dw.Filesystem_set_item_icon(container, containerinfo, 0, z, thisicon);
+        dw.Filesystem_set_item_ulong(container, containerinfo, 1, z, uint(z*100));
+        dw.Filesystem_set_item_time(container, containerinfo, 2, z, z+10, z+10, z+10);
+        dw.Filesystem_set_item_date(container, containerinfo, 3, z, z+10, z+10, z+2000);
+        dw.Container_set_row_title(containerinfo, z, fmt.Sprintf("Don't allocate from stack: Item: %d", z));
     }
     dw.Container_insert(container, containerinfo, 3);
 
     containerinfo = dw.Container_alloc(container, 1);
-    dw.Filesystem_set_file(container, containerinfo, 0, strdup("Yikes"), foldericon);
-    size = 324;
-    dw.Filesystem_set_item(container, containerinfo, 0, 0, &foldericon);
-    dw.Filesystem_set_item(container, containerinfo, 1, 0, &size);
-    dw.Filesystem_set_item(container, containerinfo, 2, 0, &time);
-    dw.Filesystem_set_item(container, containerinfo, 3, 0, &date);
+    dw.Filesystem_set_file(container, containerinfo, 0, "Yikes", foldericon);
+    dw.Filesystem_set_item_icon(container, containerinfo, 0, 0, foldericon);
+    dw.Filesystem_set_item_ulong(container, containerinfo, 1, 0, 324);
+    dw.Filesystem_set_item_time(container, containerinfo, 2, 0, z+10, z+10, z+10);
+    dw.Filesystem_set_item_date(container, containerinfo, 3, 0, z+10, z+10, z+2000);
     dw.Container_set_row_title(containerinfo, 0, "Extra");
 
     dw.Container_insert(container, containerinfo, 1);
     dw.Container_optimize(container);
-    */
-    
 
-    container_mle = dw.Mle_new( 111 );
+    container_mle = dw.Mle_new(111);
     dw.Box_pack_start( containerbox, container_mle, 500, 200, TRUE, TRUE, 0);
 
     mle_point := dw.Mle_import(container_mle, "", -1);

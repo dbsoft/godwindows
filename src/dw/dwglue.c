@@ -646,6 +646,240 @@ static char *go_tree_get_title(void *handle, void *item)
     return dw_tree_get_title((HWND)handle, (HTREEITEM)item);
 }
 
+static void *go_html_new(unsigned long id)
+{
+   return (void *)dw_html_new(id);
+}
+
+
+static void go_html_action(void *hwnd, int action)
+{
+    dw_html_action((HWND)hwnd, action);
+}
+
+static int go_html_raw(void *hwnd, char *string)
+{
+    return dw_html_raw((HWND)hwnd, string);
+}
+
+static int go_html_url(void *hwnd, char *url)
+{
+    return dw_html_url((HWND)hwnd, url);
+}
+
+static void *go_mle_new(unsigned long id)
+{
+   return (void *)dw_mle_new(id);
+}
+
+static unsigned int go_mle_import(void *handle, char *buffer, int startpoint)
+{
+    return dw_mle_import((HWND)handle, buffer, startpoint);
+}
+
+static void go_mle_export(void *handle, char *buffer, int startpoint, int length)
+{
+    dw_mle_export((HWND)handle, buffer, startpoint, length);
+}
+
+static void go_mle_get_size(void *handle, unsigned long *bytes, unsigned long *lines)
+{
+    dw_mle_get_size((HWND)handle, bytes, lines);
+}
+
+static void go_mle_delete(void *handle, int startpoint, int length)
+{
+    dw_mle_delete((HWND)handle, startpoint, length);
+}
+
+static void go_mle_clear(void *handle)
+{
+    dw_mle_clear((HWND)handle);
+}
+
+static void go_mle_freeze(void *handle)
+{
+    dw_mle_freeze((HWND)handle);
+}
+
+static void go_mle_thaw(void *handle)
+{
+    dw_mle_thaw((HWND)handle);
+}
+
+static void go_mle_set_cursor(void *handle, int point)
+{
+    dw_mle_set_cursor((HWND)handle, point);
+}
+
+static void go_mle_set_visible(void *handle, int line)
+{
+    dw_mle_set_visible((HWND)handle, line);
+}
+
+static void go_mle_set_editable(void *handle, int state)
+{
+    dw_mle_set_editable((HWND)handle, state);
+}
+
+static void go_mle_set_word_wrap(void *handle, int state)
+{
+    dw_mle_set_word_wrap((HWND)handle, state);
+}
+
+static int go_mle_search(void *handle, char *text, int point, unsigned long flags)
+{
+    return dw_mle_search((HWND)handle, text, point, flags);
+}
+
+static void *go_container_new(unsigned long id, int multi)
+{
+    return (void *)dw_container_new(id, multi);
+}
+
+static char **go_string_array_make(int size) 
+{
+    return calloc(sizeof(char*), size);
+}
+
+static void go_string_array_set(char **a, char *s, int n) 
+{
+    a[n] = s;
+}
+
+static void go_string_array_free(char **a, int size) 
+{
+    int x;
+    
+    for(x = 0; x < size; x++)
+        free(a[x]);
+    free(a);
+}
+
+static int go_container_setup(void *handle, unsigned long *flags, char **titles, int count, int separator)
+{
+    return dw_container_setup((HWND)handle, flags, titles, count, separator);
+}
+
+static void * go_container_alloc(void *handle, int rowcount)
+{
+    return dw_container_alloc((HWND)handle, rowcount);
+}
+
+static void go_container_set_item(void *handle, void *pointer, int column, int row, void *data)
+{
+    dw_container_set_item((HWND)handle, pointer, column, row, data);
+}
+
+static void go_container_change_item(void *handle, int column, int row, void *data)
+{
+    dw_container_change_item((HWND)handle, column, row, data);
+}
+
+static void go_container_set_column_width(void *handle, int column, int width)
+{
+    dw_container_set_column_width((HWND)handle, column, width);
+}
+
+static void go_container_change_row_title(void *handle, int row, char *title)
+{
+    dw_container_change_row_title((HWND)handle, row, title);
+}
+
+static void go_container_change_row_data(void *handle, int row, void *data)
+{
+    dw_container_change_row_title((HWND)handle, row, (char *)data);
+}
+
+static void go_container_insert(void *handle, void *pointer, int rowcount)
+{
+    dw_container_insert((HWND)handle, pointer, rowcount);
+}
+
+static void go_container_clear(void *handle, int redraw)
+{
+    dw_container_clear((HWND)handle, redraw);
+}
+
+static void go_container_delete(void *handle, int rowcount)
+{
+    dw_container_delete((HWND)handle, rowcount);
+}
+
+static char *go_container_query_start(void *handle, unsigned long flags)
+{
+    return dw_container_query_start((HWND)handle, flags);
+}
+
+static char *go_container_query_next(void *handle, unsigned long flags)
+{
+    return dw_container_query_next((HWND)handle, flags);
+}
+
+static void go_container_scroll(void *handle, int direction, long rows)
+{
+    dw_container_scroll((HWND)handle, direction, rows);
+}
+
+static void go_container_cursor(void *handle, char *text)
+{
+    dw_container_cursor((HWND)handle, text);
+}
+
+static void go_container_delete_row(void *handle, char *text)
+{
+    dw_container_delete_row((HWND)handle, text);
+}
+
+static void go_container_optimize(void *handle)
+{
+    dw_container_optimize((HWND)handle);
+}
+
+static void go_container_set_stripe(void *handle, unsigned long oddcolor, unsigned long evencolor)
+{
+    dw_container_set_stripe((HWND)handle, oddcolor, evencolor);
+}
+
+static void go_filesystem_set_column_title(void *handle, char *title)
+{
+    dw_filesystem_set_column_title((HWND)handle, title);
+}
+
+static int go_filesystem_setup(void *handle, unsigned long *flags, char **titles, int count)
+{
+    return dw_filesystem_setup((HWND)handle, flags, titles, count);
+}
+
+static void go_filesystem_set_item(void *handle, void *pointer, int column, int row, void *data)
+{
+    dw_filesystem_set_item((HWND)handle, pointer, column, row, data);
+}
+
+static void go_filesystem_set_file(void *handle, void *pointer, int row, char *filename, void *icon)
+{
+    dw_filesystem_set_file((HWND)handle, pointer, row, filename, (HICN)icon);
+}
+
+static void go_filesystem_change_item(void *handle, int column, int row, void *data)
+{
+    dw_filesystem_change_item((HWND)handle, column, row, data);
+}
+
+static void go_filesystem_change_file(void *handle, int row, char *filename, void *icon)
+{
+    dw_filesystem_change_file((HWND)handle, row, filename, (HICN)icon);
+}
+
+static int go_container_get_column_type(void *handle, int column)
+{
+    return dw_container_get_column_type((HWND)handle, column);
+}
+static int go_filesystem_get_column_type(void *handle, int column)
+{
+    return dw_filesystem_get_column_type((HWND)handle, column);
+}
+
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);
 extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data);
 extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8);

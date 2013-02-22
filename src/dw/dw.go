@@ -1043,6 +1043,260 @@ func Tree_get_title(handle HWND, item HTREEITEM) string {
    return title;
 }
 
+func Html_new(id uint) HWND {
+    return HWND(C.go_html_new(C.ulong(id)));
+}
+
+func Html_action(hwnd HWND, action int) {
+   C.go_html_action(unsafe.Pointer(hwnd), C.int(action));
+}
+
+func Html_raw(handle HWND, code string) int {
+   ccode := C.CString(code);
+   defer C.free(unsafe.Pointer(ccode));
+   
+   return int(C.go_html_raw(unsafe.Pointer(handle), ccode));
+}
+
+func Html_url(handle HWND, url string) int {
+   curl := C.CString(url);
+   defer C.free(unsafe.Pointer(curl));
+   
+   return int(C.go_html_url(unsafe.Pointer(handle), curl));
+}
+
+func Mle_new(id uint) HWND {
+    return HWND(C.go_mle_new(C.ulong(id)));
+}
+
+func Mle_import(handle HWND, buffer string, startpoint int) int {
+   cbuffer := C.CString(buffer);
+   defer C.free(unsafe.Pointer(cbuffer));
+   
+   return int(C.go_mle_import(unsafe.Pointer(handle), cbuffer, C.int(startpoint)));
+}
+
+func Mle_export(handle HWND, startpoint int, length int) string {
+   cbuf := C.calloc(1, C.size_t(length+1));
+   C.go_mle_export(unsafe.Pointer(handle), (*C.char)(cbuf), C.int(startpoint), C.int(length));
+   buf := C.GoString((*C.char)(cbuf));
+   C.free(cbuf);
+   return buf;
+}
+
+func Mle_get_size(handle HWND) (int, int) {
+   var bytes, lines C.ulong;
+   C.go_mle_get_size(unsafe.Pointer(handle), &bytes, &lines);
+   return int(bytes), int(lines);
+}
+
+func Mle_delete(handle HWND, startpoint int, length int) {
+   C.go_mle_delete(unsafe.Pointer(handle), C.int(startpoint), C.int(length));
+}
+
+func Mle_clear(handle HWND) {
+   C.go_mle_clear(unsafe.Pointer(handle));
+}
+
+func Mle_freeze(handle HWND) {
+   C.go_mle_freeze(unsafe.Pointer(handle));
+}
+
+func Mle_thaw(handle HWND) {
+   C.go_mle_thaw(unsafe.Pointer(handle));
+}
+
+func Mle_set_cursor(handle HWND, point int) {
+   C.go_mle_set_cursor(unsafe.Pointer(handle), C.int(point));
+}
+
+func Mle_set_visible(handle HWND, line int) {
+   C.go_mle_set_visible(unsafe.Pointer(handle), C.int(line));
+}
+
+func Mle_set_editable(handle HWND, state int) {
+   C.go_mle_set_editable(unsafe.Pointer(handle), C.int(state));
+}
+
+func Mle_set_word_wrap(handle HWND, state int) {
+   C.go_mle_set_word_wrap(unsafe.Pointer(handle), C.int(state));
+}
+
+func Mle_search(handle HWND, text string, point int, flags uint) int {
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   
+   return int(C.go_mle_search(unsafe.Pointer(handle), ctext, C.int(point), C.ulong(flags)));
+}
+
+func Container_new(id uint, multi int) HWND {
+    return HWND(C.go_container_new(C.ulong(id), C.int(multi)));
+}
+
+func Container_setup(handle HWND, flags []uint, titles []string, separator int) int {
+   count := len(flags);
+   if len(titles) < count {
+     count = len(titles);
+   }
+   
+   ctitles := C.go_string_array_make(C.int(len(titles)))
+   defer C.go_string_array_free(ctitles, C.int(len(titles)))
+   for i, s := range titles {
+      C.go_string_array_set(ctitles, C.CString(s), C.int(i))
+   }   
+
+   cflags := make([]C.ulong, count);
+   for n := 0; n < count; n++ {
+     cflags[n] = C.ulong(flags[n]);
+   }
+   flagsHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cflags)));
+   return int(C.go_container_setup(unsafe.Pointer(handle), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count), C.int(separator)));
+}
+
+func Filesystem_setup(handle HWND, flags []uint, titles []string) int {
+   count := len(flags);
+   if len(titles) < count {
+     count = len(titles);
+   }
+   
+   ctitles := C.go_string_array_make(C.int(len(titles)))
+   defer C.go_string_array_free(ctitles, C.int(len(titles)))
+   for i, s := range titles {
+      C.go_string_array_set(ctitles, C.CString(s), C.int(i))
+   }   
+
+   cflags := make([]C.ulong, count);
+   for n := 0; n < count; n++ {
+     cflags[n] = C.ulong(flags[n]);
+   }
+   flagsHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cflags)));
+   return int(C.go_filesystem_setup(unsafe.Pointer(handle), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count)));
+}
+
+func Container_alloc(handle HWND, rowcount int) unsafe.Pointer {
+   return C.go_container_alloc(unsafe.Pointer(handle), C.int(rowcount));
+}
+
+func Container_set_item(handle HWND, ptr unsafe.Pointer, column int, row int, data unsafe.Pointer) {
+   C.go_container_set_item(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), data);
+}
+
+func Container_change_item(handle HWND, column int, row int, data unsafe.Pointer) {
+   C.go_container_change_item(unsafe.Pointer(handle), C.int(column), C.int(row), data);
+}
+
+func Container_set_column_width(handle HWND, column int, width int) {
+   C.go_container_set_column_width(unsafe.Pointer(handle), C.int(column), C.int(width));
+}
+
+func Container_set_row_title(ptr unsafe.Pointer, row int, title string) {
+   ctitle := C.CString(title);
+   C.dw_container_set_row_title(ptr, C.int(row), ctitle);
+   /* TODO: Probably need to have a way to free this or leak */
+}
+
+func Container_set_row_data(ptr unsafe.Pointer row int, data unsafe.Pointer) {
+   C.dw_container_set_row_title(ptr, C.int(row), (*C.char)(data));
+}
+
+func Container_change_row_title(handle HWND, row int, title string) {
+   ctitle := C.CString(title);
+   C.go_container_change_row_title(unsafe.Pointer(handle), C.int(row), ctitle);
+}
+
+func Container_change_row_data(handle HWND, row int, data unsafe.Pointer) {
+   C.go_container_change_row_data(unsafe.Pointer(handle), C.int(row), data);
+}
+
+func Container_insert(handle HWND, ptr unsafe.Pointer, rowcount int) {
+   C.go_container_insert(unsafe.Pointer(handle), ptr, C.int(rowcount));
+}
+
+func Container_clear(handle HWND, redraw int) {
+   C.go_container_clear(unsafe.Pointer(handle), C.int(redraw));
+}
+
+func Container_delete(handle HWND, rowcount int) {
+   C.go_container_delete(unsafe.Pointer(handle), C.int(rowcount));
+}
+
+func Container_query_start(handle HWND, flags uint) string {
+   cresult := C.go_container_query_start(unsafe.Pointer(handle), C.ulong(flags));
+   result := C.GoString(cresult);
+   /* TODO: Do I need to free this? */
+   return result;
+}
+
+func Container_query_next(handle HWND, flags uint) string {
+   cresult := C.go_container_query_next(unsafe.Pointer(handle), C.ulong(flags));
+   result := C.GoString(cresult);
+   /* TODO: Do I need to free this? */
+   return result;
+}
+
+func Container_scroll(handle HWND, direction int, rows int) {
+   C.go_container_scroll(unsafe.Pointer(handle), C.int(direction), C.long(rows));
+}
+
+func Container_cursor(handle HWND, text string) {
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   
+   C.go_container_cursor(unsafe.Pointer(handle), ctext);
+}
+
+func Container_delete_row(handle HWND, text string) {
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   
+   C.go_container_delete_row(unsafe.Pointer(handle), ctext);
+}
+
+func Container_optimize(handle HWND) {
+   C.go_container_optimize(unsafe.Pointer(handle));
+}
+
+func Container_set_stripe(handle HWND, oddcolor COLOR, evencolor COLOR) {
+   C.go_container_set_stripe(unsafe.Pointer(handle), C.ulong(oddcolor), C.ulong(evencolor));
+}
+
+func Container_get_column_type(handle HWND, column int) int {
+   return int(C.go_container_get_column_type(unsafe.Pointer(handle), C.int(column)));
+}
+
+func Filesystem_get_column_type(handle HWND, column int) int {
+   return int(C.go_filesystem_get_column_type(unsafe.Pointer(handle), C.int(column)));
+}
+
+func Filesystem_set_column_title(handle HWND, title string) {
+   ctitle := C.CString(title);
+   defer C.free(unsafe.Pointer(ctitle));
+   
+   C.go_filesystem_set_column_title(unsafe.Pointer(handle), ctitle);
+}
+
+func Filesystem_set_item(handle HWND, ptr unsafe.Pointer, column int, row int, data unsafe.Pointer) {
+   C.go_filesystem_set_item(unsafe.Pointer(handle), ptr, C.int(column), C.int(row), data);
+}
+
+func Filesystem_set_file(handle HWND, ptr unsafe.Pointer, row int, filename string, icon HICN) {
+   cfilename := C.CString(filename);
+   defer C.free(unsafe.Pointer(cfilename));
+   
+   C.go_filesystem_set_file(unsafe.Pointer(handle), ptr, C.int(row), cfilename, unsafe.Pointer(icon));
+}
+
+func Filesystem_change_item(handle HWND, column int, row int, data unsafe.Pointer) {
+   C.go_filesystem_change_item(unsafe.Pointer(handle), C.int(column), C.int(row), data);
+}
+
+func Filesystem_change_file(handle HWND, row int, filename string, icon HICN) {
+   cfilename := C.CString(filename);
+   defer C.free(unsafe.Pointer(cfilename));
+   
+   C.go_filesystem_change_file(unsafe.Pointer(handle), C.int(row), cfilename, unsafe.Pointer(icon));
+}
+
 func init() {
    runtime.LockOSThread();
 }

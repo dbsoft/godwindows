@@ -596,7 +596,7 @@ func item_select_cb(window dw.HWND, item dw.HTREEITEM, text string, data unsafe.
     return FALSE;
 }
 
-/*func column_click_cb(window HWND, column_num int, data unsafe.Pointer) int {
+func column_click_cb(window HWND, column_num int, data unsafe.Pointer) int {
     var stype = "Unknown";
 
     if column_num == 0 {
@@ -619,7 +619,7 @@ func item_select_cb(window dw.HWND, item dw.HTREEITEM, text string, data unsafe.
             column_num, stype, uintptr(itemdata));
     dw.Window_set_text(dw.HWND(data), message);
     return FALSE;
-}*/
+}
 
 var exit_callback_func = exit_callback;
 var copy_clicked_callback_func = copy_clicked_callback;
@@ -647,6 +647,7 @@ var item_enter_cb_func = item_enter_cb;
 var item_context_cb_func = item_context_cb;
 var list_select_cb_func = list_select_cb; 
 var item_select_cb_func = item_select_cb;
+var column_click_cb_func = column_click_cb;
 
 var checkable_string = "checkable";
 var noncheckable_string = "non-checkable";
@@ -897,6 +898,7 @@ func text_add() {
     dw.Taskbar_insert(textbox1, fileicon, "DWTest");
 }
 
+// Page 3
 func tree_add() {
     /* create a box to pack into the notebook page */
     listbox := dw.Listbox_new(1024, TRUE);
@@ -927,6 +929,239 @@ func tree_add() {
     dw.Tree_insert(tree, "tree file 4", fileicon, t2, unsafe.Pointer(uintptr(6)));
     dw.Tree_item_change(tree, t1, "tree folder 1", foldericon);
     dw.Tree_item_change(tree, t2, "tree folder 2", foldericon);
+}
+
+// Page 4
+func container_add() {
+    var z int
+    var titles []string { "Type", "Size", "Time" "Date" };
+    var flags []uint {   dw.CFA_BITMAPORICON | dw.CFA_LEFT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
+                         dw.CFA_ULONG | dw.CFA_RIGHT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
+                         dw.CFA_TIME | dw.CFA_CENTER | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
+                         dw.CFA_DATE | dw.CFA_LEFT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR };
+
+
+    /* create a box to pack into the notebook page */
+    containerbox = dw.Box_new(dw.HORZ, 2);
+    dw.Box_pack_start(notebookbox4, containerbox, 500, 200, TRUE, TRUE, 0);
+
+    /* now a container area under this box */
+    container = dw.Container_new(100, TRUE);
+    dw.Box_pack_start(notebookbox4, container, 500, 200, TRUE, FALSE, 1);
+
+    /* and a status area to see whats going on */
+    container_status = dw.Status_text_new("", 0);
+    dw.Box_pack_start(notebookbox4, container_status, 100, -1, TRUE, FALSE, 1);
+
+    dw.Filesystem_set_column_title(container, "Test");
+    dw.Filesystem_setup(container, flags, titles);
+    dw.Container_set_stripe(container, DW_CLR_DEFAULT, DW_CLR_DEFAULT);
+    containerinfo = dw.Container_alloc(container, 3);
+
+    /*for z=0; z<3; z++ {
+        sprintf(names[z],"Don't allocate from stack: Item: %d",z);
+        size = z*100;
+        sprintf(buffer, "Filename %d",z+1);
+        if (z == 0 ) thisicon = foldericon;
+        else thisicon = fileicon;
+        fmt.Printf("Initial: container: %x containerinfo: %x icon: %x\n", DW_POINTER_TO_INT(container),
+                  DW_POINTER_TO_INT(containerinfo), DW_POINTER_TO_INT(thisicon));
+        dw_filesystem_set_file(container, containerinfo, z, buffer, thisicon);
+        dw_filesystem_set_item(container, containerinfo, 0, z, &thisicon);
+        dw_filesystem_set_item(container, containerinfo, 1, z, &size);
+
+        time.seconds = z+10;
+        time.minutes = z+10;
+        time.hours = z+10;
+        dw_filesystem_set_item(container, containerinfo, 2, z, &time);
+
+        date.day = z+10;
+        date.month = z+10;
+        date.year = z+2000;
+        dw.Filesystem_set_item(container, containerinfo, 3, z, &date);
+
+        dw.Container_set_row_title(containerinfo, z, names[z]);
+    }
+    dw.Container_insert(container, containerinfo, 3);
+
+    containerinfo = dw.Container_alloc(container, 1);
+    dw.Filesystem_set_file(container, containerinfo, 0, strdup("Yikes"), foldericon);
+    size = 324;
+    dw.Filesystem_set_item(container, containerinfo, 0, 0, &foldericon);
+    dw.Filesystem_set_item(container, containerinfo, 1, 0, &size);
+    dw.Filesystem_set_item(container, containerinfo, 2, 0, &time);
+    dw.Filesystem_set_item(container, containerinfo, 3, 0, &date);
+    dw.Container_set_row_title(containerinfo, 0, "Extra");
+
+    dw.Container_insert(container, containerinfo, 1);
+    dw.Container_optimize(container);
+    */
+    
+
+    container_mle = dw.Mle_new( 111 );
+    dw.Box_pack_start( containerbox, container_mle, 500, 200, TRUE, TRUE, 0);
+
+    mle_point := dw.Mle_import(container_mle, "", -1);
+    mle_point = dw.Mle_import(container_mle, fmt.Sprintf("%d", mle_point), mle_point);
+    mle_point = dw.Mle_import(container_mle, fmt.Sprintf("[%d]abczxydefijkl", mle_point), mle_point);
+    dw.Mle_delete(container_mle, 9, 3);
+    mle_point = dw.Mle_import(container_mle, "gh", 12);
+    newpoint, _ := dw.Mle_get_size(container_mle, &newpoint, NULL);
+    mle_point = newpoint;
+    mle_point = dw_mle_import(container_mle, fmt.Sprintf("[%d]\r\n\r\n", mle_point), mle_point);
+    dw.Mle_set_cursor(container_mle, mle_point);
+    /* connect our event trappers... */
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_ENTER, unsafe.Pointer(item_enter_cb_func), unsafe.Pointer(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_CONTEXT, unsafe.Pointer(item_context_cb_func), unsafe.Pointer(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_SELECT, unsafe.Pointer(container_select_cb_func), unsafe.Pointer(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_COLUMN_CLICK, unsafe.Pointer(column_click_cb_func), unsafe.Pointer(container_status));
+}
+
+// Page 5
+void buttons_add(void)
+{
+    /* create a box to pack into the notebook page */
+    buttonsbox := dw.Box_new(dw.VERT, 2);
+    dw.Box_pack_start(notebookbox5, buttonsbox, 25, 200, TRUE, TRUE, 0);
+    dw.Window_set_color(buttonsbox, dw.CLR_RED, dw.CLR_RED);
+
+    calbox = dw_box_new(DW_HORZ, 0);
+    dw_box_pack_start(notebookbox5, calbox, 500, 200, TRUE, TRUE, 1);
+    cal = dw_calendar_new(100);
+    dw_box_pack_start(calbox, cal, 180, 120, TRUE, TRUE, 0);
+    /*
+     dw_calendar_set_date(cal, 2001, 1, 1);
+     */
+    /*
+     * Create our file toolbar boxes...
+     */
+    buttonboxperm = dw_box_new( DW_VERT, 0 );
+    dw_box_pack_start( buttonsbox, buttonboxperm, 25, 0, FALSE, TRUE, 2 );
+    dw_window_set_color(buttonboxperm, DW_CLR_WHITE, DW_CLR_WHITE);
+    abutton1 = dw_bitmapbutton_new_from_file( "Top Button", 0, FILE_ICON_NAME );
+    dw_box_pack_start( buttonboxperm, abutton1, 100, 30, FALSE, FALSE, 0 );
+    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(button_callback), NULL );
+    dw_box_pack_start( buttonboxperm, 0, 25, 5, FALSE, FALSE, 0 );
+    abutton2 = dw_bitmapbutton_new_from_file( "Bottom", 0, FOLDER_ICON_NAME );
+    dw_box_pack_start( buttonsbox, abutton2, 25, 25, FALSE, FALSE, 0 );
+    dw_signal_connect( abutton2, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(button_callback), NULL );
+    dw_window_set_bitmap(abutton2, 0, FILE_ICON_NAME);
+
+    create_button(0);
+    /* make a combobox */
+    combox = dw_box_new(DW_VERT, 2);
+    dw_box_pack_start( notebookbox5, combox, 25, 200, TRUE, FALSE, 0);
+    combobox1 = dw_combobox_new( "fred", 0 ); /* no point in specifying an initial value */
+    dw_listbox_append( combobox1, "fred" );
+    dw_box_pack_start( combox, combobox1, -1, -1, TRUE, FALSE, 0);
+    /*
+     dw_window_set_text( combobox, "initial value");
+     */
+    dw_signal_connect( combobox1, DW_SIGNAL_LIST_SELECT, DW_SIGNAL_FUNC(combobox_select_event_callback), NULL );
+#if 0
+    /* add LOTS of items */
+    dw_debug("before appending 100 items to combobox using dw_listbox_append()\n");
+    for( i = 0; i < 100; i++ )
+    {
+        sprintf( buf, "item %d", i);
+        dw_listbox_append( combobox1, buf );
+    }
+    dw_debug("after appending 100 items to combobox\n");
+#endif
+
+    combobox2 = dw_combobox_new( "joe", 0 ); /* no point in specifying an initial value */
+    dw_box_pack_start( combox, combobox2, -1, -1, TRUE, FALSE, 0);
+    /*
+     dw_window_set_text( combobox, "initial value");
+     */
+    dw_signal_connect( combobox2, DW_SIGNAL_LIST_SELECT, DW_SIGNAL_FUNC(combobox_select_event_callback), NULL );
+    /* add LOTS of items */
+    dw_debug("before appending 500 items to combobox using dw_listbox_list_append()\n");
+    text = (char **)malloc(500*sizeof(char *));
+    for( i = 0; i < 500; i++ )
+    {
+        text[i] = (char *)malloc( 50 );
+        sprintf( text[i], "item %d", i);
+    }
+    dw_listbox_list_append( combobox2, text, 500 );
+    dw_debug("after appending 500 items to combobox\n");
+    for( i = 0; i < 500; i++ )
+    {
+        free(text[i]);
+    }
+    free(text);
+    /* now insert a couple of items */
+    dw_listbox_insert( combobox2, "inserted item 2", 2 );
+    dw_listbox_insert( combobox2, "inserted item 5", 5 );
+    /* make a spinbutton */
+    spinbutton = dw_spinbutton_new( "", 0 ); /* no point in specifying text */
+    dw_box_pack_start( combox, spinbutton, -1, -1, TRUE, FALSE, 0);
+    dw_spinbutton_set_limits( spinbutton, 100, 1 );
+    dw_spinbutton_set_pos( spinbutton, 30 );
+    dw_signal_connect( spinbutton, DW_SIGNAL_VALUE_CHANGED, DW_SIGNAL_FUNC(spinbutton_valuechanged_callback), NULL );
+    /* make a slider */
+    slider = dw_slider_new( FALSE, 11, 0 ); /* no point in specifying text */
+    dw_box_pack_start( combox, slider, -1, -1, TRUE, FALSE, 0);
+    dw_signal_connect( slider, DW_SIGNAL_VALUE_CHANGED, DW_SIGNAL_FUNC(slider_valuechanged_callback), NULL );
+    /* make a percent */
+    percent = dw_percent_new( 0 );
+    dw_box_pack_start( combox, percent, -1, -1, TRUE, FALSE, 0);
+}
+
+void create_button( int redraw)
+{
+    HWND abutton1;
+    filetoolbarbox = dw_box_new( DW_VERT, 0 );
+    dw_box_pack_start( buttonboxperm, filetoolbarbox, 0, 0, TRUE, TRUE, 0 );
+
+    abutton1 = dw_bitmapbutton_new_from_file( "Empty image. Should be under Top button", 0, "junk" );
+    dw_box_pack_start( filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
+    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(change_color_red_callback), NULL );
+    dw_box_pack_start( filetoolbarbox, 0, 25, 5, FALSE, FALSE, 0 );
+
+    abutton1 = dw_bitmapbutton_new_from_data( "A borderless bitmapbitton", 0, folder_ico, 1718 );
+    dw_box_pack_start( filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
+    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(change_color_yellow_callback), NULL );
+    dw_box_pack_start( filetoolbarbox, 0, 25, 5, FALSE, FALSE, 0 );
+    dw_window_set_style( abutton1, DW_BS_NOBORDER, DW_BS_NOBORDER );
+
+    abutton1 = dw_bitmapbutton_new_from_data( "A button from data", 0, folder_ico, 1718 );
+    dw_box_pack_start( filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
+    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(percent_button_box_callback), NULL );
+    dw_box_pack_start( filetoolbarbox, 0, 25, 5, FALSE, FALSE, 0 );
+    if ( redraw )
+    {
+        dw_window_redraw( filetoolbarbox );
+        dw_window_redraw( mainwindow );
+    }
+}
+
+// Page 8
+void scrollbox_add(void)
+{
+    HWND tmpbox,abutton1;
+    char buf[100];
+    int i;
+
+    /* create a box to pack into the notebook page */
+    scrollbox = dw_scrollbox_new(DW_VERT, 0);
+    dw_box_pack_start(notebookbox8, scrollbox, 0, 0, TRUE, TRUE, 1);
+
+    abutton1 = dw_button_new( "Show Adjustments", 0 );
+    dw_box_pack_start( scrollbox, abutton1, -1, 30, FALSE, FALSE, 0 );
+    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(scrollbox_button_callback), NULL );
+
+    for ( i = 0; i < MAX_WIDGETS; i++ )
+    {
+        tmpbox = dw_box_new( DW_HORZ, 0 );
+        dw_box_pack_start( scrollbox, tmpbox, 0, 24, TRUE, FALSE, 2);
+        sprintf( buf, "Label %d", i );
+        labelarray[i] = dw_text_new( buf , 0 );
+        dw_box_pack_start( tmpbox, labelarray[i], 0, 20, TRUE, FALSE, 0);
+        sprintf( buf, "Entry %d", i );
+        entryarray[i] = dw_entryfield_new( buf , i );
+        dw_box_pack_start( tmpbox, entryarray[i], 0, 20, TRUE, FALSE, 0);
+    }
 }
 
 func main() {
@@ -973,6 +1208,49 @@ func main() {
    dw.Notebook_page_set_text(notebook, notebookpage3, "tree");
    tree_add();
    
+   notebookbox4 = dw.Box_new(dw.VERT, 5);
+   notebookpage4 := dw.Notebook_page_new(notebook, 1, FALSE);
+   dw.Notebook_pack(notebook, notebookpage4, notebookbox4);
+   dw.Notebook_page_set_text(notebook, notebookpage4, "container");
+   container_add();
+
+   notebookbox5 = dw.Box_new(dw.VERT, 5);
+   notebookpage5 := dw.Notebook_page_new(notebook, 1, FALSE);
+   dw.Notebook_pack(notebook, notebookpage5, notebookbox5);
+   dw.Notebook_page_set_text(notebook, notebookpage5, "buttons");
+   buttons_add();
+
+/* DEPRECATED
+   notebookbox6 = dw.Box_new(dw.VERT, 5);
+   notebookpage6 := dw.Notebook_page_new( notebook, 1, FALSE );
+   dw.Notebook_pack(notebook, notebookpage6, notebookbox6);
+   dw.Notebook_page_set_text(notebook, notebookpage6, "mdi");
+   mdi_add();
+*/
+
+   notebookbox7 = dw.Box_new(dw.VERT, 6);
+   notebookpage7 := dw.Notebook_page_new(notebook, 1, FALSE);
+   dw.Notebook_pack(notebook, notebookpage7, notebookbox7);
+   dw.Notebook_page_set_text(notebook, notebookpage7, "html");
+   
+   rawhtml := dw.Html_new(1001);
+   if rawhtml != nil {
+       dw.Box_pack_start(notebookbox7, rawhtml, 0, 100, TRUE, FALSE, 0);
+       dw.Html_raw(rawhtml, "<html><body><center><h1>dwtest</h1></center></body></html>");
+       html = dw.Html_new(1002);
+       dw.Box_pack_start(notebookbox7, html, 0, 100, TRUE, TRUE, 0);
+       dw.Html_url(html, "http://dwindows.netlabs.org");
+   } else {
+       html = dw.Text_new("HTML widget not available.", 0);
+       dw.Box_pack_start(notebookbox7, html, 0, 100, TRUE, TRUE, 0);
+   }
+
+   notebookbox8 = dw.Box_new(dw.VERT, 7);
+   notebookpage8 := dw.Notebook_page_new(notebook, 1, FALSE);
+   dw.Notebook_pack(notebook, notebookpage8, notebookbox8);
+   dw.Notebook_page_set_text(notebook, notebookpage8, "scrollbox");
+   scrollbox_add();
+
    /* Set the default field */
    dw.Window_default(mainwindow, copypastefield);
 

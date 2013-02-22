@@ -57,17 +57,20 @@ var MB_ERROR = C.DW_MB_ERROR
 var MB_INFORMATION = C.DW_MB_INFORMATION
 var MB_QUESTION = C.DW_MB_QUESTION
 
+/* Preset Pointers */
 var POINTER_DEFAULT = C.DW_POINTER_DEFAULT
 var POINTER_ARROW = C.DW_POINTER_ARROW
 var POINTER_CLOCK = C.DW_POINTER_CLOCK
 var POINTER_QUESTION = C.DW_POINTER_QUESTION
 
+/* Draw Text Flags */
 var DT_LEFT uint = C.DW_DT_LEFT
 var DT_CENTER uint = C.DW_DT_CENTER
 var DT_RIGHT uint = C.DW_DT_RIGHT
 var DT_VCENTER uint = C.DW_DT_VCENTER
 var DT_WORDBREAK uint = C.DW_DT_WORDBREAK
 
+/* Window Frame Creation Flags */
 var FCF_CLOSEBUTTON uint = C.DW_FCF_CLOSEBUTTON
 var FCF_TITLEBAR uint = C.DW_FCF_TITLEBAR
 var FCF_SYSMENU uint = C.DW_FCF_SYSMENU
@@ -89,17 +92,20 @@ var LIT_NONE = C.DW_LIT_NONE
 
 var MLE_CASESENSITIVE = C.DW_MLE_CASESENSITIVE
 
+/* Button Styles */
 var BS_NOBORDER uint = C.DW_BS_NOBORDER
 
+/* Key Code Modifiers */
 var KC_CTRL = C.KC_CTRL
 var KC_SHIFT = C.KC_SHIFT
 var KC_ALT = C.KC_ALT
 
+/* Menu Presets */
 var MENU_SEPARATOR = C.DW_MENU_SEPARATOR
 var MENU_AUTO uint = C.DW_MENU_AUTO
 var MENU_POPUP uint = ^uint(0)
 
-var PERCENT_INDETERMINATE = -1
+var PERCENT_INDETERMINATE uint = ^uint(0)
 
 /* Return value error codes */
 var ERROR_NONE = C.DW_ERROR_NONE
@@ -125,6 +131,7 @@ var DRAW_FILL = C.DW_DRAW_FILL
 var DRAW_FULL = C.DW_DRAW_FULL
 var DRAW_NOAA = C.DW_DRAW_NOAA
 
+/* Preset Drawing Colors */
 var CLR_BLACK = COLOR(C.DW_CLR_BLACK)
 var CLR_DARKRED = COLOR(C.DW_CLR_DARKRED)
 var CLR_DARKGREEN = COLOR(C.DW_CLR_DARKGREEN)
@@ -176,14 +183,34 @@ var GRAV_RIGHT = C.DW_GRAV_RIGHT
 var GRAV_BOTTOM = C.DW_GRAV_BOTTOM
 var GRAV_OBSTACLES = C.DW_GRAV_OBSTACLES
 
+/* Container Flags */
+var CFA_BITMAPORICON uint = C.DW_CFA_BITMAPORICON
+var CFA_STRING uint = C.DW_CFA_STRING 
+var CFA_ULONG uint = C.DW_CFA_ULONG
+var CFA_TIME uint = C.DW_CFA_TIME
+var CFA_DATE uint = C.DW_CFA_DATE
+var CFA_CENTER uint = C.DW_CFA_CENTER
+var CFA_LEFT uint = C.DW_CFA_LEFT
+var CFA_RIGHT uint = C.DW_CFA_RIGHT
+
+var CFA_STRINGANDICON uint = C.DW_CFA_STRINGANDICON
+var CFA_HORZSEPARATOR uint = C.DW_CFA_HORZSEPARATOR
+var CFA_SEPARATOR uint = C.DW_CFA_SEPARATOR
+
+var CRA_SELECTED uint = C.DW_CRA_SELECTED
+var CRA_CUROSRED uint = C.DW_CRA_CURSORED
+
+/* Mouse buttons */
 var BUTTON1_MASK = C.DW_BUTTON1_MASK
 var BUTTON2_MASK = C.DW_BUTTON2_MASK
 var BUTTON3_MASK = C.DW_BUTTON3_MASK
 
+/* File dialog */
 var FILE_OPEN = C.DW_FILE_OPEN
 var FILE_SAVE = C.DW_FILE_SAVE
 var DIRECTORY_OPEN = C.DW_DIRECTORY_OPEN
 
+/* Key codes */
 var VK_LBUTTON  = int(C.VK_LBUTTON)
 var VK_RBUTTON  = int(C.VK_RBUTTON)
 var VK_CANCEL   = int(C.VK_CANCEL)
@@ -694,6 +721,18 @@ func Listbox_append(handle HWND, text string) {
     C.go_listbox_append(unsafe.Pointer(handle), ctext);
 }
 
+func Listbox_list_append(handle HWND, text []string) {
+   count := len(text);
+   ctext := C.go_string_array_make(C.int(count))
+   defer C.go_string_array_free(ctext, C.int(count))
+   
+   for i, s := range text {
+      C.go_string_array_set(ctext, C.CString(s), C.int(i))
+   }   
+   
+   C.go_listbox_list_append(unsafe.Pointer(handle), ctext, C.int(count));
+}
+
 func Listbox_insert(handle HWND, text string, pos int) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -806,6 +845,10 @@ func Checkbox_set(handle HWND, value int) {
 
 func Percent_new(id C.ulong) HWND {
     return HWND(C.go_percent_new(id));
+}
+
+func Percent_set_pos(handle HWND, position uint) {
+   C.go_percent_set_pos(unsafe.Pointer(handle), C.uint(position));
 }
 
 func Slider_new(vertical int, increments int, id uint) HWND {
@@ -1260,12 +1303,12 @@ func Container_set_stripe(handle HWND, oddcolor COLOR, evencolor COLOR) {
    C.go_container_set_stripe(unsafe.Pointer(handle), C.ulong(oddcolor), C.ulong(evencolor));
 }
 
-func Container_get_column_type(handle HWND, column int) int {
-   return int(C.go_container_get_column_type(unsafe.Pointer(handle), C.int(column)));
+func Container_get_column_type(handle HWND, column int) uint {
+   return uint(C.go_container_get_column_type(unsafe.Pointer(handle), C.int(column)));
 }
 
-func Filesystem_get_column_type(handle HWND, column int) int {
-   return int(C.go_filesystem_get_column_type(unsafe.Pointer(handle), C.int(column)));
+func Filesystem_get_column_type(handle HWND, column int) uint {
+   return uint(C.go_filesystem_get_column_type(unsafe.Pointer(handle), C.int(column)));
 }
 
 func Filesystem_set_column_title(handle HWND, title string) {
@@ -1295,6 +1338,41 @@ func Filesystem_change_file(handle HWND, row int, filename string, icon HICN) {
    defer C.free(unsafe.Pointer(cfilename));
    
    C.go_filesystem_change_file(unsafe.Pointer(handle), C.int(row), cfilename, unsafe.Pointer(icon));
+}
+
+func Calendar_new(id uint) HWND {
+    return HWND(C.go_calendar_new(C.ulong(id)));
+}
+
+func Calendar_set_date(handle HWND, year uint, month uint, day uint) {
+   C.go_calendar_set_date(unsafe.Pointer(handle), C.uint(year), C.uint(month), C.uint(day));
+}
+
+func Calendar_get_date(handle HWND) (uint, uint, uint) {
+   var year, month, day C.uint;
+   
+   C.go_calendar_get_date(unsafe.Pointer(handle), &year, &month, &day);
+   return uint(year), uint(month), uint(day);
+}
+
+func Bitmap_new(id uint) HWND {
+    return HWND(C.go_bitmap_new(C.ulong(id)));
+}
+
+func Bitmapbutton_new(text string, id uint) HWND {
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   
+   return HWND(C.go_bitmapbutton_new(ctext, C.ulong(id)));
+}
+
+func Bitmapbutton_new_from_file(text string, id uint, filename string) HWND {
+   ctext := C.CString(text);
+   defer C.free(unsafe.Pointer(ctext));
+   cfilename := C.CString(filename);
+   defer C.free(unsafe.Pointer(cfilename));
+   
+   return HWND(C.go_bitmapbutton_new_from_file(ctext, C.ulong(id), cfilename));
 }
 
 func init() {

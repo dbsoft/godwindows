@@ -44,6 +44,23 @@ var max_linewidth = 0
 // Page 3
 var notebookbox3, tree dw.HWND
 
+// Page 4
+var notebookbox4, container_mle, container dw.HWND
+var mle_point = 0
+
+// Page 5
+var notebookbox5, combobox1, combobox2, cal, spinbutton, slider, percent, buttonsbox, buttonboxperm dw.HWND
+
+// Page 7
+var notebookbox7, html dw.HWND
+
+// Page 8
+var notebookbox8, scrollbox dw.HWND
+var MAX_WIDGETS = 20
+
+var iteration = 0;
+
+
 // Miscellaneous
 var fileicon, foldericon dw.HICN
 var current_file string
@@ -596,28 +613,119 @@ func item_select_cb(window dw.HWND, item dw.HTREEITEM, text string, data unsafe.
     return FALSE;
 }
 
-func column_click_cb(window HWND, column_num int, data unsafe.Pointer) int {
+func container_select_cb(window dw.HWND, item dw.HTREEITEM, text string, data unsafe.Pointer, itemdata unsafe.Pointer)  int {
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x", uintptr(unsafe.Pointer(window)),
+            uintptr(unsafe.Pointer(item)), text, uintptr(itemdata));
+    dw.Window_set_text(dw.HWND(data), message);
+    mle_point = dw.Mle_import(container_mle, message, mle_point);
+    str := dw.Container_query_start(container, dw.CRA_SELECTED);
+    for len(str) > 0 {
+        mle_point = dw.Mle_import( container_mle, fmt.Sprintf("Selected: %s\r\n", str), mle_point);
+        str = dw.Container_query_next(container, dw.CRA_SELECTED);
+    }
+    /* Make the last inserted point the cursor location */
+    dw.Mle_set_cursor(container_mle, mle_point);
+    /* set the details of item 0 to new data */
+    dw.Filesystem_change_file(container, 0, "new data", fileicon);
+    //size = 999;
+    //dw_filesystem_change_item(container, 1, 0, &size);
+    return FALSE;
+}
+
+func combobox_select_event_callback(window dw.HWND, index int, data unsafe.Pointer) int {
+    fmt.Printf("got combobox_select_event for index: %d, iteration: %d\n", index, iteration);
+    iteration++;
+    return FALSE;
+}
+
+func column_click_cb(window dw.HWND, column_num int, data unsafe.Pointer) int {
     var stype = "Unknown";
 
     if column_num == 0 {
         stype = "Filename";
     } else {
         column_type := dw.Filesystem_get_column_type(window, column_num-1);
-        if column_type == DW_CFA_STRING {
+        if column_type == dw.CFA_STRING {
             stype = "String";
-        } else if column_type == DW_CFA_ULONG) {
+        } else if column_type == dw.CFA_ULONG {
             stype = "ULong";
-        } else if column_type == DW_CFA_DATE) {
+        } else if column_type == dw.CFA_DATE {
             stype = "Date";
-        } else if  column_type == DW_CFA_TIME {
+        } else if  column_type == dw.CFA_TIME {
             stype = "Time";
-        } else if column_type == DW_CFA_BITMAPORICON {
+        } else if column_type == dw.CFA_BITMAPORICON {
             stype = "BitmapOrIcon";
         }
     }
-    message := fmt.Sprintf("DW_SIGNAL_COLUMN_CLICK: Window: %x Column: %d Type: %s Itemdata: %x", uintptr(unsafe,Pointer(window)),
-            column_num, stype, uintptr(itemdata));
+    message := fmt.Sprintf("DW_SIGNAL_COLUMN_CLICK: Window: %x Column: %d Type: %s Itemdata: %x", uintptr(unsafe.Pointer(window)),
+            column_num, stype);
     dw.Window_set_text(dw.HWND(data), message);
+    return FALSE;
+}
+
+// Page 5 Callbacks
+func button_callback(window dw.HWND, data unsafe.Pointer) int {
+    idx := dw.Listbox_selected(combobox1);
+    buf1 := dw.Listbox_get_text(combobox1, idx);
+    idx = dw.Listbox_selected( combobox2 );
+    buf2 := dw.Listbox_get_text(combobox2, idx);
+    y, m, d := dw.Calendar_get_date(cal);
+    spvalue := dw.Spinbutton_get_pos(spinbutton);
+    message := fmt.Sprintf("spinbutton: %d\ncombobox1: \"%s\"\ncombobox2: \"%s\"\ncalendar: %d-%d-%d",
+                  spvalue,
+                  buf1, buf2,
+                  y, m, d );
+    dw.Messagebox( "Values", dw.MB_OK | dw.MB_INFORMATION, message);
+    return FALSE;
+}
+
+var isfoldericon bool = true
+
+func bitmap_toggle_callback(window dw.HWND, data unsafe.Pointer) int {
+    if isfoldericon == true {
+       isfoldericon = false;
+       dw.Window_set_bitmap(window, 0, FILE_ICON_NAME);
+       dw.Window_set_tooltip(window, "File Icon" );
+    } else {
+       isfoldericon = true;
+       //dw.Window_set_bitmap_from_data(window, 0, folder_ico, sizeof(folder_ico));
+       dw.Window_set_tooltip(window, "Folder Icon");
+    }
+    return FALSE;
+}
+
+func percent_button_box_callback(window dw.HWND, data unsafe.Pointer) int {
+    dw.Percent_set_pos(percent, dw.PERCENT_INDETERMINATE);
+    return FALSE;
+}
+
+func change_color_red_callback(window dw.HWND, data unsafe.Pointer) int {
+    dw.Window_set_color(buttonsbox, dw.CLR_RED, dw.CLR_RED);
+    return FALSE;
+}
+
+func change_color_yellow_callback(window dw.HWND, data unsafe.Pointer) int {
+    dw.Window_set_color(buttonsbox, dw.CLR_YELLOW, dw.CLR_YELLOW);
+    return FALSE;
+}
+
+/* Callback to handle user selection of the spinbutton position */
+func spinbutton_valuechanged_callback(hwnd dw.HWND, value int, data unsafe.Pointer) int {
+    dw.Messagebox("DWTest", dw.MB_OK, fmt.Sprintf("New value from spinbutton: %d\n", value));
+    return FALSE;
+}
+
+/* Callback to handle user selection of the slider position */
+func slider_valuechanged_callback(hwnd dw.HWND, value int, data unsafe.Pointer) int {
+    dw.Percent_set_pos(percent, uint(value * 10));
+    return FALSE;
+}
+
+// Page 8 Callbacks
+func scrollbox_button_callback(window dw.HWND, data unsafe.Pointer) int {
+    pos := dw.Scrollbox_get_pos(scrollbox, dw.VERT);
+    rng := dw.Scrollbox_get_range(scrollbox, dw.VERT);
+    fmt.Printf("Pos %d Range %d\n", pos, rng);
     return FALSE;
 }
 
@@ -648,6 +756,16 @@ var item_context_cb_func = item_context_cb;
 var list_select_cb_func = list_select_cb; 
 var item_select_cb_func = item_select_cb;
 var column_click_cb_func = column_click_cb;
+var container_select_cb_func = container_select_cb;
+var combobox_select_event_callback_func = combobox_select_event_callback;
+var scrollbox_button_callback_func = scrollbox_button_callback;
+var button_callback_func = button_callback;
+var bitmap_toggle_callback_func = bitmap_toggle_callback;
+var percent_button_box_callback_func = percent_button_box_callback;
+var change_color_red_callback_func = change_color_red_callback;
+var change_color_yellow_callback_func = change_color_yellow_callback;
+var spinbutton_valuechanged_callback_func = spinbutton_valuechanged_callback;
+var slider_valuechanged_callback_func = slider_valuechanged_callback;
 
 var checkable_string = "checkable";
 var noncheckable_string = "non-checkable";
@@ -933,16 +1051,16 @@ func tree_add() {
 
 // Page 4
 func container_add() {
-    var z int
-    var titles []string { "Type", "Size", "Time" "Date" };
-    var flags []uint {   dw.CFA_BITMAPORICON | dw.CFA_LEFT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
+    //var z int
+    titles := []string{ "Type", "Size", "Time", "Date" };
+    flags := []uint{   dw.CFA_BITMAPORICON | dw.CFA_LEFT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
                          dw.CFA_ULONG | dw.CFA_RIGHT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
                          dw.CFA_TIME | dw.CFA_CENTER | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
                          dw.CFA_DATE | dw.CFA_LEFT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR };
 
 
     /* create a box to pack into the notebook page */
-    containerbox = dw.Box_new(dw.HORZ, 2);
+    containerbox := dw.Box_new(dw.HORZ, 2);
     dw.Box_pack_start(notebookbox4, containerbox, 500, 200, TRUE, TRUE, 0);
 
     /* now a container area under this box */
@@ -950,15 +1068,15 @@ func container_add() {
     dw.Box_pack_start(notebookbox4, container, 500, 200, TRUE, FALSE, 1);
 
     /* and a status area to see whats going on */
-    container_status = dw.Status_text_new("", 0);
+    container_status := dw.Status_text_new("", 0);
     dw.Box_pack_start(notebookbox4, container_status, 100, -1, TRUE, FALSE, 1);
 
     dw.Filesystem_set_column_title(container, "Test");
     dw.Filesystem_setup(container, flags, titles);
-    dw.Container_set_stripe(container, DW_CLR_DEFAULT, DW_CLR_DEFAULT);
-    containerinfo = dw.Container_alloc(container, 3);
+    dw.Container_set_stripe(container, dw.CLR_DEFAULT, dw.CLR_DEFAULT);
+    /*containerinfo := dw.Container_alloc(container, 3);
 
-    /*for z=0; z<3; z++ {
+    for z=0; z<3; z++ {
         sprintf(names[z],"Don't allocate from stack: Item: %d",z);
         size = z*100;
         sprintf(buffer, "Filename %d",z+1);
@@ -1006,161 +1124,138 @@ func container_add() {
     mle_point = dw.Mle_import(container_mle, fmt.Sprintf("[%d]abczxydefijkl", mle_point), mle_point);
     dw.Mle_delete(container_mle, 9, 3);
     mle_point = dw.Mle_import(container_mle, "gh", 12);
-    newpoint, _ := dw.Mle_get_size(container_mle, &newpoint, NULL);
+    newpoint, _ := dw.Mle_get_size(container_mle);
     mle_point = newpoint;
-    mle_point = dw_mle_import(container_mle, fmt.Sprintf("[%d]\r\n\r\n", mle_point), mle_point);
+    mle_point = dw.Mle_import(container_mle, fmt.Sprintf("[%d]\r\n\r\n", mle_point), mle_point);
     dw.Mle_set_cursor(container_mle, mle_point);
     /* connect our event trappers... */
-    dw.Signal_connect(container, dw.SIGNAL_ITEM_ENTER, unsafe.Pointer(item_enter_cb_func), unsafe.Pointer(container_status));
-    dw.Signal_connect(container, dw.SIGNAL_ITEM_CONTEXT, unsafe.Pointer(item_context_cb_func), unsafe.Pointer(container_status));
-    dw.Signal_connect(container, dw.SIGNAL_ITEM_SELECT, unsafe.Pointer(container_select_cb_func), unsafe.Pointer(container_status));
-    dw.Signal_connect(container, dw.SIGNAL_COLUMN_CLICK, unsafe.Pointer(column_click_cb_func), unsafe.Pointer(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_ENTER, unsafe.Pointer(&item_enter_cb_func), unsafe.Pointer(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_CONTEXT, unsafe.Pointer(&item_context_cb_func), unsafe.Pointer(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_SELECT, unsafe.Pointer(&container_select_cb_func), unsafe.Pointer(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_COLUMN_CLICK, unsafe.Pointer(&column_click_cb_func), unsafe.Pointer(container_status));
 }
 
 // Page 5
-void buttons_add(void)
-{
+func buttons_add() {
+    var i int;
+    
     /* create a box to pack into the notebook page */
-    buttonsbox := dw.Box_new(dw.VERT, 2);
+    buttonsbox = dw.Box_new(dw.VERT, 2);
     dw.Box_pack_start(notebookbox5, buttonsbox, 25, 200, TRUE, TRUE, 0);
     dw.Window_set_color(buttonsbox, dw.CLR_RED, dw.CLR_RED);
 
-    calbox = dw_box_new(DW_HORZ, 0);
-    dw_box_pack_start(notebookbox5, calbox, 500, 200, TRUE, TRUE, 1);
-    cal = dw_calendar_new(100);
-    dw_box_pack_start(calbox, cal, 180, 120, TRUE, TRUE, 0);
+    calbox := dw.Box_new(dw.HORZ, 0);
+    dw.Box_pack_start(notebookbox5, calbox, 500, 200, TRUE, TRUE, 1);
+    cal = dw.Calendar_new(100);
+    dw.Box_pack_start(calbox, cal, 180, 120, TRUE, TRUE, 0);
     /*
      dw_calendar_set_date(cal, 2001, 1, 1);
      */
     /*
      * Create our file toolbar boxes...
      */
-    buttonboxperm = dw_box_new( DW_VERT, 0 );
-    dw_box_pack_start( buttonsbox, buttonboxperm, 25, 0, FALSE, TRUE, 2 );
-    dw_window_set_color(buttonboxperm, DW_CLR_WHITE, DW_CLR_WHITE);
-    abutton1 = dw_bitmapbutton_new_from_file( "Top Button", 0, FILE_ICON_NAME );
-    dw_box_pack_start( buttonboxperm, abutton1, 100, 30, FALSE, FALSE, 0 );
-    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(button_callback), NULL );
-    dw_box_pack_start( buttonboxperm, 0, 25, 5, FALSE, FALSE, 0 );
-    abutton2 = dw_bitmapbutton_new_from_file( "Bottom", 0, FOLDER_ICON_NAME );
-    dw_box_pack_start( buttonsbox, abutton2, 25, 25, FALSE, FALSE, 0 );
-    dw_signal_connect( abutton2, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(button_callback), NULL );
-    dw_window_set_bitmap(abutton2, 0, FILE_ICON_NAME);
+    buttonboxperm = dw.Box_new(dw.VERT, 0);
+    dw.Box_pack_start(buttonsbox, buttonboxperm, 25, 0, FALSE, TRUE, 2);
+    dw.Window_set_color(buttonboxperm, dw.CLR_WHITE, dw.CLR_WHITE);
+    abutton1 := dw.Bitmapbutton_new_from_file("Top Button", 0, FILE_ICON_NAME);
+    dw.Box_pack_start(buttonboxperm, abutton1, 100, 30, FALSE, FALSE, 0);
+    dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, unsafe.Pointer(&button_callback_func), nil);
+    dw.Box_pack_start(buttonboxperm, nil, 25, 5, FALSE, FALSE, 0);
+    abutton2 := dw.Bitmapbutton_new_from_file("Bottom", 0, FOLDER_ICON_NAME);
+    dw.Box_pack_start(buttonsbox, abutton2, 25, 25, FALSE, FALSE, 0);
+    dw.Signal_connect(abutton2, dw.SIGNAL_CLICKED, unsafe.Pointer(&button_callback_func), nil);
+    dw.Window_set_bitmap(abutton2, 0, FILE_ICON_NAME);
 
-    create_button(0);
+    create_button(false);
     /* make a combobox */
-    combox = dw_box_new(DW_VERT, 2);
-    dw_box_pack_start( notebookbox5, combox, 25, 200, TRUE, FALSE, 0);
-    combobox1 = dw_combobox_new( "fred", 0 ); /* no point in specifying an initial value */
-    dw_listbox_append( combobox1, "fred" );
-    dw_box_pack_start( combox, combobox1, -1, -1, TRUE, FALSE, 0);
+    combox := dw.Box_new(dw.VERT, 2);
+    dw.Box_pack_start(notebookbox5, combox, 25, 200, TRUE, FALSE, 0);
+    combobox1 = dw.Combobox_new("fred", 0 ); /* no point in specifying an initial value */
+    dw.Listbox_append(combobox1, "fred" );
+    dw.Box_pack_start(combox, combobox1, -1, -1, TRUE, FALSE, 0);
     /*
      dw_window_set_text( combobox, "initial value");
      */
-    dw_signal_connect( combobox1, DW_SIGNAL_LIST_SELECT, DW_SIGNAL_FUNC(combobox_select_event_callback), NULL );
-#if 0
-    /* add LOTS of items */
-    dw_debug("before appending 100 items to combobox using dw_listbox_append()\n");
-    for( i = 0; i < 100; i++ )
-    {
-        sprintf( buf, "item %d", i);
-        dw_listbox_append( combobox1, buf );
-    }
-    dw_debug("after appending 100 items to combobox\n");
-#endif
+    dw.Signal_connect(combobox1, dw.SIGNAL_LIST_SELECT, unsafe.Pointer(&combobox_select_event_callback_func), nil);
 
-    combobox2 = dw_combobox_new( "joe", 0 ); /* no point in specifying an initial value */
-    dw_box_pack_start( combox, combobox2, -1, -1, TRUE, FALSE, 0);
+    combobox2 = dw.Combobox_new("joe", 0); /* no point in specifying an initial value */
+    dw.Box_pack_start(combox, combobox2, -1, -1, TRUE, FALSE, 0);
     /*
      dw_window_set_text( combobox, "initial value");
      */
-    dw_signal_connect( combobox2, DW_SIGNAL_LIST_SELECT, DW_SIGNAL_FUNC(combobox_select_event_callback), NULL );
+    dw.Signal_connect(combobox2, dw.SIGNAL_LIST_SELECT, unsafe.Pointer(&combobox_select_event_callback_func), nil);
     /* add LOTS of items */
-    dw_debug("before appending 500 items to combobox using dw_listbox_list_append()\n");
-    text = (char **)malloc(500*sizeof(char *));
-    for( i = 0; i < 500; i++ )
-    {
-        text[i] = (char *)malloc( 50 );
-        sprintf( text[i], "item %d", i);
+    fmt.Printf("before appending 500 items to combobox using dw_listbox_list_append()\n");
+    text := make([]string, 500);
+    for  i = 0; i < 500; i++ {
+        text[i] = fmt.Sprintf("item %d", i);
     }
-    dw_listbox_list_append( combobox2, text, 500 );
-    dw_debug("after appending 500 items to combobox\n");
-    for( i = 0; i < 500; i++ )
-    {
-        free(text[i]);
-    }
-    free(text);
+    dw.Listbox_list_append(combobox2, text);
+    fmt.Printf("after appending 500 items to combobox\n");
     /* now insert a couple of items */
-    dw_listbox_insert( combobox2, "inserted item 2", 2 );
-    dw_listbox_insert( combobox2, "inserted item 5", 5 );
+    dw.Listbox_insert(combobox2, "inserted item 2", 2 );
+    dw.Listbox_insert(combobox2, "inserted item 5", 5 );
     /* make a spinbutton */
-    spinbutton = dw_spinbutton_new( "", 0 ); /* no point in specifying text */
-    dw_box_pack_start( combox, spinbutton, -1, -1, TRUE, FALSE, 0);
-    dw_spinbutton_set_limits( spinbutton, 100, 1 );
-    dw_spinbutton_set_pos( spinbutton, 30 );
-    dw_signal_connect( spinbutton, DW_SIGNAL_VALUE_CHANGED, DW_SIGNAL_FUNC(spinbutton_valuechanged_callback), NULL );
+    spinbutton = dw.Spinbutton_new("", 0); /* no point in specifying text */
+    dw.Box_pack_start(combox, spinbutton, -1, -1, TRUE, FALSE, 0);
+    dw.Spinbutton_set_limits(spinbutton, 100, 1);
+    dw.Spinbutton_set_pos(spinbutton, 30);
+    dw.Signal_connect(spinbutton, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&spinbutton_valuechanged_callback_func), nil);
     /* make a slider */
-    slider = dw_slider_new( FALSE, 11, 0 ); /* no point in specifying text */
-    dw_box_pack_start( combox, slider, -1, -1, TRUE, FALSE, 0);
-    dw_signal_connect( slider, DW_SIGNAL_VALUE_CHANGED, DW_SIGNAL_FUNC(slider_valuechanged_callback), NULL );
+    slider = dw.Slider_new(FALSE, 11, 0); /* no point in specifying text */
+    dw.Box_pack_start(combox, slider, -1, -1, TRUE, FALSE, 0);
+    dw.Signal_connect(slider, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&slider_valuechanged_callback_func), nil);
     /* make a percent */
-    percent = dw_percent_new( 0 );
-    dw_box_pack_start( combox, percent, -1, -1, TRUE, FALSE, 0);
+    percent = dw.Percent_new(0);
+    dw.Box_pack_start(combox, percent, -1, -1, TRUE, FALSE, 0);
 }
 
-void create_button( int redraw)
-{
-    HWND abutton1;
-    filetoolbarbox = dw_box_new( DW_VERT, 0 );
-    dw_box_pack_start( buttonboxperm, filetoolbarbox, 0, 0, TRUE, TRUE, 0 );
+func create_button(redraw bool) {
+    filetoolbarbox := dw.Box_new(dw.VERT, 0);
+    dw.Box_pack_start(buttonboxperm, filetoolbarbox, 0, 0, TRUE, TRUE, 0);
 
-    abutton1 = dw_bitmapbutton_new_from_file( "Empty image. Should be under Top button", 0, "junk" );
-    dw_box_pack_start( filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
-    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(change_color_red_callback), NULL );
-    dw_box_pack_start( filetoolbarbox, 0, 25, 5, FALSE, FALSE, 0 );
+    abutton1 := dw.Bitmapbutton_new_from_file("Empty image. Should be under Top button", 0, "junk");
+    dw.Box_pack_start(filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
+    dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, unsafe.Pointer(&change_color_red_callback_func), nil);
+    dw.Box_pack_start(filetoolbarbox, nil, 25, 5, FALSE, FALSE, 0);
 
-    abutton1 = dw_bitmapbutton_new_from_data( "A borderless bitmapbitton", 0, folder_ico, 1718 );
-    dw_box_pack_start( filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
-    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(change_color_yellow_callback), NULL );
-    dw_box_pack_start( filetoolbarbox, 0, 25, 5, FALSE, FALSE, 0 );
-    dw_window_set_style( abutton1, DW_BS_NOBORDER, DW_BS_NOBORDER );
+    //abutton1 = dw_bitmapbutton_new_from_data("A borderless bitmapbitton", 0, folder_ico, 1718 );
+    abutton1 = dw.Bitmapbutton_new_from_file("A borderless bitmapbitton", 0, "junk");
+    dw.Box_pack_start(filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
+    dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, unsafe.Pointer(&change_color_yellow_callback_func), nil);
+    dw.Box_pack_start(filetoolbarbox, nil, 25, 5, FALSE, FALSE, 0);
+    dw.Window_set_style(abutton1, dw.BS_NOBORDER, dw.BS_NOBORDER);
 
-    abutton1 = dw_bitmapbutton_new_from_data( "A button from data", 0, folder_ico, 1718 );
-    dw_box_pack_start( filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
-    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(percent_button_box_callback), NULL );
-    dw_box_pack_start( filetoolbarbox, 0, 25, 5, FALSE, FALSE, 0 );
-    if ( redraw )
-    {
-        dw_window_redraw( filetoolbarbox );
-        dw_window_redraw( mainwindow );
+    //abutton1 = dw.Bitmapbutton_new_from_data("A button from data", 0, folder_ico, 1718 );
+    abutton1 = dw.Bitmapbutton_new_from_file("A button from data", 0, "junk");
+    dw.Box_pack_start(filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
+    dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, unsafe.Pointer(&percent_button_box_callback_func), nil);
+    dw.Box_pack_start(filetoolbarbox, nil, 25, 5, FALSE, FALSE, 0);
+    if redraw == true {
+        dw.Window_redraw(filetoolbarbox);
+        dw.Window_redraw(mainwindow);
     }
 }
 
 // Page 8
-void scrollbox_add(void)
-{
-    HWND tmpbox,abutton1;
-    char buf[100];
-    int i;
+func scrollbox_add() {
+   var i int;
 
     /* create a box to pack into the notebook page */
-    scrollbox = dw_scrollbox_new(DW_VERT, 0);
-    dw_box_pack_start(notebookbox8, scrollbox, 0, 0, TRUE, TRUE, 1);
+    scrollbox = dw.Scrollbox_new(dw.VERT, 0);
+    dw.Box_pack_start(notebookbox8, scrollbox, 0, 0, TRUE, TRUE, 1);
 
-    abutton1 = dw_button_new( "Show Adjustments", 0 );
-    dw_box_pack_start( scrollbox, abutton1, -1, 30, FALSE, FALSE, 0 );
-    dw_signal_connect( abutton1, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(scrollbox_button_callback), NULL );
+    abutton1 := dw.Button_new("Show Adjustments", 0);
+    dw.Box_pack_start(scrollbox, abutton1, -1, 30, FALSE, FALSE, 0 );
+    dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, unsafe.Pointer(&scrollbox_button_callback_func), nil);
 
-    for ( i = 0; i < MAX_WIDGETS; i++ )
-    {
-        tmpbox = dw_box_new( DW_HORZ, 0 );
-        dw_box_pack_start( scrollbox, tmpbox, 0, 24, TRUE, FALSE, 2);
-        sprintf( buf, "Label %d", i );
-        labelarray[i] = dw_text_new( buf , 0 );
-        dw_box_pack_start( tmpbox, labelarray[i], 0, 20, TRUE, FALSE, 0);
-        sprintf( buf, "Entry %d", i );
-        entryarray[i] = dw_entryfield_new( buf , i );
-        dw_box_pack_start( tmpbox, entryarray[i], 0, 20, TRUE, FALSE, 0);
+    for i = 0; i < MAX_WIDGETS; i++ {
+        tmpbox := dw.Box_new(dw.HORZ, 0);
+        dw.Box_pack_start(scrollbox, tmpbox, 0, 24, TRUE, FALSE, 2);
+        label := dw.Text_new(fmt.Sprintf("Label %d", i), 0 );
+        dw.Box_pack_start(tmpbox, label, 0, 20, TRUE, FALSE, 0);
+        item := dw.Entryfield_new(fmt.Sprintf("Entry %d", i), uint(i));
+        dw.Box_pack_start(tmpbox, item, 0, 20, TRUE, FALSE, 0);
     }
 }
 

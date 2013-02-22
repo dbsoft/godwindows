@@ -347,6 +347,11 @@ static void go_listbox_append(void *handle, char *text)
     dw_listbox_append((HWND)handle, text);
 }
 
+static void go_listbox_list_append(void *handle, char **text, int count)
+{
+    dw_listbox_list_append((HWND)handle, text, count);
+}
+
 static void go_listbox_insert(void *handle, char *text, int pos)
 {
     dw_listbox_insert((HWND)handle, text, pos);
@@ -439,6 +444,11 @@ static void go_checkbox_set(void *handle, int value)
 static void *go_percent_new(unsigned long id)
 {
    return (void *)dw_percent_new(id);
+}
+
+static void go_percent_set_pos(void *handle, unsigned int position)
+{
+   dw_percent_set_pos((HWND)handle, position);
 }
 
 static void *go_slider_new(int vertical, int increments, unsigned long id)
@@ -878,6 +888,36 @@ static int go_container_get_column_type(void *handle, int column)
 static int go_filesystem_get_column_type(void *handle, int column)
 {
     return dw_filesystem_get_column_type((HWND)handle, column);
+}
+
+static void *go_calendar_new(unsigned long id)
+{
+   return (void *)dw_calendar_new(id);
+}
+
+static void go_calendar_set_date(void *handle, unsigned int year, unsigned int month, unsigned int day)
+{
+    dw_calendar_set_date((HWND)handle, year, month, day);
+}
+
+static void go_calendar_get_date(void *handle, unsigned int *year, unsigned int *month, unsigned int *day)
+{
+    dw_calendar_get_date((HWND)handle, year, month, day);
+}
+
+static void *go_bitmap_new(unsigned long id)
+{
+   return (void *)dw_bitmap_new(id);
+}
+
+static void *go_bitmapbutton_new(char *text, unsigned long id)
+{
+   return (void *)dw_bitmapbutton_new(text, id);
+}
+
+static void *go_bitmapbutton_new_from_file(char *text, unsigned long id, char *filename)
+{
+   return (void *)dw_bitmapbutton_new_from_file(text, id, filename);
 }
 
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);

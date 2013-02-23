@@ -55,7 +55,7 @@ func Image_root_set(path string) int {
 
 func Locale_set(loc string) int {
    cloc := C.CString(loc);
-   defer C.free(unsafe.Pointer(loc));
+   defer C.free(unsafe.Pointer(cloc));
    
    return int(C.goib_locale_set(cloc));
 }

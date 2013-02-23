@@ -4,7 +4,6 @@ import (
    "unsafe"
    "dw"
    "dwib"
-   "fmt"
 )
 
 // Global variables
@@ -17,8 +16,7 @@ var APP_NAME = "DWIB Example"
 
 /* Handle exiting the application */
 func exit_handler(win dw.HWND, data unsafe.Pointer) int {
-    if(dw.Messagebox(APP_NAME, dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit"))
-    {
+    if dw.Messagebox(APP_NAME, dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit") == dw.MB_RETURN_YES {
         /* Exit the application cleanly */
         dw.Main_quit();
     }

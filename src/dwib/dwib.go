@@ -1,8 +1,8 @@
 package dwib
 
 /*
-#cgo linux pkg-config: dwindows dwib
-#cgo freebsd pkg-config: dwindows dwib
+#cgo linux pkg-config: dwib dwindows libxml-2.0
+#cgo freebsd pkg-config: dwib dwindows libxml-2.0
 #cgo darwin CFLAGS: -I/usr/local/include -g -O2 -D__MAC__
 #cgo darwin LDFLAGS: -L/usr/local/lib -ldwindows -ldwib -lresolv -framework Cocoa -framework WebKit -lpthread
 #cgo windows CFLAGS: -IC:/Work/BitBucket/dwindows -IC:/Work/BitBucket/dwib -g -O2 -D__WIN32__ -mthreads

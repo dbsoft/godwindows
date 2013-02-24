@@ -1108,7 +1108,7 @@ func container_add() {
     dw.Box_pack_start( containerbox, container_mle, 500, 200, TRUE, TRUE, 0);
 
     mle_point = dw.Mle_import(container_mle, "", -1);
-    mle_point = dw.Mle_import(container_mle, fmt.Sprintf("%d", mle_point), mle_point);
+    mle_point = dw.Mle_import(container_mle, fmt.Sprintf("[%d]", mle_point), mle_point);
     mle_point = dw.Mle_import(container_mle, fmt.Sprintf("[%d]abczxydefijkl", mle_point), mle_point);
     dw.Mle_delete(container_mle, 9, 3);
     mle_point = dw.Mle_import(container_mle, "gh", 12);

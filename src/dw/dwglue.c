@@ -1079,6 +1079,16 @@ static float go_splitbar_get(void *handle)
     return dw_splitbar_get((HWND)handle);
 }
 
+static int go_print_run(void *print, unsigned long flags)
+{
+    return dw_print_run((HPRINT)print, flags);
+}
+
+static void go_print_cancel(void *print)
+{
+    return dw_print_cancel((HPRINT)print);
+}
+
 extern int go_int_callback_basic(void *pfunc, void* window, void *data);
 extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data);
 extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8);
@@ -1091,6 +1101,7 @@ extern int go_int_callback_numeric(void *pfunc, void* window, int val, void *dat
 extern int go_int_callback_ulong(void *pfunc, void* window, unsigned long val, void *data);
 extern int go_int_callback_tree(void *pfunc, void* window, void *item, void *data);
 extern int go_int_callback_timer(void *pfunc, void *data);
+extern int go_int_callback_print(void *pfunc, void *print, void *pixmap, int page_num, void *data);
 
 static int DWSIGNAL go_callback_basic(HWND window, void *data)
 {
@@ -1210,6 +1221,29 @@ static int DWSIGNAL go_callback_timer(void *data)
       return go_int_callback_timer(param[0], param[1]);
    }
    return 0;
+}
+
+static int DWSIGNAL go_callback_print(HPRINT print, HPIXMAP pixmap, int page_num, void *data)
+{
+    if(data)
+    {
+       void **param = (void **)data;
+       return go_int_callback_print(param[0], (void *)print, (void *)pixmap, page_num, param[1]);
+    }
+    return 0;
+}
+
+static void *go_print_new(char *jobname, unsigned long flags, unsigned int pages, void *drawfunc, void *drawdata)
+{
+    void **param = malloc(sizeof(void *) * 2);
+   
+    if(param && drawfunc)
+    {
+       param[0] = drawfunc;
+       param[1] = drawdata;
+       return (void*)dw_print_new(jobname, flags, pages, DW_SIGNAL_FUNC(go_callback_print), param);
+    }
+    return NULL;
 }
 
 static int go_timer_connect(int interval, void *sigfunc, void *data)

@@ -20,6 +20,7 @@ type HICN unsafe.Pointer
 type HTIMER C.int
 type HMENUI unsafe.Pointer
 type HPIXMAP unsafe.Pointer
+type HPRINT unsafe.Pointer
 type HNOTEPAGE C.ulong
 type COLOR C.ulong
 
@@ -953,7 +954,7 @@ func Pixmap_set_transparent_color(pixmap HPIXMAP, color COLOR) {
     C.go_pixmap_set_transparent_color(unsafe.Pointer(pixmap), C.ulong(color));
 }
 
-func Pixmap_set_font(handle HWND, fontname string) int {
+func Pixmap_set_font(handle HPIXMAP, fontname string) int {
     cfontname := C.CString(fontname);
     defer C.free(unsafe.Pointer(cfontname));
     
@@ -1451,6 +1452,21 @@ func Splitbar_get(handle HWND) float32 {
    return float32(C.go_splitbar_get(unsafe.Pointer(handle)));
 }
 
+func Print_new(jobname string, flags uint, pages uint, drawfunc unsafe.Pointer, drawdata unsafe.Pointer) HPRINT {
+   cjobname := C.CString(jobname);
+   defer C.free(unsafe.Pointer(cjobname));
+
+   return HPRINT(C.go_print_new(cjobname, C.ulong(flags), C.uint(pages), drawfunc, drawdata));
+}
+
+func Print_run(print HPRINT, flags uint) int {
+   return int(C.go_print_run(unsafe.Pointer(print), C.ulong(flags)));
+}
+
+func Print_cancel(print HPRINT) {
+   C.go_print_cancel(unsafe.Pointer(print));
+}
+
 func init() {
    runtime.LockOSThread();
 }
@@ -1525,5 +1541,11 @@ func go_int_callback_tree(pfunc unsafe.Pointer, window unsafe.Pointer, tree unsa
 func go_int_callback_timer(pfunc unsafe.Pointer, data unsafe.Pointer) C.int {
    thisfunc := *(*func(unsafe.Pointer) int)(pfunc);
    return C.int(thisfunc(data));
+}
+
+//export go_int_callback_print
+func go_int_callback_print(pfunc unsafe.Pointer, print unsafe.Pointer, pixmap unsafe.Pointer, page_num C.int, data unsafe.Pointer) C.int {
+   thisfunc := *(*func(HPRINT, HPIXMAP, int, unsafe.Pointer) int)(pfunc);
+   return C.int(thisfunc(HPRINT(print), HPIXMAP(pixmap), int(page_num), data));
 }
 

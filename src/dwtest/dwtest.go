@@ -377,6 +377,44 @@ func update_render() {
     }
 }
 
+func draw_page(print dw.HPRINT, pixmap dw.HPIXMAP, page_num int, data unsafe.Pointer) int {
+   dw.Pixmap_set_font(pixmap, FIXEDFONT);
+   if page_num == 0 {
+       draw_shapes(FALSE, pixmap);
+   } else if page_num == 1 {
+       /* If we have a file to display... */
+       if len(current_file) > 0 {
+           /* Calculate new dimensions */
+           _, fheight := dw.Font_text_extents_get(nil, pixmap, "(g");
+           nrows := int(dw.Pixmap_height(pixmap) / fheight);
+
+           /* Do the actual drawing */
+           draw_file(0, 0, nrows, fheight, pixmap);
+       } else {
+           /* We don't have a file so center an error message on the page */
+           var text = "No file currently selected!";
+
+           /* Get the font size for this printer context... */
+           fwidth, fheight := dw.Font_text_extents_get(nil, pixmap, text);
+
+           posx := int(dw.Pixmap_width(pixmap) - fwidth)/2;
+           posy := int(dw.Pixmap_height(pixmap) - fheight)/2;
+
+           dw.Color_foreground_set(dw.CLR_BLACK);
+           dw.Color_background_set(dw.CLR_WHITE);
+           dw.Draw_text(nil, pixmap, posx, posy, text);
+       }
+   }
+   return TRUE;
+}
+
+func print_callback(window dw.HWND, data unsafe.Pointer) int {
+   print := dw.Print_new("DWTest Job", 0, 2, unsafe.Pointer(&draw_page_func), nil);
+   dw.Print_run(print, 0);
+   return FALSE;
+}
+
+
 /* This gets called when a part of the graph needs to be repainted. */
 func text_expose(hwnd dw.HWND, x int, y int, width int, height int, data unsafe.Pointer) int {
     if render_type != 1 {
@@ -627,8 +665,7 @@ func container_select_cb(window dw.HWND, item dw.HTREEITEM, text string, data un
     dw.Mle_set_cursor(container_mle, mle_point);
     /* set the details of item 0 to new data */
     dw.Filesystem_change_file(container, 0, "new data", fileicon);
-    //size = 999;
-    //dw_filesystem_change_item(container, 1, 0, &size);
+    dw.Filesystem_change_item_ulong(container, 1, 0, 999);
     return FALSE;
 }
 
@@ -766,6 +803,8 @@ var change_color_red_callback_func = change_color_red_callback;
 var change_color_yellow_callback_func = change_color_yellow_callback;
 var spinbutton_valuechanged_callback_func = spinbutton_valuechanged_callback;
 var slider_valuechanged_callback_func = slider_valuechanged_callback;
+var print_callback_func = print_callback;
+var draw_page_func = draw_page;
 
 var checkable_string = "checkable";
 var noncheckable_string = "non-checkable";
@@ -1009,7 +1048,7 @@ func text_add() {
     dw.Signal_connect(vscrollbar, dw.SIGNAL_VALUE_CHANGED, unsafe.Pointer(&scrollbar_valuechanged_callback_func), unsafe.Pointer(status1));
     dw.Signal_connect(imagestretchcheck, dw.SIGNAL_CLICKED, unsafe.Pointer(&refresh_callback_func), nil);
     dw.Signal_connect(button1, dw.SIGNAL_CLICKED, unsafe.Pointer(&refresh_callback_func), nil);
-    //dw.Signal_connect(button2, dw.SIGNAL_CLICKED, unsafe.Pointer(&print_callback_func), nil);
+    dw.Signal_connect(button2, dw.SIGNAL_CLICKED, unsafe.Pointer(&print_callback_func), nil);
     dw.Signal_connect(rendcombo, dw.SIGNAL_LIST_SELECT, unsafe.Pointer(&render_select_event_callback_func), nil);
     dw.Signal_connect(mainwindow, dw.SIGNAL_KEY_PRESS, unsafe.Pointer(&keypress_callback_func), nil);
 

@@ -9,6 +9,7 @@ import (
    "bytes"
    "io"
    "runtime"
+   "go/build"
 )
 
 // Global variables
@@ -67,8 +68,9 @@ var current_file string
 var lines []string
 var menu_enabled bool = true
 
-var FOLDER_ICON_NAME string = "mac/folder"
-var FILE_ICON_NAME string = "mac/file"
+var FOLDER_ICON_NAME string = "folder"
+var FILE_ICON_NAME string = "file"
+var SRCROOT string
 
 func read_file() {
     var (
@@ -1028,8 +1030,8 @@ func text_add() {
     text1pm = dw.Pixmap_new(textbox1, uint(font_width * width1), uint(font_height * rows), depth);
     text2pm = dw.Pixmap_new(textbox2, uint(font_width * cols), uint(font_height * rows), depth);
     image = dw.Pixmap_new_from_file(textbox2, "test");
-    if image == nil {
-        image = dw.Pixmap_new_from_file(textbox2, "~/test");
+    if image == nil && len(SRCROOT) > 0 {
+        image = dw.Pixmap_new_from_file(textbox2, fmt.Sprintf("%s/test", SRCROOT));
     }
     if image != nil {
         dw.Pixmap_set_transparent_color(image, dw.CLR_WHITE);
@@ -1293,7 +1295,13 @@ func main() {
    } else if runtime.GOOS == "darwin" {
       FIXEDFONT = "9.Monaco";
    }
-    
+   
+   /* Locate the source root of the package */
+   pkg, err := build.Import("dwtest", "", build.FindOnly);
+   if err == nil && len(pkg.SrcRoot) > 0 {
+      SRCROOT = fmt.Sprintf("%s/dwtest", pkg.SrcRoot);
+   }
+   
    /* Initialize the Dynamic Windows engine */
    dw.Init(dw.TRUE);
 
@@ -1306,8 +1314,13 @@ func main() {
    dw.Box_pack_start(mainwindow, notebookbox, 0, 0, dw.TRUE, dw.TRUE, 0);
 
    foldericon = dw.Icon_load_from_file(FOLDER_ICON_NAME);
+   if foldericon == nil && len(SRCROOT) > 0 {
+      foldericon = dw.Icon_load_from_file(fmt.Sprintf("%s/%s", SRCROOT, FOLDER_ICON_NAME));
+   }
    fileicon = dw.Icon_load_from_file(FILE_ICON_NAME);
-
+   if fileicon == nil && len(SRCROOT) > 0 {
+      fileicon = dw.Icon_load_from_file(fmt.Sprintf("%s/%s", SRCROOT, FILE_ICON_NAME));
+   }
    notebook := dw.Notebook_new(1, dw.TRUE);
    dw.Box_pack_start(notebookbox, notebook, 100, 100, dw.TRUE, dw.TRUE, 0);
    dw.Signal_connect(notebook, dw.SIGNAL_SWITCH_PAGE, unsafe.Pointer(&switch_page_callback_func), nil);

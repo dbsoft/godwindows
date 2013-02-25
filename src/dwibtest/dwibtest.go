@@ -4,6 +4,8 @@ import (
    "unsafe"
    "dw"
    "dwib"
+   "fmt"
+   "go/build"
 )
 
 // Global variables
@@ -13,6 +15,7 @@ const (
 )
 
 var APP_NAME = "DWIB Example"
+var SRCROOT string
 
 /* Handle exiting the application */
 func exit_handler(win dw.HWND, data unsafe.Pointer) int {
@@ -26,11 +29,20 @@ func exit_handler(win dw.HWND, data unsafe.Pointer) int {
 var exit_handler_func = exit_handler;
 
 func main() {
+   /* Locate the source root of the package */
+   pkg, err := build.Import("dwibtest", "", build.FindOnly);
+   if err == nil && len(pkg.SrcRoot) > 0 {
+      SRCROOT = fmt.Sprintf("%s/dwibtest", pkg.SrcRoot);
+   }
+   
     /* Initialize Dynamic Windows */
     dw.Init(TRUE);
 
     /* Load the interface XML file */
     handle := dwib.Open("example.xml");
+    if handle == nil && len(SRCROOT) > 0 {
+       handle = dwib.Open(fmt.Sprintf("%s/example.xml", SRCROOT));
+    }
 
     /* Show an error if it fails to load */
     if handle == nil {

@@ -1186,11 +1186,11 @@ func buttons_add() {
     buttonboxperm = dw.Box_new(dw.VERT, 0);
     dw.Box_pack_start(buttonsbox, buttonboxperm, 25, 0, FALSE, TRUE, 2);
     dw.Window_set_color(buttonboxperm, dw.CLR_WHITE, dw.CLR_WHITE);
-    abutton1 := dw.Bitmapbutton_new_from_file("Top Button", 0, FILE_ICON_NAME);
+    abutton1 := dw.Bitmapbutton_new_from_file("Top Button", 0, fmt.Sprintf("%s/%s", SRCROOT, FILE_ICON_NAME));
     dw.Box_pack_start(buttonboxperm, abutton1, 100, 30, FALSE, FALSE, 0);
     dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, unsafe.Pointer(&button_callback_func), nil);
     dw.Box_pack_start(buttonboxperm, nil, 25, 5, FALSE, FALSE, 0);
-    abutton2 := dw.Bitmapbutton_new_from_file("Bottom", 0, FOLDER_ICON_NAME);
+    abutton2 := dw.Bitmapbutton_new_from_file("Bottom", 0, fmt.Sprintf("%s/%s", SRCROOT, FOLDER_ICON_NAME));
     dw.Box_pack_start(buttonsbox, abutton2, 25, 25, FALSE, FALSE, 0);
     dw.Signal_connect(abutton2, dw.SIGNAL_CLICKED, unsafe.Pointer(&button_callback_func), nil);
     dw.Window_set_bitmap(abutton2, 0, FILE_ICON_NAME);
@@ -1248,8 +1248,7 @@ func create_button(redraw bool) {
     dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, unsafe.Pointer(&change_color_red_callback_func), nil);
     dw.Box_pack_start(filetoolbarbox, nil, 25, 5, FALSE, FALSE, 0);
 
-    //abutton1 = dw_bitmapbutton_new_from_data("A borderless bitmapbitton", 0, folder_ico, 1718 );
-    abutton1 = dw.Bitmapbutton_new_from_file("A borderless bitmapbitton", 0, "junk");
+    abutton1 = dw.Bitmapbutton_new_from_file("A borderless bitmapbitton", 0, fmt.Sprintf("%s/%s", SRCROOT, FOLDER_ICON_NAME));
     dw.Box_pack_start(filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
     dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, unsafe.Pointer(&change_color_yellow_callback_func), nil);
     dw.Box_pack_start(filetoolbarbox, nil, 25, 5, FALSE, FALSE, 0);

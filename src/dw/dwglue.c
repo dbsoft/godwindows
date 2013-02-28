@@ -1259,6 +1259,14 @@ static int go_timer_connect(int interval, void *sigfunc, void *data)
    return 0;
 }
 
+static void DWSIGNAL go_signal_free(HWND window, void *data)
+{
+   if(data)
+   {
+      free(data);
+   }
+}
+
 static void go_signal_connect(void *window, char *signame, void *sigfunc, void *data)
 {
    void **param = malloc(sizeof(void *) * 2);
@@ -1314,6 +1322,6 @@ static void go_signal_connect(void *window, char *signame, void *sigfunc, void *
          func = (void *)go_callback_tree;
       }
       
-      dw_signal_connect((HWND)window, signame, func, param);
+      dw_signal_connect_data((HWND)window, signame, func, DW_SIGNAL_FUNC(go_signal_free), param);
    }
 }

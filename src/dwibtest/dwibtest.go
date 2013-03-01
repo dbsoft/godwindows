@@ -67,6 +67,8 @@ func main() {
     /* Close the Interface Builder XML */
     dwib.Close(handle);
 
+    /* Call dw.Shutdown() to shutdown the Dynamic Windows engine */
+    dw.Shutdown();
     return;
 }
 

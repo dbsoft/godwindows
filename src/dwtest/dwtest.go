@@ -1409,6 +1409,8 @@ func main() {
    /* Now that the loop is done we can cleanup */
    dw.Taskbar_delete(textbox1, fileicon);
    dw.Window_destroy(mainwindow);
-
+   
    fmt.Printf("dwtest exiting...\n");
+   /* Call dw.Shutdown() to shutdown the Dynamic Windows engine */
+   dw.Shutdown();
 }

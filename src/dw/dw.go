@@ -302,6 +302,10 @@ func Init(newthread int) int {
    return int(C.go_init(C.int(newthread)));
 }
 
+func Shutdown() {
+   C.dw_shutdown();
+}
+
 func Environment_query(env *Env) {
     var cenv C.DWEnv;
     C.dw_environment_query(&cenv);

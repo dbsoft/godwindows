@@ -6,7 +6,7 @@ package dwib
 #cgo darwin CFLAGS: -I/usr/local/include -g -O2 -D__MAC__
 #cgo darwin LDFLAGS: -L/usr/local/lib -ldwindows -ldwib -lresolv -framework Cocoa -framework WebKit -lpthread
 #cgo windows CFLAGS: -IC:/Work/BitBucket/dwindows -IC:/Work/BitBucket/dwib -g -O2 -D__WIN32__ -mthreads
-#cgo windows LDFLAGS: -LC:/Work/BitBucket/dwindows -ldwindows -LC:/Work/BitBucket/dwib -ldwib
+#cgo windows LDFLAGS: -LC:/Work/BitBucket/dwindows -ldw -LC:/Work/BitBucket/dwib -ldwib
 #include "dwibglue.c"
 */
 import "C"

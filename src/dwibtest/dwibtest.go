@@ -1,7 +1,6 @@
 package main
 
 import (
-   "unsafe"
    "dw"
    "dwib"
    "fmt"
@@ -18,7 +17,7 @@ var APP_NAME = "DWIB Example"
 var SRCROOT string
 
 /* Handle exiting the application */
-func exit_handler(win dw.HWND, data unsafe.Pointer) int {
+func exit_handler(win dw.HWND, data dw.POINTER) int {
     if dw.Messagebox(APP_NAME, dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit") == dw.MB_RETURN_YES {
         /* Exit the application cleanly */
         dw.Main_quit();
@@ -55,10 +54,10 @@ func main() {
     dwib.Show(window);
 
     /* Connect the signal handlers */
-    dw.Signal_connect(window, dw.SIGNAL_DELETE, unsafe.Pointer(&exit_handler_func), nil);
+    dw.Signal_connect(window, dw.SIGNAL_DELETE, dw.SIGNAL_FUNC(&exit_handler_func), nil);
     /* Handler for Mac application menu Quit */
-    dw.Signal_connect(dw.DESKTOP, dw.SIGNAL_DELETE, unsafe.Pointer(&exit_handler_func), nil);
-    dw.Signal_connect(dwib.Window_get_handle(window, "quitmenu"), dw.SIGNAL_CLICKED, unsafe.Pointer(&exit_handler_func), nil);
+    dw.Signal_connect(dw.DESKTOP, dw.SIGNAL_DELETE, dw.SIGNAL_FUNC(&exit_handler_func), nil);
+    dw.Signal_connect(dwib.Window_get_handle(window, "quitmenu"), dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&exit_handler_func), nil);
 
     dw.Main();
 

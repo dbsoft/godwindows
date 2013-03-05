@@ -19,7 +19,7 @@ func Load(handle DWIB, name string) dw.HWND {
    cname := C.CString(name);
    defer C.free(unsafe.Pointer(cname));
    
-   return dw.HWND(C.goib_load(unsafe.Pointer(handle), cname));
+   return dw.POINTER_TO_HWND(dw.POINTER(C.goib_load(unsafe.Pointer(handle), cname)));
 }
 
 func Load_at_index(handle DWIB, name string, dataname string, window dw.HWND, box dw.HWND, index int) int {
@@ -28,11 +28,11 @@ func Load_at_index(handle DWIB, name string, dataname string, window dw.HWND, bo
    cdataname := C.CString(dataname);
    defer C.free(unsafe.Pointer(cdataname));
    
-   return int(C.goib_load_at_index(unsafe.Pointer(handle), cname, cdataname, unsafe.Pointer(window), unsafe.Pointer(box), C.int(index)));
+   return int(C.goib_load_at_index(unsafe.Pointer(handle), cname, cdataname, unsafe.Pointer(dw.HWND_TO_POINTER(window)), unsafe.Pointer(dw.HWND_TO_POINTER(box)), C.int(index)));
 }
 
 func Show(handle dw.HWND) {
-   C.goib_show(unsafe.Pointer(handle));
+   C.goib_show(unsafe.Pointer(dw.HWND_TO_POINTER(handle)));
 }
 
 func Open(filename string) DWIB {
@@ -64,6 +64,6 @@ func Window_get_handle(handle dw.HWND, dataname string) dw.HWND {
    cdataname := C.CString(dataname);
    defer C.free(unsafe.Pointer(cdataname));
 
-   return dw.HWND(C.goib_window_get_handle(unsafe.Pointer(handle), cdataname));
+   return dw.POINTER_TO_HWND(dw.POINTER(C.goib_window_get_handle(unsafe.Pointer(dw.HWND_TO_POINTER(handle)), cdataname)));
 }
 

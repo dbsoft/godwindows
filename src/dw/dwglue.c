@@ -87,7 +87,7 @@ static void go_window_enable(void *handle)
    dw_window_enable((HWND)handle);
 }
 
-static HWND go_window_from_id(void *handle, int id)
+static void *go_window_from_id(void *handle, int id)
 {
    return dw_window_from_id((HWND)handle, id);
 }

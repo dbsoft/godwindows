@@ -1503,7 +1503,7 @@ func init() {
 
 var backs []unsafe.Pointer;
 
-func (window HWND) Delete(sigfunc func(window HWND) int) {
+func (window HWND) Delete(sigfunc func(window HWND, data POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_DELETE);
    defer C.free(unsafe.Pointer(csigname));
    

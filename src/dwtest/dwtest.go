@@ -1178,7 +1178,7 @@ func buttons_add() {
     cal = dw.Calendar_new(100);
     dw.Box_pack_start(calbox, cal, 180, 120, TRUE, TRUE, 0);
     /*
-     dw_calendar_set_date(cal, 2001, 1, 1);
+     dw.Calendar_set_date(cal, 2001, 1, 1);
      */
     /*
      * Create our file toolbar boxes...

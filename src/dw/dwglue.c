@@ -2,14 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int go_init(int newthread)
-{
-   int argc = 0;
-   char **argv = NULL;
-   
-   return dw_init(newthread, argc, argv);
-}
-
 static int go_messagebox(char *title, int flags, char *message)
 {
    return dw_messagebox(title, flags, message);

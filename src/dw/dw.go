@@ -13,6 +13,7 @@ import "C"
 import "unsafe"
 import "runtime"
 import "reflect"
+import "os"
 
 type HWND unsafe.Pointer
 type HTREEITEM unsafe.Pointer
@@ -299,7 +300,16 @@ func RGB(red uint8, green uint8, blue uint8) COLOR {
 }
 
 func Init(newthread int) int {
-   return int(C.go_init(C.int(newthread)));
+   if len(os.Args) > 0 {
+      var argc C.int = C.int(len(os.Args));
+      argv := C.go_string_array_make(argc);
+      defer C.go_string_array_free(argv, argc);
+      for i, s := range os.Args {
+         C.go_string_array_set(argv, C.CString(s), C.int(i))
+      }   
+      return int(C.dw_init(C.int(newthread), argc, argv));
+   }      
+   return int(C.dw_init(C.int(newthread), 0, nil));
 }
 
 func Shutdown() {

@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int go_init(int newthread, int argc, char *argv[])
+{
+   return dw_init(newthread, argc, argv);
+}
+
 static int go_messagebox(char *title, int flags, char *message)
 {
    return dw_messagebox(title, flags, message);

@@ -338,9 +338,9 @@ func Init(newthread int) int {
         for i, s := range os.Args {
             C.go_string_array_set(argv, C.CString(s), C.int(i))
         }   
-        return int(C.dw_init(C.int(newthread), argc, argv));
+        return int(C.go_init(C.int(newthread), argc, argv));
     }      
-    return int(C.dw_init(C.int(newthread), 0, nil));
+    return int(C.go_init(C.int(newthread), 0, nil));
 }
 
 func Shutdown() {

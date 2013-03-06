@@ -26,13 +26,14 @@ func main() {
     window := dw.Window_new(dw.DESKTOP, APP_NAME, dw.FCF_SYSMENU | dw.FCF_TITLEBAR | dw.FCF_TASKLIST | dw.FCF_DLGBORDER | dw.FCF_SIZEBORDER | dw.FCF_MINMAX);
 
     label := dw.Text_new("Hello, World", 0);
-    dw.Box_pack_start(window, label, 0, 0, dw.TRUE, dw.TRUE, 0);
+    window.PackStart(label, 0, 0, dw.TRUE, dw.TRUE, 0);
     
     /* Connect the signal handlers */
-    window.Delete(func(window dw.HWND) int { return exit_handler(window, message); });
+    window.ConnectDelete(func(window dw.HWND) int { return exit_handler(window, message); });
 
-    dw.Window_set_size(window, 640, 550);
-    dw.Window_show(window);
+    /* Set the size and show the window */
+    window.SetSize(640, 550);
+    window.Show();
     
     dw.Main();
 

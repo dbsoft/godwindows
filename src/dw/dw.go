@@ -16,18 +16,20 @@ import "reflect"
 import "os"
 
 type HWND struct {
-   hwnd unsafe.Pointer
+    hwnd unsafe.Pointer
 }
 type HTREEITEM unsafe.Pointer
 type HICN unsafe.Pointer
 type HTIMER struct {
-   tid C.int
+    tid C.int
 }
 type HMENUI unsafe.Pointer
-type HPIXMAP unsafe.Pointer
+type HPIXMAP struct {
+    hpixmap unsafe.Pointer
+}
 type HPRINT struct {
-   hprint unsafe.Pointer
-   jobname string
+    hprint unsafe.Pointer
+    jobname string
 }
 type HNOTEPAGE C.ulong
 type COLOR C.ulong
@@ -42,8 +44,8 @@ type Env struct {
 
 // Define our exported constants
 const (
-   FALSE int = iota
-   TRUE
+    FALSE int = iota
+    TRUE
 )
 
 var DESKTOP HWND
@@ -52,7 +54,7 @@ var DESKTOP HWND
 var NOHWND HWND
 var NOHTIMER HTIMER
 var NOHPRINT HPRINT
-var NOHPIXMAP HPIXMAP = nil
+var NOHPIXMAP HPIXMAP
 var NOHMENUI HMENUI = nil
 var NOHICN HICN = nil
 var NOMENU HMENUI = nil
@@ -306,7 +308,7 @@ var VK_LCONTROL = int(C.VK_LCONTROL)
 var VK_RCONTROL = int(C.VK_RCONTROL)
 
 func RESOURCE(id uintptr) unsafe.Pointer {
-   return unsafe.Pointer(id);
+    return unsafe.Pointer(id);
 }
 
 func RGB(red uint8, green uint8, blue uint8) COLOR {
@@ -317,32 +319,32 @@ func RGB(red uint8, green uint8, blue uint8) COLOR {
 }
 
 func POINTER_TO_HWND(ptr POINTER) HWND {
-   return HWND{unsafe.Pointer(ptr)};
+    return HWND{unsafe.Pointer(ptr)};
 }
 
 func HWND_TO_UINTPTR(handle HWND) uintptr {
-   return uintptr(handle.hwnd);
+    return uintptr(handle.hwnd);
 }
 
 func HWND_TO_POINTER(handle HWND) POINTER {
-   return POINTER(handle.hwnd);
+    return POINTER(handle.hwnd);
 }
 
 func Init(newthread int) int {
-   if len(os.Args) > 0 {
-      var argc C.int = C.int(len(os.Args));
-      argv := C.go_string_array_make(argc);
-      defer C.go_string_array_free(argv, argc);
-      for i, s := range os.Args {
-         C.go_string_array_set(argv, C.CString(s), C.int(i))
-      }   
-      return int(C.dw_init(C.int(newthread), argc, argv));
-   }      
-   return int(C.dw_init(C.int(newthread), 0, nil));
+    if len(os.Args) > 0 {
+        var argc C.int = C.int(len(os.Args));
+        argv := C.go_string_array_make(argc);
+        defer C.go_string_array_free(argv, argc);
+        for i, s := range os.Args {
+            C.go_string_array_set(argv, C.CString(s), C.int(i))
+        }   
+        return int(C.dw_init(C.int(newthread), argc, argv));
+    }      
+    return int(C.dw_init(C.int(newthread), 0, nil));
 }
 
 func Shutdown() {
-   C.dw_shutdown();
+    C.dw_shutdown();
 }
 
 func Environment_query(env *Env) {
@@ -361,90 +363,158 @@ func Environment_query(env *Env) {
 }
 
 func Messagebox(title string, flags int, message string) int {
-   ctitle := C.CString(title);
-   defer C.free(unsafe.Pointer(ctitle));
-   cmessage := C.CString(message);
-   defer C.free(unsafe.Pointer(cmessage));
-   
-   return int(C.go_messagebox(ctitle, C.int(flags), cmessage));
+    ctitle := C.CString(title);
+    defer C.free(unsafe.Pointer(ctitle));
+    cmessage := C.CString(message);
+    defer C.free(unsafe.Pointer(cmessage));
+
+    return int(C.go_messagebox(ctitle, C.int(flags), cmessage));
 }
 
 func Window_new(owner HWND, title string, flags uint) HWND {
-   ctitle := C.CString(title);
-   defer C.free(unsafe.Pointer(ctitle));
-   
-   return HWND{C.go_window_new(unsafe.Pointer(owner.hwnd), ctitle, C.ulong(flags))};
+    ctitle := C.CString(title);
+    defer C.free(unsafe.Pointer(ctitle));
+
+    return HWND{C.go_window_new(unsafe.Pointer(owner.hwnd), ctitle, C.ulong(flags))};
 }
 
 func Window_show(handle HWND) int {
    return int(C.go_window_show(unsafe.Pointer(handle.hwnd)));
 }
 
+func (window HWND) Show() int {
+    return Window_show(window);
+}
+
 func Window_hide(handle HWND) int {
    return int(C.go_window_hide(unsafe.Pointer(handle.hwnd)));
+}
+
+func (window HWND) Hide() int {
+    return Window_hide(window);
 }
 
 func Window_lower(handle HWND) int {
    return int(C.go_window_lower(unsafe.Pointer(handle.hwnd)));
 }
 
+func (window HWND) Lower() int {
+    return Window_lower(window);
+}
+
 func Window_raise(handle HWND) int {
    return int(C.go_window_raise(unsafe.Pointer(handle.hwnd)));
+}
+
+func (window HWND) Raise() int {
+    return Window_raise(window);
 }
 
 func Window_minimize(handle HWND) int {
    return int(C.go_window_minimize(unsafe.Pointer(handle.hwnd)));
 }
 
+func (window HWND) Minimize() int {
+    return Window_minimize(window);
+}
+
 func Window_set_pos(handle HWND, x int, y int) {
-   C.go_window_set_pos(unsafe.Pointer(handle.hwnd), C.long(x), C.long(y));
+    C.go_window_set_pos(unsafe.Pointer(handle.hwnd), C.long(x), C.long(y));
+}
+
+func (window HWND) SetPos(x int, y int) {
+    Window_set_pos(window, x, y);
 }
 
 func Window_set_pos_size(handle HWND, x int, y int, width uint, height uint) {
-   C.go_window_set_pos_size(unsafe.Pointer(handle.hwnd), C.long(x), C.long(y), C.ulong(width), C.ulong(height));
+    C.go_window_set_pos_size(unsafe.Pointer(handle.hwnd), C.long(x), C.long(y), C.ulong(width), C.ulong(height));
+}
+
+func (window HWND) SetPosSize(x int, y int, width uint, height uint) {
+    Window_set_pos_size(window, x, y, width, height);
 }
 
 func Window_set_size(handle HWND, width uint, height uint) {
-   C.go_window_set_size(unsafe.Pointer(handle.hwnd), C.ulong(width), C.ulong(height));
+    C.go_window_set_size(unsafe.Pointer(handle.hwnd), C.ulong(width), C.ulong(height));
+}
+
+func (window HWND) SetSize(width uint, height uint) {
+    Window_set_size(window, width, height);
 }
 
 func Window_set_color(handle HWND, fore COLOR, back COLOR) int {
    return int(C.go_window_set_color(unsafe.Pointer(handle.hwnd), C.ulong(fore), C.ulong(back)));
 }
 
+func (window HWND) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
 func Window_set_style(handle HWND, style uint, mask uint) {
-   C.go_window_set_style(unsafe.Pointer(handle.hwnd), C.ulong(style), C.ulong(mask));
+    C.go_window_set_style(unsafe.Pointer(handle.hwnd), C.ulong(style), C.ulong(mask));
+}
+
+func (window HWND) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
 }
 
 func Window_click_default(window HWND, next HWND) {
-   C.go_window_click_default(unsafe.Pointer(window.hwnd), unsafe.Pointer(next.hwnd));
+    C.go_window_click_default(unsafe.Pointer(window.hwnd), unsafe.Pointer(next.hwnd));
+}
+
+func (window HWND) ClickDefault(next HWND) {
+    Window_click_default(window, next);
 }
 
 func Window_default(window HWND, defaultitem HWND) {
-   C.go_window_default(unsafe.Pointer(window.hwnd), unsafe.Pointer(defaultitem.hwnd));
+    C.go_window_default(unsafe.Pointer(window.hwnd), unsafe.Pointer(defaultitem.hwnd));
 }
 
-func Window_destroy(handle HWND) C.int {
-   return C.go_window_destroy(unsafe.Pointer(handle.hwnd));
+func (window HWND) Default(defaultitem HWND) {
+    Window_default(window, defaultitem);
+}
+
+func Window_destroy(handle HWND) int {
+    return int(C.go_window_destroy(unsafe.Pointer(handle.hwnd)));
+}
+
+func (window HWND) Destroy() int {
+    return Window_destroy(window);
 }
 
 func Window_disable(handle HWND) {
    C.go_window_disable(unsafe.Pointer(handle.hwnd));
 }
 
+func (window HWND) Disable() {
+    Window_disable(window);
+}
+
 func Window_enable(handle HWND) {
-   C.go_window_enable(unsafe.Pointer(handle.hwnd));
+    C.go_window_enable(unsafe.Pointer(handle.hwnd));
+}
+
+func (window HWND) Enable() {
+    Window_enable(window);
 }
 
 func Window_from_id(handle HWND, cid int) HWND {
-   return HWND{C.go_window_from_id(unsafe.Pointer(handle.hwnd), C.int(cid))};
+    return HWND{C.go_window_from_id(unsafe.Pointer(handle.hwnd), C.int(cid))};
 }
 
-func Window_get_data(window HWND, dataname string) unsafe.Pointer {
-   cdataname := C.CString(dataname);
-   defer C.free(unsafe.Pointer(cdataname));
-   
-   return C.go_window_get_data(unsafe.Pointer(window.hwnd), cdataname);
+func (window HWND) FromID(cid int) HWND {
+    return Window_from_id(window, cid);
+}
+
+func Window_get_data(window HWND, dataname string) POINTER {
+    cdataname := C.CString(dataname);
+    defer C.free(unsafe.Pointer(cdataname));
+
+    return POINTER(C.go_window_get_data(unsafe.Pointer(window.hwnd), cdataname));
+}
+
+func (window HWND) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
 }
 
 func Window_get_font(handle HWND) string {
@@ -454,124 +524,208 @@ func Window_get_font(handle HWND) string {
    return fontname;
 }
 
+func (window HWND) GetFont() string {
+    return Window_get_font(window);
+}
+
 func Window_set_font(handle HWND, fontname string) int {
-   cfontname := C.CString(fontname);
-   defer C.free(unsafe.Pointer(cfontname));
-   
-   return int(C.go_window_set_font(unsafe.Pointer(handle.hwnd), cfontname));
+    cfontname := C.CString(fontname);
+    defer C.free(unsafe.Pointer(cfontname));
+
+    return int(C.go_window_set_font(unsafe.Pointer(handle.hwnd), cfontname));
+}
+
+func (window HWND) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
 }
 
 func Window_get_pos_size(handle HWND) (int, int, uint, uint) {
-   var x, y C.long;
-   var width, height C.ulong;
-   C.go_window_get_pos_size(unsafe.Pointer(handle.hwnd), &x, &y, &width, &height);
-   return int(x), int(y), uint(width), uint(height);
+    var x, y C.long;
+    var width, height C.ulong;
+    C.go_window_get_pos_size(unsafe.Pointer(handle.hwnd), &x, &y, &width, &height);
+    return int(x), int(y), uint(width), uint(height);
+}
+
+func (window HWND) GetPosSize() (int, int, uint, uint) {
+    return Window_get_pos_size(window);
 }
 
 func Window_get_preferred_size(handle HWND) (int, int) {
-   var width, height C.int;
-   C.go_window_get_preferred_size(unsafe.Pointer(handle.hwnd), &width, &height);
-   return int(width), int(height);
+    var width, height C.int;
+    C.go_window_get_preferred_size(unsafe.Pointer(handle.hwnd), &width, &height);
+    return int(width), int(height);
+}
+
+func (window HWND) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
 }
 
 func Window_get_text(handle HWND) string {
-   ctext := C.go_window_get_text(unsafe.Pointer(handle.hwnd));
-   text := C.GoString(ctext);
-   C.dw_free(unsafe.Pointer(ctext));
-   return text;
+    ctext := C.go_window_get_text(unsafe.Pointer(handle.hwnd));
+    text := C.GoString(ctext);
+    C.dw_free(unsafe.Pointer(ctext));
+    return text;
+}
+
+func (window HWND) GetText() string {
+    return Window_get_text(window);
 }
 
 func Window_set_text(handle HWND, text string) {
-   ctext := C.CString(text);
-   defer C.free(unsafe.Pointer(ctext));
-   
-   C.go_window_set_text(unsafe.Pointer(handle.hwnd), ctext);
+    ctext := C.CString(text);
+    defer C.free(unsafe.Pointer(ctext));
+
+    C.go_window_set_text(unsafe.Pointer(handle.hwnd), ctext);
+}
+
+func (window HWND) SetText(text string) {
+    Window_set_text(window, text);
 }
 
 func Window_set_tooltip(handle HWND, bubbletext string) {
-   cbubbletext := C.CString(bubbletext);
-   defer C.free(unsafe.Pointer(cbubbletext));
-   
-   C.go_window_set_tooltip(unsafe.Pointer(handle.hwnd), cbubbletext);
+    cbubbletext := C.CString(bubbletext);
+    defer C.free(unsafe.Pointer(cbubbletext));
+
+    C.go_window_set_tooltip(unsafe.Pointer(handle.hwnd), cbubbletext);
+}
+
+func (window HWND) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
 }
 
 func Window_redraw(handle HWND) {
-   C.go_window_redraw(unsafe.Pointer(handle.hwnd));
+    C.go_window_redraw(unsafe.Pointer(handle.hwnd));
+}
+
+func (window HWND) Redraw() {
+    Window_redraw(window);
 }
 
 func Window_capture(handle HWND) {
-   C.go_window_capture(unsafe.Pointer(handle.hwnd));
+    C.go_window_capture(unsafe.Pointer(handle.hwnd));
+}
+
+func (window HWND) Capture() {
+    Window_capture(window);
 }
 
 func Window_release() {
-   C.dw_window_release();
+    C.dw_window_release();
+}
+
+func (window HWND) Release() {
+    Window_release();
 }
 
 func Window_set_bitmap(window HWND, id uint, filename string) {
-   cfilename := C.CString(filename);
-   defer C.free(unsafe.Pointer(cfilename));
-   
-   C.go_window_set_bitmap(unsafe.Pointer(window.hwnd), C.ulong(id), cfilename);
+    cfilename := C.CString(filename);
+    defer C.free(unsafe.Pointer(cfilename));
+
+    C.go_window_set_bitmap(unsafe.Pointer(window.hwnd), C.ulong(id), cfilename);
+}
+
+func (window HWND) SetBitmap(id uint, filename string) {
+    Window_set_bitmap(window, id, filename);
 }
 
 func Window_set_border(handle HWND, border int) {
-   C.go_window_set_border(unsafe.Pointer(handle.hwnd), C.int(border));
+    C.go_window_set_border(unsafe.Pointer(handle.hwnd), C.int(border));
+}
+
+func (window HWND) SetBorder(border int) {
+    Window_set_border(window, border);
 }
 
 func Window_set_focus(handle HWND) {
-   C.go_window_set_focus(unsafe.Pointer(handle.hwnd));
+    C.go_window_set_focus(unsafe.Pointer(handle.hwnd));
+}
+
+func (window HWND) SetFocus() {
+    Window_set_focus(window);
 }
 
 func Window_set_gravity(handle HWND, horz int, vert int) {
-   C.go_window_set_gravity(unsafe.Pointer(handle.hwnd), C.int(horz), C.int(vert));
+    C.go_window_set_gravity(unsafe.Pointer(handle.hwnd), C.int(horz), C.int(vert));
+}
+
+func (window HWND) SetGravity(horz int, vert int) {
+    Window_set_gravity(window, horz, vert);
 }
 
 func Window_set_icon(handle HWND, icon HICN) {
-   C.go_window_set_icon(unsafe.Pointer(handle.hwnd), unsafe.Pointer(icon));
+    C.go_window_set_icon(unsafe.Pointer(handle.hwnd), unsafe.Pointer(icon));
+}
+
+func (window HWND) SetIcon(icon HICN) {
+    Window_set_icon(window, icon);
 }
 
 func Window_set_pointer(handle HWND, cursortype int) {
-   C.go_window_set_pointer(unsafe.Pointer(handle.hwnd), C.int(cursortype));
+    C.go_window_set_pointer(unsafe.Pointer(handle.hwnd), C.int(cursortype));
+}
+
+func (window HWND) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
 }
 
 func Main() {
-   C.dw_main();
+    C.dw_main();
 }
 
 func Main_iteration() {
-   C.dw_main_iteration();
+    C.dw_main_iteration();
 }
 
 func Main_quit() {
-   C.dw_main_quit();
+    C.dw_main_quit();
 }
 
 func Main_sleep(milliseconds int) {
-   C.dw_main_sleep(C.int(milliseconds));
+    C.dw_main_sleep(C.int(milliseconds));
 }
 
 func Box_new(btype int, pad int) HWND {
-   return HWND{C.go_box_new(C.int(btype), C.int(pad))};
+    return HWND{C.go_box_new(C.int(btype), C.int(pad))};
 }
 
 func Box_pack_at_index(box HWND, item HWND, index int, width int, height int, hsize int, vsize int, pad int) {
-   C.go_box_pack_at_index(unsafe.Pointer(box.hwnd), unsafe.Pointer(item.hwnd), C.int(index), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
+    C.go_box_pack_at_index(unsafe.Pointer(box.hwnd), unsafe.Pointer(item.hwnd), C.int(index), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
+}
+
+func (window HWND) PackAtIndex(item HWND, index int, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_at_index(window, item, index, width, height, hsize, vsize, pad);
 }
 
 func Box_pack_end(box HWND, item HWND, width int, height int, hsize int, vsize int, pad int) {
    C.go_box_pack_end(unsafe.Pointer(box.hwnd), unsafe.Pointer(item.hwnd), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
 
+func (window HWND) PackEnd(item HWND, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_end(window, item, width, height, hsize, vsize, pad);
+}
+
 func Box_pack_start(box HWND, item HWND, width int, height int, hsize int, vsize int, pad int) {
    C.go_box_pack_start(unsafe.Pointer(box.hwnd), unsafe.Pointer(item.hwnd), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
+}
+
+func (window HWND) PackStart(item HWND, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_start(window, item, width, height, hsize, vsize, pad);
 }
 
 func Box_unpack(handle HWND) int {
    return int(C.go_box_unpack(unsafe.Pointer(handle.hwnd)));
 }
 
+func (window HWND) Unpack() int {
+    return Box_unpack(window);
+}
+
 func Box_unpack_at_index(handle HWND, index int) HWND {
-   return HWND{C.go_box_unpack_at_index(unsafe.Pointer(handle.hwnd), C.int(index))};
+    return HWND{C.go_box_unpack_at_index(unsafe.Pointer(handle.hwnd), C.int(index))};
+}
+
+func (window HWND) UnpackAtIndex(index int) HWND {
+    return Box_unpack_at_index(window, index);
 }
 
 func Text_new(text string, id uint) HWND {
@@ -772,9 +926,9 @@ func Listbox_list_append(handle HWND, text []string) {
    ctext := C.go_string_array_make(C.int(count))
    defer C.go_string_array_free(ctext, C.int(count))
    
-   for i, s := range text {
-      C.go_string_array_set(ctext, C.CString(s), C.int(i))
-   }   
+    for i, s := range text {
+        C.go_string_array_set(ctext, C.CString(s), C.int(i))
+    }   
    
    C.go_listbox_list_append(unsafe.Pointer(handle.hwnd), ctext, C.int(count));
 }
@@ -968,94 +1122,206 @@ func Font_text_extents_get(handle HWND, pixmap HPIXMAP, text string) (int, int) 
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   C.go_font_text_extents_get(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap), ctext, &width, &height);
+   C.go_font_text_extents_get(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap.hpixmap), ctext, &width, &height);
    return int(width), int(height);
 }
 
+func (window HWND) GetTextExtents(text string) (int, int) {
+    return Font_text_extents_get(window, NOHPIXMAP, text);
+}
+
+func (pixmap HPIXMAP) GetTextExtents(text string) (int, int) {
+    return Font_text_extents_get(NOHWND, pixmap, text);
+}
+
 func Pixmap_new(handle HWND, width uint, height uint, depth uint) HPIXMAP {
-    return HPIXMAP(C.go_pixmap_new(unsafe.Pointer(handle.hwnd), C.ulong(width), C.ulong(height), C.ulong(depth)));
+    return HPIXMAP{C.go_pixmap_new(unsafe.Pointer(handle.hwnd), C.ulong(width), C.ulong(height), C.ulong(depth))};
 }
 
 func Pixmap_new_from_file(handle HWND, filename string) HPIXMAP {
     cfilename := C.CString(filename);
     defer C.free(unsafe.Pointer(cfilename));
     
-    return HPIXMAP(C.go_pixmap_new_from_file(unsafe.Pointer(handle.hwnd), cfilename));
+    return HPIXMAP{C.go_pixmap_new_from_file(unsafe.Pointer(handle.hwnd), cfilename)};
 }
 
 func Pixmap_grab(handle HWND, id uint) HPIXMAP {
-    return HPIXMAP(C.go_pixmap_grab(unsafe.Pointer(handle.hwnd), C.ulong(id)));
+    return HPIXMAP{C.go_pixmap_grab(unsafe.Pointer(handle.hwnd), C.ulong(id))};
+}
+
+func (window HWND) PixmapGrab(id uint) HPIXMAP {
+    return Pixmap_grab(window, id);
 }
 
 func Pixmap_bitblt(dest HWND, destp HPIXMAP, xdest int, ydest int, width int, height int, src HWND, srcp HPIXMAP, xsrc int, ysrc int) {
-    C.go_pixmap_bitblt(unsafe.Pointer(dest.hwnd), unsafe.Pointer(destp), C.int(xdest), C.int(ydest), C.int(width), C.int(height), unsafe.Pointer(src.hwnd), unsafe.Pointer(srcp), C.int(xsrc), C.int(ysrc)); 
+    C.go_pixmap_bitblt(unsafe.Pointer(dest.hwnd), unsafe.Pointer(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), unsafe.Pointer(src.hwnd), unsafe.Pointer(srcp.hpixmap), C.int(xsrc), C.int(ysrc)); 
 }
 
-func Pixmap_stretch_bitblt(dest HWND, destp HPIXMAP, xdest int, ydest int, width int, height int, src HWND, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) C.int {
-    return C.go_pixmap_stretch_bitblt(unsafe.Pointer(dest.hwnd), unsafe.Pointer(destp), C.int(xdest), C.int(ydest), C.int(width), C.int(height), unsafe.Pointer(src.hwnd), unsafe.Pointer(srcp), C.int(xsrc), C.int(ysrc), C.int(srcwidth), C.int(srcheight)); 
+func Pixmap_stretch_bitblt(dest HWND, destp HPIXMAP, xdest int, ydest int, width int, height int, src HWND, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
+    return int(C.go_pixmap_stretch_bitblt(unsafe.Pointer(dest.hwnd), unsafe.Pointer(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), unsafe.Pointer(src.hwnd), unsafe.Pointer(srcp.hpixmap), C.int(xsrc), C.int(ysrc), C.int(srcwidth), C.int(srcheight))); 
+}
+
+func (window HWND) BitBltStretchPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
+    return Pixmap_stretch_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc, srcwidth, srcheight);
+}
+
+func (window HWND) BitBltStretchWindow(xdest int, ydest int, width int, height int, src HWND, xsrc int, ysrc int, srcwidth int, srcheight int) int {
+    return Pixmap_stretch_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc, srcwidth, srcheight);
+}
+
+func (pixmap HPIXMAP) BitBltStretchPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
+    return Pixmap_stretch_bitblt(NOHWND, pixmap, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc, srcwidth, srcheight);
+}
+
+func (pixmap HPIXMAP) BitBltStretchWindow(xdest int, ydest int, width int, height int, src HWND, xsrc int, ysrc int, srcwidth int, srcheight int) int {
+    return Pixmap_stretch_bitblt(NOHWND, pixmap, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc, srcwidth, srcheight);
+}
+
+func (window HWND) BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int) {
+    Pixmap_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc);
+}
+
+func (window HWND) BitBltWindow(xdest int, ydest int, width int, height int, src HWND, xsrc int, ysrc int) {
+    Pixmap_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc);
+}
+
+func (pixmap HPIXMAP) BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int) {
+    Pixmap_bitblt(NOHWND, pixmap, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc);
+}
+
+func (pixmap HPIXMAP) BitBltWindow(xdest int, ydest int, width int, height int, src HWND, xsrc int, ysrc int) {
+    Pixmap_bitblt(NOHWND, pixmap, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc);
 }
 
 func Pixmap_set_transparent_color(pixmap HPIXMAP, color COLOR) {
-    C.go_pixmap_set_transparent_color(unsafe.Pointer(pixmap), C.ulong(color));
+    C.go_pixmap_set_transparent_color(unsafe.Pointer(pixmap.hpixmap), C.ulong(color));
+}
+
+func (pixmap HPIXMAP) SetTransparentColor(color COLOR) {
+    Pixmap_set_transparent_color(pixmap, color);
 }
 
 func Pixmap_set_font(pixmap HPIXMAP, fontname string) int {
     cfontname := C.CString(fontname);
     defer C.free(unsafe.Pointer(cfontname));
     
-    return int(C.go_pixmap_set_font(unsafe.Pointer(pixmap), cfontname));
+    return int(C.go_pixmap_set_font(unsafe.Pointer(pixmap.hpixmap), cfontname));
+}
+
+func (pixmap HPIXMAP) SetFont(fontname string) int {
+    return Pixmap_set_font(pixmap, fontname);
 }
 
 func Pixmap_destroy(pixmap HPIXMAP) {
-    C.go_pixmap_destroy(unsafe.Pointer(pixmap));
+    C.go_pixmap_destroy(unsafe.Pointer(pixmap.hpixmap));
+}
+
+func (pixmap HPIXMAP) Destroy() {
+    Pixmap_destroy(pixmap);
 }
 
 func Pixmap_width(pixmap HPIXMAP) int {
-    return int(C.go_pixmap_width(unsafe.Pointer(pixmap)));
+    return int(C.go_pixmap_width(unsafe.Pointer(pixmap.hpixmap)));
+}
+
+func (pixmap HPIXMAP) GetWidth() int {
+    return Pixmap_width(pixmap);
 }
 
 func Pixmap_height(pixmap HPIXMAP) int {
-    return int(C.go_pixmap_height(unsafe.Pointer(pixmap)));
+    return int(C.go_pixmap_height(unsafe.Pointer(pixmap.hpixmap)));
+}
+
+func (pixmap HPIXMAP) GetHeight() int {
+    return Pixmap_height(pixmap);
 }
 
 func Draw_point(handle HWND, pixmap HPIXMAP, x int, y int) {
-    C.go_draw_point(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap), C.int(x), C.int(y));
+    C.go_draw_point(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap.hpixmap), C.int(x), C.int(y));
+}
+
+func (window HWND) DrawPoint(x int, y int) {
+    Draw_point(window, NOHPIXMAP, x, y);
+}
+
+func (pixmap HPIXMAP) DrawPoint(x int, y int) {
+    Draw_point(NOHWND, pixmap, x, y);
 }
 
 func Draw_line(handle HWND, pixmap HPIXMAP, x1 int, y1 int, x2 int, y2 int) {
-    C.go_draw_line(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
+    C.go_draw_line(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap.hpixmap), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
+}
+
+func (window HWND) DrawLine(x1 int, y1 int, x2 int, y2 int) {
+    Draw_line(window, NOHPIXMAP, x1, y1, x2, y2);
+}
+
+func (pixmap HPIXMAP) DrawLine(x1 int, y1 int, x2 int, y2 int) {
+    Draw_line(NOHWND, pixmap, x1, y1, x2, y2);
 }
 
 func Draw_polygon(handle HWND, pixmap HPIXMAP, flags int, x []int, y []int) {
     count := len(x);
     if len(y) < count {
-      count = len(y);
+        count = len(y);
     }
     cx := make([]C.int, count);
     cy := make([]C.int, count);
     for n := 0; n < count; n++ {
-      cx[n] = C.int(x[n]);
-      cy[n] = C.int(y[n]);
+        cx[n] = C.int(x[n]);
+        cy[n] = C.int(y[n]);
     }
     xHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cx)));
     yHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cy)));
 
-    C.go_draw_polygon(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap), C.int(flags), C.int(count), (*C.int)(unsafe.Pointer(xHeader.Data)), (*C.int)(unsafe.Pointer(yHeader.Data)));
+    C.go_draw_polygon(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap.hpixmap), C.int(flags), C.int(count), (*C.int)(unsafe.Pointer(xHeader.Data)), (*C.int)(unsafe.Pointer(yHeader.Data)));
+}
+
+func (window HWND) DrawPolygon(flags int, x []int, y []int) {
+    Draw_polygon(window, NOHPIXMAP, flags, x, y);
+}
+
+func (pixmap HPIXMAP) DrawPolygon(flags int, x []int, y []int) {
+    Draw_polygon(NOHWND, pixmap, flags, x, y);
 }
 
 func Draw_rect(handle HWND, pixmap HPIXMAP, fill int, x int, y int, width int, height int) {
-    C.go_draw_rect(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap), C.int(fill), C.int(x), C.int(y), C.int(width), C.int(height));
+    C.go_draw_rect(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap.hpixmap), C.int(fill), C.int(x), C.int(y), C.int(width), C.int(height));
+}
+
+func (window HWND) DrawRect(fill int, x int, y int, width int, height int) {
+    Draw_rect(window, NOHPIXMAP, fill, x, y, width, height);
+}
+
+func (pixmap HPIXMAP) DrawRect(fill int, x int, y int, width int, height int) {
+    Draw_rect(NOHWND, pixmap, fill, x, y, width, height);
 }
 
 func Draw_arc(handle HWND, pixmap HPIXMAP, flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
-    C.go_draw_arc(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap), C.int(flags), C.int(xorigin), C.int(yorigin), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
+    C.go_draw_arc(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap.hpixmap), C.int(flags), C.int(xorigin), C.int(yorigin), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
+}
+
+func (window HWND) DrawArc(flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
+    Draw_arc(window, NOHPIXMAP, flags, xorigin, yorigin, x1, y1, x2, y2);
+}
+
+func (pixmap HPIXMAP) DrawArc(flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
+    Draw_arc(NOHWND, pixmap, flags, xorigin, yorigin, x1, y1, x2, y2);
 }
 
 func Draw_text(handle HWND, pixmap HPIXMAP, x int, y int, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    C.go_draw_text(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap), C.int(x), C.int(y), ctext);
+    C.go_draw_text(unsafe.Pointer(handle.hwnd), unsafe.Pointer(pixmap.hpixmap), C.int(x), C.int(y), ctext);
+}
+
+func (window HWND) DrawText(x int, y int, text string) {
+    Draw_text(window, NOHPIXMAP, x, y, text);
+}
+
+func (pixmap HPIXMAP) DrawText(x int, y int, text string) {
+    Draw_text(NOHWND, pixmap, x, y, text);
 }
 
 func Pointer_query_pos() (int, int) {
@@ -1223,43 +1489,43 @@ func Container_new(id uint, multi int) HWND {
 }
 
 func Container_setup(handle HWND, flags []uint, titles []string, separator int) int {
-   count := len(flags);
-   if len(titles) < count {
-     count = len(titles);
-   }
-   
-   ctitles := C.go_string_array_make(C.int(len(titles)))
-   defer C.go_string_array_free(ctitles, C.int(len(titles)))
-   for i, s := range titles {
-      C.go_string_array_set(ctitles, C.CString(s), C.int(i))
-   }   
+    count := len(flags);
+    if len(titles) < count {
+        count = len(titles);
+    }
 
-   cflags := make([]C.ulong, count);
-   for n := 0; n < count; n++ {
-     cflags[n] = C.ulong(flags[n]);
-   }
-   flagsHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cflags)));
-   return int(C.go_container_setup(unsafe.Pointer(handle.hwnd), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count), C.int(separator)));
+    ctitles := C.go_string_array_make(C.int(len(titles)))
+    defer C.go_string_array_free(ctitles, C.int(len(titles)))
+    for i, s := range titles {
+        C.go_string_array_set(ctitles, C.CString(s), C.int(i))
+    }   
+
+    cflags := make([]C.ulong, count);
+    for n := 0; n < count; n++ {
+        cflags[n] = C.ulong(flags[n]);
+    }
+    flagsHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cflags)));
+    return int(C.go_container_setup(unsafe.Pointer(handle.hwnd), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count), C.int(separator)));
 }
 
 func Filesystem_setup(handle HWND, flags []uint, titles []string) int {
-   count := len(flags);
-   if len(titles) < count {
-     count = len(titles);
-   }
-   
-   ctitles := C.go_string_array_make(C.int(len(titles)))
-   defer C.go_string_array_free(ctitles, C.int(len(titles)))
-   for i, s := range titles {
-      C.go_string_array_set(ctitles, C.CString(s), C.int(i))
-   }   
+    count := len(flags);
+    if len(titles) < count {
+        count = len(titles);
+    }
 
-   cflags := make([]C.ulong, count);
-   for n := 0; n < count; n++ {
-     cflags[n] = C.ulong(flags[n]);
-   }
-   flagsHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cflags)));
-   return int(C.go_filesystem_setup(unsafe.Pointer(handle.hwnd), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count)));
+    ctitles := C.go_string_array_make(C.int(len(titles)))
+    defer C.go_string_array_free(ctitles, C.int(len(titles)))
+    for i, s := range titles {
+        C.go_string_array_set(ctitles, C.CString(s), C.int(i))
+    }   
+
+    cflags := make([]C.ulong, count);
+    for n := 0; n < count; n++ {
+        cflags[n] = C.ulong(flags[n]);
+    }
+    flagsHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cflags)));
+    return int(C.go_filesystem_setup(unsafe.Pointer(handle.hwnd), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count)));
 }
 
 func Container_alloc(handle HWND, rowcount int) POINTER {
@@ -1532,8 +1798,128 @@ var backs []unsafe.Pointer;
 
 var go_flags_no_data C.int = 1;
 
-func (window HWND) Delete(sigfunc func(window HWND) int) {
+func (window HWND) ConnectDelete(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_DELETE);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectClicked(sigfunc func(window HWND) int) {
+   csigname := C.CString(C.DW_SIGNAL_CLICKED);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectSetFocus(sigfunc func(window HWND) int) {
+   csigname := C.CString(C.DW_SIGNAL_SET_FOCUS);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectKeyPress(sigfunc func(window HWND, ch uint8, vk int, state int, utf8 string) int) {
+   csigname := C.CString(C.DW_SIGNAL_KEY_PRESS);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectMotion(sigfunc func(window HWND, x int, y int, mask int) int) {
+   csigname := C.CString(C.DW_SIGNAL_MOTION_NOTIFY);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectButtonPress(sigfunc func(window HWND, x int, y int, mask int) int) {
+   csigname := C.CString(C.DW_SIGNAL_BUTTON_PRESS);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectButtonRelease(sigfunc func(window HWND, x int, y int, mask int) int) {
+   csigname := C.CString(C.DW_SIGNAL_BUTTON_RELEASE);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectExpose(sigfunc func(window HWND, x int, y int, width int, height int) int) {
+   csigname := C.CString(C.DW_SIGNAL_EXPOSE);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectItemEnter(sigfunc func(window HWND, str string) int) {
+   csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectItemContext(sigfunc func(window HWND, text string, x int, y int, itemdata POINTER) int) {
+   csigname := C.CString(C.DW_SIGNAL_ITEM_CONTEXT);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectItemSelect(sigfunc func(window HWND, item HTREEITEM, text string, itemdata POINTER) int) {
+   csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectListSelect(sigfunc func(window HWND, index int) int) {
+   csigname := C.CString(C.DW_SIGNAL_LIST_SELECT);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectValueChanged(sigfunc func(window HWND, index int) int) {
+   csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectColumnClick(sigfunc func(window HWND, index int) int) {
+   csigname := C.CString(C.DW_SIGNAL_COLUMN_CLICK);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectSwitchPage(sigfunc func(window HWND, index uint) int) {
+   csigname := C.CString(C.DW_SIGNAL_SWITCH_PAGE);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (window HWND) ConnectTreeExpand(sigfunc func(window HWND, item HTREEITEM) int) {
+   csigname := C.CString(C.DW_SIGNAL_TREE_EXPAND);
    defer C.free(unsafe.Pointer(csigname));
    
    //backs = append(backs, unsafe.Pointer(&sigfunc));
@@ -1695,9 +2081,9 @@ func go_int_callback_timer(pfunc unsafe.Pointer, data unsafe.Pointer, flags C.in
 func go_int_callback_print(pfunc unsafe.Pointer, print unsafe.Pointer, pixmap unsafe.Pointer, page_num C.int, data unsafe.Pointer, flags C.int) C.int {
    if (flags & go_flags_no_data) == go_flags_no_data {
       thisfunc := *(*func(HPRINT, HPIXMAP, int) int)(pfunc);
-      return C.int(thisfunc(HPRINT{print,""}, HPIXMAP(pixmap), int(page_num)));
+      return C.int(thisfunc(HPRINT{print,""}, HPIXMAP{pixmap}, int(page_num)));
    }
    thisfunc := *(*func(HPRINT, HPIXMAP, int, POINTER) int)(pfunc);
-   return C.int(thisfunc(HPRINT{print, ""}, HPIXMAP(pixmap), int(page_num), POINTER(data)));
+   return C.int(thisfunc(HPRINT{print, ""}, HPIXMAP{pixmap}, int(page_num), POINTER(data)));
 }
 

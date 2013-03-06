@@ -38,7 +38,7 @@ func main() {
     dw.Main();
 
     /* Destroy the main window */
-    dw.Window_destroy(window);
+    window.Destroy();
 
     /* Call dw.Shutdown() to shutdown the Dynamic Windows engine */
     dw.Shutdown();

@@ -17,8 +17,8 @@ var APP_NAME = "DWIB Example"
 var SRCROOT string
 
 /* Handle exiting the application */
-func exit_handler(win dw.HWND, data dw.POINTER) int {
-    if dw.Messagebox(APP_NAME, dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit") == dw.MB_RETURN_YES {
+func exit_handler() int {
+    if dw.Messagebox(APP_NAME, dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit?") == dw.MB_RETURN_YES {
         /* Exit the application cleanly */
         dw.Main_quit();
     }
@@ -54,15 +54,16 @@ func main() {
     dwib.Show(window);
 
     /* Connect the signal handlers */
-    dw.Signal_connect(window, dw.SIGNAL_DELETE, dw.SIGNAL_FUNC(&exit_handler_func), nil);
+    window.ConnectDelete(func(window dw.HWND) int { return exit_handler(); });
     /* Handler for Mac application menu Quit */
-    dw.Signal_connect(dw.DESKTOP, dw.SIGNAL_DELETE, dw.SIGNAL_FUNC(&exit_handler_func), nil);
-    dw.Signal_connect(dwib.Window_get_handle(window, "quitmenu"), dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&exit_handler_func), nil);
+    dw.DESKTOP.ConnectDelete(func(window dw.HWND) int { return exit_handler(); });
+    quitmenu := dwib.Window_get_handle(window, "quitmenu");
+    quitmenu.ConnectClicked(func(window dw.HWND) int { return exit_handler(); });
 
     dw.Main();
 
     /* Destroy the main window */
-    dw.Window_destroy(window);
+    window.Destroy();
     /* Close the Interface Builder XML */
     dwib.Close(handle);
 

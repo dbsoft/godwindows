@@ -242,7 +242,7 @@ func motion_notify_event(window dw.HWND, x int, y int, buttonmask int, data dw.P
 func show_window_callback(window dw.HWND, data dw.POINTER) int {
     thiswindow := dw.POINTER_TO_HWND(data);
 
-    if thiswindow != dw.DESKTOP {
+    if thiswindow != dw.NOHWND {
         dw.Window_show(thiswindow);
         dw.Window_raise(thiswindow);
     }
@@ -271,7 +271,7 @@ func context_menu_event(window dw.HWND, x int, y int, buttonmask int, data dw.PO
 func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
     var hpm dw.HPIXMAP
 
-    if hpma == nil {
+    if hpma == dw.NOHPIXMAP {
         hpm = text2pm;
     } else {
         hpm = hpma;
@@ -281,25 +281,25 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
         var i int
 
         dw.Color_foreground_set(dw.CLR_WHITE);
-        if hpma == nil {
-            dw.Draw_rect(dw.DESKTOP, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(text1pm), dw.Pixmap_height(text1pm));
+        if hpma == dw.NOHPIXMAP {
+            dw.Draw_rect(dw.NOHWND, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(text1pm), dw.Pixmap_height(text1pm));
         }
-        dw.Draw_rect(dw.DESKTOP, hpm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(hpm), dw.Pixmap_height(hpm));
+        dw.Draw_rect(dw.NOHWND, hpm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(hpm), dw.Pixmap_height(hpm));
 
         for i = 0; (i < nrows) && (i+row < len(lines)); i++ {
             fileline := i + row - 1;
             y := i*fheight;
             dw.Color_background_set(dw.COLOR(1 + (fileline % 15)));
             dw.Color_foreground_set(dw.COLOR(fileline % 16));
-            if hpma == nil {
-                dw.Draw_text(dw.DESKTOP, text1pm, 0, y, fmt.Sprintf("%6.6d", i+row));
+            if hpma == dw.NOHPIXMAP {
+                dw.Draw_text(dw.NOHWND, text1pm, 0, y, fmt.Sprintf("%6.6d", i+row));
             }
             thisline := lines[i+row];
             if len(thisline) > col {
-               dw.Draw_text(dw.DESKTOP, hpm, 0, y, thisline[col:]);
+               dw.Draw_text(dw.NOHWND, hpm, 0, y, thisline[col:]);
             }
         }
-        if hpma == nil {
+        if hpma == dw.NOHPIXMAP {
             text_expose(textbox1, 0, 0, 0, 0, nil);
             text_expose(textbox2, 0, 0, 0, 0, nil);
         }
@@ -308,9 +308,9 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
 
 /* When hpma is not NULL we are printing.. so handle things differently */
 func draw_shapes(direct int, hpma dw.HPIXMAP) {
-    var hpm, pixmap dw.HPIXMAP = nil, nil
+    var hpm, pixmap dw.HPIXMAP = dw.NOHPIXMAP, dw.NOHPIXMAP
     var window dw.HWND
-    if hpma != nil {
+    if hpma != dw.NOHPIXMAP {
         hpm = hpma;
     } else {
         hpm = text2pm;
@@ -353,16 +353,16 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
     dw.Draw_arc(window, pixmap, 0, 30, height - 30, 30, height - 10, 10, height - 30);
     /* Full circle in the left top area */
     dw.Draw_arc(window, pixmap, dw.DRAW_FULL, 120, 100, 80, 80, 160, 120);
-    if image != nil {
+    if image != dw.NOHPIXMAP {
         if image_stretch == TRUE {
-            dw.Pixmap_stretch_bitblt(window, pixmap, 10, 10, width - 20, height - 20, dw.DESKTOP, image, 0, 0, dw.Pixmap_width(image), dw.Pixmap_height(image));
+            dw.Pixmap_stretch_bitblt(window, pixmap, 10, 10, width - 20, height - 20, dw.NOHWND, image, 0, 0, dw.Pixmap_width(image), dw.Pixmap_height(image));
         } else {
-            dw.Pixmap_bitblt(window, pixmap, image_x, image_y, dw.Pixmap_width(image), dw.Pixmap_height(image), dw.DESKTOP, image, 0, 0);
+            dw.Pixmap_bitblt(window, pixmap, image_x, image_y, dw.Pixmap_width(image), dw.Pixmap_height(image), dw.NOHWND, image, 0, 0);
         }
     }
 
     /* If we aren't drawing direct do a bitblt */
-    if direct == FALSE && hpma == nil {
+    if direct == FALSE && hpma == dw.NOHPIXMAP {
         text_expose(textbox2, 0, 0, 0, 0, nil);
     }
 }
@@ -386,7 +386,7 @@ func draw_page(print dw.HPRINT, pixmap dw.HPIXMAP, page_num int, data dw.POINTER
        /* If we have a file to display... */
        if len(current_file) > 0 {
            /* Calculate new dimensions */
-           _, fheight := dw.Font_text_extents_get(dw.DESKTOP, pixmap, "(g");
+           _, fheight := dw.Font_text_extents_get(dw.NOHWND, pixmap, "(g");
            nrows := int(dw.Pixmap_height(pixmap) / fheight);
 
            /* Do the actual drawing */
@@ -396,21 +396,21 @@ func draw_page(print dw.HPRINT, pixmap dw.HPIXMAP, page_num int, data dw.POINTER
            var text = "No file currently selected!";
 
            /* Get the font size for this printer context... */
-           fwidth, fheight := dw.Font_text_extents_get(dw.DESKTOP, pixmap, text);
+           fwidth, fheight := dw.Font_text_extents_get(dw.NOHWND, pixmap, text);
 
            posx := int(dw.Pixmap_width(pixmap) - fwidth)/2;
            posy := int(dw.Pixmap_height(pixmap) - fheight)/2;
 
            dw.Color_foreground_set(dw.CLR_BLACK);
            dw.Color_background_set(dw.CLR_WHITE);
-           dw.Draw_text(dw.DESKTOP, pixmap, posx, posy, text);
+           dw.Draw_text(dw.NOHWND, pixmap, posx, posy, text);
        }
    }
    return TRUE;
 }
 
 func print_callback(window dw.HWND, data dw.POINTER) int {
-   print := dw.Print_new("DWTest Job", 0, 2, dw.SIGNAL_FUNC(&draw_page_func), nil);
+   print := dw.Print_new2("DWTest Job", 0, 2, dw.SIGNAL_FUNC(&draw_page_func), nil);
    dw.Print_run(print, 0);
    return FALSE;
 }
@@ -432,7 +432,7 @@ func text_expose(hwnd dw.HWND, x int, y int, width int, height int, data dw.POIN
         width = dw.Pixmap_width(hpm);
         height = dw.Pixmap_height(hpm);
 
-        dw.Pixmap_bitblt(hwnd, nil, 0, 0, width, height, dw.DESKTOP, hpm, 0, 0);
+        dw.Pixmap_bitblt(hwnd, dw.NOHPIXMAP, 0, 0, width, height, dw.NOHWND, hpm, 0, 0);
         dw.Flush();
     } else {
         update_render();
@@ -455,7 +455,7 @@ func configure_event(hwnd dw.HWND, width int, height int, data dw.POINTER) int {
 
     /* Make sure the side area is cleared */
     dw.Color_foreground_set(dw.CLR_WHITE);
-    dw.Draw_rect(dw.DESKTOP, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(text1pm), dw.Pixmap_height(text1pm));
+    dw.Draw_rect(dw.NOHWND, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(text1pm), dw.Pixmap_height(text1pm));
 
    /* Destroy the old pixmaps */
     dw.Pixmap_destroy(old1);
@@ -998,15 +998,15 @@ func text_add() {
     /* create render box for number pixmap */
     textbox1 = dw.Render_new(100);
     dw.Window_set_font(textbox1, FIXEDFONT);
-    font_width, font_height = dw.Font_text_extents_get(textbox1, nil, "(g");
+    font_width, font_height = dw.Font_text_extents_get(textbox1, dw.NOHPIXMAP, "(g");
     font_width = font_width / 2;
     vscrollbox := dw.Box_new(dw.VERT, 0);
     dw.Box_pack_start(vscrollbox, textbox1, font_width * width1, font_height * rows, dw.FALSE, dw.TRUE, 0);
-    dw.Box_pack_start(vscrollbox, dw.DESKTOP, font_width * (width1 + 1), hscrollbarheight, dw.FALSE, dw.FALSE, 0);
+    dw.Box_pack_start(vscrollbox, dw.NOHWND, font_width * (width1 + 1), hscrollbarheight, dw.FALSE, dw.FALSE, 0);
     dw.Box_pack_start(pagebox, vscrollbox, 0, 0, dw.FALSE, dw.TRUE, 0);
 
     /* pack empty space 1 character wide */
-    dw.Box_pack_start(pagebox, dw.DESKTOP, font_width, 0, dw.FALSE, dw.TRUE, 0);
+    dw.Box_pack_start(pagebox, dw.NOHWND, font_width, 0, dw.FALSE, dw.TRUE, 0);
 
     /* create box for filecontents and horz scrollbar */
     textboxA := dw.Box_new(dw.VERT, 0);
@@ -1023,22 +1023,22 @@ func text_add() {
     vscrollbox = dw.Box_new(dw.VERT, 0);
     dw.Box_pack_start(vscrollbox, vscrollbar, -1, -1, dw.FALSE, dw.TRUE, 0);
     /* Pack an area of empty space 14x14 pixels */
-    dw.Box_pack_start(vscrollbox, dw.DESKTOP, vscrollbarwidth, hscrollbarheight, dw.FALSE, dw.FALSE, 0);
+    dw.Box_pack_start(vscrollbox, dw.NOHWND, vscrollbarwidth, hscrollbarheight, dw.FALSE, dw.FALSE, 0);
     dw.Box_pack_start(pagebox, vscrollbox, 0, 0, dw.FALSE, dw.TRUE, 0);
 
     text1pm = dw.Pixmap_new(textbox1, uint(font_width * width1), uint(font_height * rows), depth);
     text2pm = dw.Pixmap_new(textbox2, uint(font_width * cols), uint(font_height * rows), depth);
     image = dw.Pixmap_new_from_file(textbox2, "test");
-    if image == nil && len(SRCROOT) > 0 {
+    if image == dw.NOHPIXMAP && len(SRCROOT) > 0 {
         image = dw.Pixmap_new_from_file(textbox2, fmt.Sprintf("%s/test", SRCROOT));
     }
-    if image != nil {
+    if image != dw.NOHPIXMAP {
         dw.Pixmap_set_transparent_color(image, dw.CLR_WHITE);
     }
 
     dw.Messagebox("DWTest", dw.MB_OK | dw.MB_INFORMATION, fmt.Sprintf("Width: %d Height: %d\n", font_width, font_height));
-    dw.Draw_rect(dw.DESKTOP, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * width1, font_height * rows);
-    dw.Draw_rect(dw.DESKTOP, text2pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * cols, font_height * rows);
+    dw.Draw_rect(dw.NOHWND, text1pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * width1, font_height * rows);
+    dw.Draw_rect(dw.NOHWND, text2pm, dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * cols, font_height * rows);
     dw.Signal_connect(textbox1, dw.SIGNAL_BUTTON_PRESS, dw.SIGNAL_FUNC(&context_menu_event_func), nil);
     dw.Signal_connect(textbox1, dw.SIGNAL_EXPOSE, dw.SIGNAL_FUNC(&text_expose_func), nil);
     dw.Signal_connect(textbox2, dw.SIGNAL_EXPOSE, dw.SIGNAL_FUNC(&text_expose_func), nil);
@@ -1188,7 +1188,7 @@ func buttons_add() {
     abutton1 := dw.Bitmapbutton_new_from_file("Top Button", 0, fmt.Sprintf("%s/%s", SRCROOT, FILE_ICON_NAME));
     dw.Box_pack_start(buttonboxperm, abutton1, 100, 30, FALSE, FALSE, 0);
     dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&button_callback_func), nil);
-    dw.Box_pack_start(buttonboxperm, dw.DESKTOP, 25, 5, FALSE, FALSE, 0);
+    dw.Box_pack_start(buttonboxperm, dw.NOHWND, 25, 5, FALSE, FALSE, 0);
     abutton2 := dw.Bitmapbutton_new_from_file("Bottom", 0, fmt.Sprintf("%s/%s", SRCROOT, FOLDER_ICON_NAME));
     dw.Box_pack_start(buttonsbox, abutton2, 25, 25, FALSE, FALSE, 0);
     dw.Signal_connect(abutton2, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&button_callback_func), nil);
@@ -1245,19 +1245,19 @@ func create_button(redraw bool) {
     abutton1 := dw.Bitmapbutton_new_from_file("Empty image. Should be under Top button", 0, "junk");
     dw.Box_pack_start(filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
     dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&change_color_red_callback_func), nil);
-    dw.Box_pack_start(filetoolbarbox, dw.DESKTOP, 25, 5, FALSE, FALSE, 0);
+    dw.Box_pack_start(filetoolbarbox, dw.NOHWND, 25, 5, FALSE, FALSE, 0);
 
     abutton1 = dw.Bitmapbutton_new_from_file("A borderless bitmapbitton", 0, fmt.Sprintf("%s/%s", SRCROOT, FOLDER_ICON_NAME));
     dw.Box_pack_start(filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
     dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&change_color_yellow_callback_func), nil);
-    dw.Box_pack_start(filetoolbarbox, dw.DESKTOP, 25, 5, FALSE, FALSE, 0);
+    dw.Box_pack_start(filetoolbarbox, dw.NOHWND, 25, 5, FALSE, FALSE, 0);
     dw.Window_set_style(abutton1, dw.BS_NOBORDER, dw.BS_NOBORDER);
 
     //abutton1 = dw.Bitmapbutton_new_from_data("A button from data", 0, folder_ico, 1718 );
     abutton1 = dw.Bitmapbutton_new_from_file("A button from data", 0, "junk");
     dw.Box_pack_start(filetoolbarbox, abutton1, 25, 25, FALSE, FALSE, 0);
     dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&percent_button_box_callback_func), nil);
-    dw.Box_pack_start(filetoolbarbox, dw.DESKTOP, 25, 5, FALSE, FALSE, 0);
+    dw.Box_pack_start(filetoolbarbox, dw.NOHWND, 25, 5, FALSE, FALSE, 0);
     if redraw == true {
         dw.Window_redraw(filetoolbarbox);
         dw.Window_redraw(mainwindow);
@@ -1312,11 +1312,11 @@ func main() {
    dw.Box_pack_start(mainwindow, notebookbox, 0, 0, dw.TRUE, dw.TRUE, 0);
 
    foldericon = dw.Icon_load_from_file(FOLDER_ICON_NAME);
-   if foldericon == nil && len(SRCROOT) > 0 {
+   if foldericon == dw.NOHICN && len(SRCROOT) > 0 {
       foldericon = dw.Icon_load_from_file(fmt.Sprintf("%s/%s", SRCROOT, FOLDER_ICON_NAME));
    }
    fileicon = dw.Icon_load_from_file(FILE_ICON_NAME);
-   if fileicon == nil && len(SRCROOT) > 0 {
+   if fileicon == dw.NOHICN && len(SRCROOT) > 0 {
       fileicon = dw.Icon_load_from_file(fmt.Sprintf("%s/%s", SRCROOT, FILE_ICON_NAME));
    }
    notebook := dw.Notebook_new(1, dw.TRUE);
@@ -1367,7 +1367,7 @@ func main() {
    dw.Notebook_page_set_text(notebook, notebookpage7, "html");
    
    rawhtml := dw.Html_new(1001);
-   if rawhtml != dw.DESKTOP {
+   if rawhtml != dw.NOHWND {
        dw.Box_pack_start(notebookbox7, rawhtml, 0, 100, TRUE, FALSE, 0);
        dw.Html_raw(rawhtml, "<html><body><center><h1>dwtest</h1></center></body></html>");
        html = dw.Html_new(1002);

@@ -29,7 +29,7 @@ func main() {
     dw.Box_pack_start(window, label, 0, 0, dw.TRUE, dw.TRUE, 0);
     
     /* Connect the signal handlers */
-    window.Delete(func(window dw.HWND, data dw.POINTER) int { return exit_handler(window, message); });
+    window.Delete(func(window dw.HWND) int { return exit_handler(window, message); });
 
     dw.Window_set_size(window, 640, 550);
     dw.Window_show(window);

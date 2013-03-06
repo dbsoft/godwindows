@@ -20,10 +20,15 @@ type HWND struct {
 }
 type HTREEITEM unsafe.Pointer
 type HICN unsafe.Pointer
-type HTIMER C.int
+type HTIMER struct {
+   tid C.int
+}
 type HMENUI unsafe.Pointer
 type HPIXMAP unsafe.Pointer
-type HPRINT unsafe.Pointer
+type HPRINT struct {
+   hprint unsafe.Pointer
+   jobname string
+}
 type HNOTEPAGE C.ulong
 type COLOR C.ulong
 type POINTER unsafe.Pointer
@@ -42,6 +47,14 @@ const (
 )
 
 var DESKTOP HWND
+
+// Varaibles to pass if "none/nil" is intended
+var NOHWND HWND
+var NOHTIMER HTIMER
+var NOHPRINT HPRINT
+var NOHPIXMAP HPIXMAP = nil
+var NOHMENUI HMENUI = nil
+var NOHICN HICN = nil
 var NOMENU HMENUI = nil
 
 // Import as much as we can from C
@@ -632,18 +645,20 @@ func Color_choose(value COLOR) COLOR {
 }
 
 func Timer_connect(interval int, sigfunc SIGNAL_FUNC, data POINTER) HTIMER {
-   return HTIMER(C.go_timer_connect(C.int(interval), unsafe.Pointer(sigfunc), unsafe.Pointer(data)));
+   return HTIMER{C.go_timer_connect(C.int(interval), unsafe.Pointer(sigfunc), unsafe.Pointer(data), 0)};
 }
 
 func Timer_disconnect(id HTIMER) {
-   C.dw_timer_disconnect(C.int(id));
+   if id.tid > 0 {
+      C.dw_timer_disconnect(C.int(id.tid));
+   }
 }
 
 func Signal_connect(window HWND, signame string, sigfunc SIGNAL_FUNC, data POINTER) {
    csigname := C.CString(signame);
    defer C.free(unsafe.Pointer(csigname));
    
-   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(sigfunc), unsafe.Pointer(data));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(sigfunc), unsafe.Pointer(data), 0);
 }
 
 func Beep(freq int, dur int) {
@@ -1482,110 +1497,207 @@ func Splitbar_get(handle HWND) float32 {
    return float32(C.go_splitbar_get(unsafe.Pointer(handle.hwnd)));
 }
 
-func Print_new(jobname string, flags uint, pages uint, drawfunc SIGNAL_FUNC, drawdata POINTER) HPRINT {
+func Print_new(jobname string) HPRINT {
+   return HPRINT{nil, jobname};
+}
+
+/* Classic version... */
+func Print_new2(jobname string, flags uint, pages uint, drawfunc SIGNAL_FUNC, drawdata POINTER) HPRINT {
    cjobname := C.CString(jobname);
    defer C.free(unsafe.Pointer(cjobname));
 
-   return HPRINT(C.go_print_new(cjobname, C.ulong(flags), C.uint(pages), unsafe.Pointer(drawfunc), unsafe.Pointer(drawdata)));
+   return HPRINT{C.go_print_new(cjobname, C.ulong(flags), C.uint(pages), unsafe.Pointer(drawfunc), unsafe.Pointer(drawdata), 0), jobname};
 }
 
 func Print_run(print HPRINT, flags uint) int {
-   return int(C.go_print_run(unsafe.Pointer(print), C.ulong(flags)));
+   if print.hprint != nil {
+      return int(C.go_print_run(unsafe.Pointer(print.hprint), C.ulong(flags)));
+   }
+   return C.DW_ERROR_UNKNOWN;
 }
 
 func Print_cancel(print HPRINT) {
-   C.go_print_cancel(unsafe.Pointer(print));
+   if print.hprint != nil {
+      C.go_print_cancel(unsafe.Pointer(print.hprint));
+   }
 }
 
 func init() {
    runtime.LockOSThread();
 }
 
+/* Do we need to cache the function pointers so they don't get garbage collected?
 var backs []unsafe.Pointer;
+*/
 
-func (window HWND) Delete(sigfunc func(window HWND, data POINTER) int) {
+var go_flags_no_data C.int = 1;
+
+func (window HWND) Delete(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_DELETE);
    defer C.free(unsafe.Pointer(csigname));
    
-   backs = append(backs, unsafe.Pointer(&sigfunc));
-   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil);
+   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+}
+
+func (id HTIMER) Connect(sigfunc func() int, interval int) {
+   if id.tid == 0 {
+      //backs = append(backs, unsafe.Pointer(&sigfunc));
+      id.tid = C.go_timer_connect(C.int(interval), unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
+   }
+}
+
+func (id HTIMER) Disconnect(sigfunc func() int) {
+   if id.tid > 0 {
+      C.dw_timer_disconnect(C.int(id.tid));
+   }
+}
+
+func (print HPRINT) Connect(drawfunc func(HPRINT, HPIXMAP, int) int, flags uint, pages int) {
+   if print.hprint == nil {
+      //backs = append(backs, unsafe.Pointer(&sigfunc));
+      cjobname := C.CString(print.jobname);
+      defer C.free(unsafe.Pointer(cjobname));
+
+      print.hprint = C.go_print_new(cjobname, C.ulong(flags), C.uint(pages), unsafe.Pointer(&drawfunc), nil, go_flags_no_data);
+   }
+}
+
+func (print HPRINT) Run(flags uint) {
+   Print_run(print, flags);
+}
+
+func (print HPRINT) Cancel() {
+   Print_cancel(print);
 }
 
 //export go_int_callback_basic
-func go_int_callback_basic(pfunc unsafe.Pointer, window unsafe.Pointer, data unsafe.Pointer) C.int {
+func go_int_callback_basic(pfunc unsafe.Pointer, window unsafe.Pointer, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND) int)(pfunc);
+      return C.int(thisfunc(HWND{window}));
+   }
    thisfunc := *(*func(HWND, POINTER) int)(pfunc);
    return C.int(thisfunc(HWND{window}, POINTER(data)));
 }
 
 //export go_int_callback_configure
-func go_int_callback_configure(pfunc unsafe.Pointer, window unsafe.Pointer, width C.int, height C.int, data unsafe.Pointer) C.int {
+func go_int_callback_configure(pfunc unsafe.Pointer, window unsafe.Pointer, width C.int, height C.int, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, int, int) C.int)(pfunc);
+      return C.int(thisfunc(HWND{window}, int(width), int(height)));
+   }
    thisfunc := *(*func(HWND, int, int, POINTER) C.int)(pfunc);
    return C.int(thisfunc(HWND{window}, int(width), int(height), POINTER(data)));
 }
 
 //export go_int_callback_keypress
-func go_int_callback_keypress(pfunc unsafe.Pointer, window unsafe.Pointer, ch C.char, vk C.int, state C.int, data unsafe.Pointer, utf8 *C.char) C.int {
+func go_int_callback_keypress(pfunc unsafe.Pointer, window unsafe.Pointer, ch C.char, vk C.int, state C.int, data unsafe.Pointer, utf8 *C.char, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, uint8, int, int, string) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, uint8(ch), int(vk), int(state), C.GoString(utf8)));
+   }
    thisfunc := *(*func(HWND, uint8, int, int, POINTER, string) int)(pfunc);
    return C.int(thisfunc(HWND{window}, uint8(ch), int(vk), int(state), POINTER(data), C.GoString(utf8)));
 }
 
 //export go_int_callback_mouse
-func go_int_callback_mouse(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int, y C.int, mask C.int, data unsafe.Pointer) C.int {
+func go_int_callback_mouse(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int, y C.int, mask C.int, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, int, int, int) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, int(x), int(y), int(mask)));
+   }
    thisfunc := *(*func(HWND, int, int, int, POINTER) int)(pfunc);
    return C.int(thisfunc(HWND{window}, int(x), int(y), int(mask), POINTER(data)));
 }
 
 //export go_int_callback_expose
-func go_int_callback_expose(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int, y C.int, width C.int, height C.int, data unsafe.Pointer) C.int {
+func go_int_callback_expose(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int, y C.int, width C.int, height C.int, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, int, int, int, int) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, int(x), int(y), int(width), int(height)));
+   }
    thisfunc := *(*func(HWND, int, int, int, int, POINTER) int)(pfunc);
    return C.int(thisfunc(HWND{window}, int(x), int(y), int(width), int(height), POINTER(data)));
 }
 
 //export go_int_callback_string
-func go_int_callback_string(pfunc unsafe.Pointer, window unsafe.Pointer, str *C.char, data unsafe.Pointer) C.int {
+func go_int_callback_string(pfunc unsafe.Pointer, window unsafe.Pointer, str *C.char, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, string) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, C.GoString(str)));
+   }
    thisfunc := *(*func(HWND, string, POINTER) int)(pfunc);
    return C.int(thisfunc(HWND{window}, C.GoString(str), POINTER(data)));
 }
 
 //export go_int_callback_item_context
-func go_int_callback_item_context(pfunc unsafe.Pointer, window unsafe.Pointer, text *C.char, x C.int, y C.int, data unsafe.Pointer, itemdata unsafe.Pointer) C.int {
+func go_int_callback_item_context(pfunc unsafe.Pointer, window unsafe.Pointer, text *C.char, x C.int, y C.int, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, string, int, int, POINTER) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, C.GoString(text), int(x), int(y), POINTER(itemdata)));
+   }
    thisfunc := *(*func(HWND, string, int, int, POINTER, POINTER) int)(pfunc);
    return C.int(thisfunc(HWND{window}, C.GoString(text), int(x), int(y), POINTER(data), POINTER(itemdata)));
 }
 
 //export go_int_callback_item_select
-func go_int_callback_item_select(pfunc unsafe.Pointer, window unsafe.Pointer, item unsafe.Pointer, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer) C.int {
+func go_int_callback_item_select(pfunc unsafe.Pointer, window unsafe.Pointer, item unsafe.Pointer, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, HTREEITEM, string, POINTER) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, HTREEITEM(item), C.GoString(text), POINTER(itemdata)));
+   }
    thisfunc := *(*func(HWND, HTREEITEM, string, POINTER, POINTER) int)(pfunc);
    return C.int(thisfunc(HWND{window}, HTREEITEM(item), C.GoString(text), POINTER(data), POINTER(itemdata)));
 }
 
 //export go_int_callback_numeric
-func go_int_callback_numeric(pfunc unsafe.Pointer, window unsafe.Pointer, val C.int, data unsafe.Pointer) C.int {
-   thisfunc := *(*func(HWND, int, unsafe.Pointer) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, int(val), data));
+func go_int_callback_numeric(pfunc unsafe.Pointer, window unsafe.Pointer, val C.int, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, int) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, int(val)));
+   }
+   thisfunc := *(*func(HWND, int, POINTER) int)(pfunc);
+   return C.int(thisfunc(HWND{window}, int(val), POINTER(data)));
 }
 
 //export go_int_callback_ulong
-func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ulong, data unsafe.Pointer) C.int {
+func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ulong, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, uint) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, uint(val)));
+   }
    thisfunc := *(*func(HWND, uint, POINTER) int)(pfunc);
    return C.int(thisfunc(HWND{window}, uint(val), POINTER(data)));
 }
 
 //export go_int_callback_tree
-func go_int_callback_tree(pfunc unsafe.Pointer, window unsafe.Pointer, tree unsafe.Pointer, data unsafe.Pointer) C.int {
+func go_int_callback_tree(pfunc unsafe.Pointer, window unsafe.Pointer, tree unsafe.Pointer, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HWND, HTREEITEM) int)(pfunc);
+      return C.int(thisfunc(HWND{window}, HTREEITEM(tree)));
+   }
    thisfunc := *(*func(HWND, HTREEITEM, POINTER) int)(pfunc);
    return C.int(thisfunc(HWND{window}, HTREEITEM(tree), POINTER(data)));
 }
 
 //export go_int_callback_timer
-func go_int_callback_timer(pfunc unsafe.Pointer, data unsafe.Pointer) C.int {
+func go_int_callback_timer(pfunc unsafe.Pointer, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func() int)(pfunc);
+      return C.int(thisfunc());
+   }
    thisfunc := *(*func(POINTER) int)(pfunc);
    return C.int(thisfunc(POINTER(data)));
 }
 
 //export go_int_callback_print
-func go_int_callback_print(pfunc unsafe.Pointer, print unsafe.Pointer, pixmap unsafe.Pointer, page_num C.int, data unsafe.Pointer) C.int {
+func go_int_callback_print(pfunc unsafe.Pointer, print unsafe.Pointer, pixmap unsafe.Pointer, page_num C.int, data unsafe.Pointer, flags C.int) C.int {
+   if (flags & go_flags_no_data) == go_flags_no_data {
+      thisfunc := *(*func(HPRINT, HPIXMAP, int) int)(pfunc);
+      return C.int(thisfunc(HPRINT{print,""}, HPIXMAP(pixmap), int(page_num)));
+   }
    thisfunc := *(*func(HPRINT, HPIXMAP, int, POINTER) int)(pfunc);
-   return C.int(thisfunc(HPRINT(print), HPIXMAP(pixmap), int(page_num), POINTER(data)));
+   return C.int(thisfunc(HPRINT{print, ""}, HPIXMAP(pixmap), int(page_num), POINTER(data)));
 }
 

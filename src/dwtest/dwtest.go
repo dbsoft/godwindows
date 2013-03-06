@@ -370,11 +370,11 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
 func update_render() {
     switch render_type {
         case 0:
-            draw_shapes(FALSE, nil);
+            draw_shapes(FALSE, dw.NOHPIXMAP);
         case 1:
-            draw_shapes(TRUE, nil);
+            draw_shapes(TRUE, dw.NOHPIXMAP);
         case 2:
-            draw_file(current_row, current_col, rows, font_height, nil);
+            draw_file(current_row, current_col, rows, font_height, dw.NOHPIXMAP);
     }
 }
 
@@ -1042,7 +1042,7 @@ func text_add() {
     dw.Signal_connect(textbox1, dw.SIGNAL_BUTTON_PRESS, dw.SIGNAL_FUNC(&context_menu_event_func), nil);
     dw.Signal_connect(textbox1, dw.SIGNAL_EXPOSE, dw.SIGNAL_FUNC(&text_expose_func), nil);
     dw.Signal_connect(textbox2, dw.SIGNAL_EXPOSE, dw.SIGNAL_FUNC(&text_expose_func), nil);
-    dw.Signal_connect(textbox2, dw.SIGNAL_CONFIGURE, dw.SIGNAL_FUNC(&configure_event_func), dw.POINTER(text2pm));
+    dw.Signal_connect(textbox2, dw.SIGNAL_CONFIGURE, dw.SIGNAL_FUNC(&configure_event_func), nil);
     dw.Signal_connect(textbox2, dw.SIGNAL_MOTION_NOTIFY, dw.SIGNAL_FUNC(&motion_notify_event_func), dw.POINTER(uintptr(1)));
     dw.Signal_connect(textbox2, dw.SIGNAL_BUTTON_PRESS, dw.SIGNAL_FUNC(&motion_notify_event_func), nil);
     dw.Signal_connect(hscrollbar, dw.SIGNAL_VALUE_CHANGED, dw.SIGNAL_FUNC(&scrollbar_valuechanged_callback_func), dw.HWND_TO_POINTER(status1));

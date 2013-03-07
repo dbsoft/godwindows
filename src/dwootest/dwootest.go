@@ -25,7 +25,7 @@ func main() {
     /* Create our window */
     window := dw.Window_new(dw.DESKTOP, APP_NAME, dw.FCF_SYSMENU | dw.FCF_TITLEBAR | dw.FCF_TASKLIST | dw.FCF_DLGBORDER | dw.FCF_SIZEBORDER | dw.FCF_MINMAX);
 
-    label := dw.Text_new("Hello, World", 0);
+    label := dw.Text_new("Hello, 世界", 0);
     window.PackStart(label, 0, 0, dw.TRUE, dw.TRUE, 0);
     
     /* Connect the signal handlers */

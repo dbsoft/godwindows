@@ -307,6 +307,9 @@ var VK_RSHIFT   = int(C.VK_RSHIFT)
 var VK_LCONTROL = int(C.VK_LCONTROL)
 var VK_RCONTROL = int(C.VK_RCONTROL)
 
+// Cache the function pointers so they don't get garbage collected
+var backs []unsafe.Pointer;
+
 func RESOURCE(id uintptr) unsafe.Pointer {
     return unsafe.Pointer(id);
 }
@@ -799,6 +802,7 @@ func Color_choose(value COLOR) COLOR {
 }
 
 func Timer_connect(interval int, sigfunc SIGNAL_FUNC, data POINTER) HTIMER {
+   backs = append(backs, unsafe.Pointer(sigfunc));
    return HTIMER{C.go_timer_connect(C.int(interval), unsafe.Pointer(sigfunc), unsafe.Pointer(data), 0)};
 }
 
@@ -812,6 +816,7 @@ func Signal_connect(window HWND, signame string, sigfunc SIGNAL_FUNC, data POINT
    csigname := C.CString(signame);
    defer C.free(unsafe.Pointer(csigname));
    
+   backs = append(backs, unsafe.Pointer(sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(sigfunc), unsafe.Pointer(data), 0);
 }
 
@@ -1769,6 +1774,7 @@ func Print_new(jobname string) HPRINT {
 
 /* Classic version... */
 func Print_new2(jobname string, flags uint, pages uint, drawfunc SIGNAL_FUNC, drawdata POINTER) HPRINT {
+   backs = append(backs, unsafe.Pointer(drawfunc));
    cjobname := C.CString(jobname);
    defer C.free(unsafe.Pointer(cjobname));
 
@@ -1792,17 +1798,13 @@ func init() {
    runtime.LockOSThread();
 }
 
-/* Do we need to cache the function pointers so they don't get garbage collected?
-var backs []unsafe.Pointer;
-*/
-
 var go_flags_no_data C.int = 1;
 
 func (window HWND) ConnectDelete(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_DELETE);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1810,7 +1812,7 @@ func (window HWND) ConnectClicked(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_CLICKED);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1818,7 +1820,7 @@ func (window HWND) ConnectSetFocus(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_SET_FOCUS);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1826,7 +1828,7 @@ func (window HWND) ConnectKeyPress(sigfunc func(window HWND, ch uint8, vk int, s
    csigname := C.CString(C.DW_SIGNAL_KEY_PRESS);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1834,7 +1836,7 @@ func (window HWND) ConnectMotion(sigfunc func(window HWND, x int, y int, mask in
    csigname := C.CString(C.DW_SIGNAL_MOTION_NOTIFY);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1842,7 +1844,7 @@ func (window HWND) ConnectButtonPress(sigfunc func(window HWND, x int, y int, ma
    csigname := C.CString(C.DW_SIGNAL_BUTTON_PRESS);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1850,7 +1852,7 @@ func (window HWND) ConnectButtonRelease(sigfunc func(window HWND, x int, y int, 
    csigname := C.CString(C.DW_SIGNAL_BUTTON_RELEASE);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1858,7 +1860,7 @@ func (window HWND) ConnectExpose(sigfunc func(window HWND, x int, y int, width i
    csigname := C.CString(C.DW_SIGNAL_EXPOSE);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1866,7 +1868,7 @@ func (window HWND) ConnectItemEnter(sigfunc func(window HWND, str string) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1874,7 +1876,7 @@ func (window HWND) ConnectItemContext(sigfunc func(window HWND, text string, x i
    csigname := C.CString(C.DW_SIGNAL_ITEM_CONTEXT);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1882,7 +1884,7 @@ func (window HWND) ConnectItemSelect(sigfunc func(window HWND, item HTREEITEM, t
    csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1890,7 +1892,7 @@ func (window HWND) ConnectListSelect(sigfunc func(window HWND, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_LIST_SELECT);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1898,7 +1900,7 @@ func (window HWND) ConnectValueChanged(sigfunc func(window HWND, index int) int)
    csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1906,7 +1908,7 @@ func (window HWND) ConnectColumnClick(sigfunc func(window HWND, index int) int) 
    csigname := C.CString(C.DW_SIGNAL_COLUMN_CLICK);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1914,7 +1916,7 @@ func (window HWND) ConnectSwitchPage(sigfunc func(window HWND, index uint) int) 
    csigname := C.CString(C.DW_SIGNAL_SWITCH_PAGE);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
@@ -1922,13 +1924,13 @@ func (window HWND) ConnectTreeExpand(sigfunc func(window HWND, item HTREEITEM) i
    csigname := C.CString(C.DW_SIGNAL_TREE_EXPAND);
    defer C.free(unsafe.Pointer(csigname));
    
-   //backs = append(backs, unsafe.Pointer(&sigfunc));
+   backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
 }
 
 func (id HTIMER) Connect(sigfunc func() int, interval int) {
    if id.tid == 0 {
-      //backs = append(backs, unsafe.Pointer(&sigfunc));
+      backs = append(backs, unsafe.Pointer(&sigfunc));
       id.tid = C.go_timer_connect(C.int(interval), unsafe.Pointer(&sigfunc), nil, go_flags_no_data);
    }
 }
@@ -1941,7 +1943,7 @@ func (id HTIMER) Disconnect(sigfunc func() int) {
 
 func (print HPRINT) Connect(drawfunc func(HPRINT, HPIXMAP, int) int, flags uint, pages int) {
    if print.hprint == nil {
-      //backs = append(backs, unsafe.Pointer(&sigfunc));
+      backs = append(backs, unsafe.Pointer(&drawfunc));
       cjobname := C.CString(print.jobname);
       defer C.free(unsafe.Pointer(cjobname));
 
@@ -1955,6 +1957,22 @@ func (print HPRINT) Run(flags uint) {
 
 func (print HPRINT) Cancel() {
    Print_cancel(print);
+}
+
+//export go_callback_remove
+func go_callback_remove(pfunc unsafe.Pointer) {
+   // Scan through the callback function pointer list...
+   for i, p := range backs {
+      // When we find the pointer of the function
+      // we are removing...
+      if p == pfunc {
+         // Remove it from the callback list...
+         // So it can be garbage collected if not used
+         backs = append(backs[:i], backs[i+1:]...);
+         //delete(backs, i);
+         return;
+      }
+   }   
 }
 
 //export go_int_callback_basic

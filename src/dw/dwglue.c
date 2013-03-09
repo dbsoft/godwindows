@@ -1099,6 +1099,7 @@ extern int go_int_callback_ulong(void *pfunc, void* window, unsigned long val, v
 extern int go_int_callback_tree(void *pfunc, void* window, void *item, void *data, int flags);
 extern int go_int_callback_timer(void *pfunc, void *data, int flags);
 extern int go_int_callback_print(void *pfunc, void *print, void *pixmap, int page_num, void *data, int flags);
+extern void go_callback_remove(void *pfunc);
 
 static int DWSIGNAL go_callback_basic(HWND window, void *data)
 {
@@ -1262,6 +1263,8 @@ static void DWSIGNAL go_signal_free(HWND window, void *data)
 {
    if(data)
    {
+      void **param = (void **)data;
+      go_callback_remove(param[0]);
       free(data);
    }
 }

@@ -102,6 +102,11 @@ static void *go_window_get_data(void *handle, char *dataname)
    return dw_window_get_data((HWND)handle, dataname);
 }
 
+static void go_window_set_data(void *handle, char *dataname, void *data)
+{
+   dw_window_set_data((HWND)handle, dataname, data);
+}
+
 static char *go_window_get_font(void *handle)
 {
    return dw_window_get_font((HWND)handle);

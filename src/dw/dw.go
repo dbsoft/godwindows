@@ -15,15 +15,78 @@ import "runtime"
 import "reflect"
 import "os"
 
+type HANDLE interface {
+   GetHandle() unsafe.Pointer
+}
 type HWND struct {
     hwnd unsafe.Pointer
 }
-type HTREEITEM unsafe.Pointer
+type HENTRYFIELD struct {
+   hwnd unsafe.Pointer
+}
+type HGENERIC struct {
+   hwnd unsafe.Pointer
+}
+type HTREE struct {
+   hwnd unsafe.Pointer
+}
+type HCONTAINER struct {
+   hwnd unsafe.Pointer
+   filesystem bool
+}
+type HMLE struct {
+   hwnd unsafe.Pointer
+}
+type HBUTTON struct {
+   hwnd unsafe.Pointer
+}
+type HSPINBUTTON struct {
+   hwnd unsafe.Pointer
+}
+type HNOTEBOOK struct {
+   hwnd unsafe.Pointer
+}
+type HBOX struct {
+   hwnd unsafe.Pointer
+}
+type HSCROLLBOX struct {
+   hwnd unsafe.Pointer
+}
+type HMENU struct {
+   hwnd unsafe.Pointer
+}
+type HLISTBOX struct {
+   hwnd unsafe.Pointer
+}
+type HPERCENT struct {
+   hwnd unsafe.Pointer
+}
+type HSLIDER struct {
+   hwnd unsafe.Pointer
+}
+type HSCROLLBAR struct {
+   hwnd unsafe.Pointer
+}
+type HRENDER struct {
+   hwnd unsafe.Pointer
+}
+type HHTML struct {
+   hwnd unsafe.Pointer
+}
+type HCALENDAR struct {
+   hwnd unsafe.Pointer
+}
+type HTREEITEM struct {
+    htreeitem unsafe.Pointer
+    htree HANDLE
+}
 type HICN unsafe.Pointer
 type HTIMER struct {
     tid C.int
 }
-type HMENUI unsafe.Pointer
+type HMENUI struct {
+    hmenui unsafe.Pointer
+}
 type HPIXMAP struct {
     hpixmap unsafe.Pointer
 }
@@ -31,7 +94,10 @@ type HPRINT struct {
     hprint unsafe.Pointer
     jobname string
 }
-type HNOTEPAGE C.ulong
+type HNOTEPAGE struct {
+    pageid C.ulong
+    hnotebook HANDLE
+}
 type COLOR C.ulong
 type POINTER unsafe.Pointer
 type SIGNAL_FUNC unsafe.Pointer
@@ -55,9 +121,9 @@ var NOHWND HWND
 var NOHTIMER HTIMER
 var NOHPRINT HPRINT
 var NOHPIXMAP HPIXMAP
-var NOHMENUI HMENUI = nil
+var NOHMENUI HMENUI
+var NOMENU HMENUI
 var NOHICN HICN = nil
-var NOMENU HMENUI = nil
 
 // Import as much as we can from C
 var HORZ = C.DW_HORZ
@@ -321,16 +387,92 @@ func RGB(red uint8, green uint8, blue uint8) COLOR {
     return COLOR((0xF0000000 | (lred) | (lgreen << 8) | (lblue << 16)));
 }
 
-func POINTER_TO_HWND(ptr POINTER) HWND {
-    return HWND{unsafe.Pointer(ptr)};
+func POINTER_TO_HANDLE(ptr POINTER) HANDLE {
+    return HANDLE(HWND{unsafe.Pointer(ptr)});
 }
 
-func HWND_TO_UINTPTR(handle HWND) uintptr {
-    return uintptr(handle.hwnd);
+func HANDLE_TO_UINTPTR(handle HANDLE) uintptr {
+    return uintptr(handle.GetHandle());
 }
 
-func HWND_TO_POINTER(handle HWND) POINTER {
-    return POINTER(handle.hwnd);
+func HANDLE_TO_POINTER(handle HANDLE) POINTER {
+    return POINTER(handle.GetHandle());
+}
+
+func (window HWND) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HENTRYFIELD) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HGENERIC) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HTREE) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HCONTAINER) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HMLE) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HBUTTON) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HSPINBUTTON) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HNOTEBOOK) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HBOX) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HSCROLLBOX) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HMENU) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HLISTBOX) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HPERCENT) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HSLIDER) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HSCROLLBAR) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HRENDER) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HHTML) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HCALENDAR) GetHandle() unsafe.Pointer {
+   return window.hwnd;
 }
 
 func Init(newthread int) int {
@@ -381,171 +523,146 @@ func Window_new(owner HWND, title string, flags uint) HWND {
     return HWND{C.go_window_new(unsafe.Pointer(owner.hwnd), ctitle, C.ulong(flags))};
 }
 
-func Window_show(handle HWND) int {
-   return int(C.go_window_show(unsafe.Pointer(handle.hwnd)));
+func Window_show(handle HANDLE) int {
+   return int(C.go_window_show(handle.GetHandle()));
 }
 
 func (window HWND) Show() int {
     return Window_show(window);
 }
 
-func Window_hide(handle HWND) int {
-   return int(C.go_window_hide(unsafe.Pointer(handle.hwnd)));
+func Window_hide(handle HANDLE) int {
+   return int(C.go_window_hide(handle.GetHandle()));
 }
 
 func (window HWND) Hide() int {
     return Window_hide(window);
 }
 
-func Window_lower(handle HWND) int {
-   return int(C.go_window_lower(unsafe.Pointer(handle.hwnd)));
+func Window_lower(handle HANDLE) int {
+   return int(C.go_window_lower(handle.GetHandle()));
 }
 
 func (window HWND) Lower() int {
     return Window_lower(window);
 }
 
-func Window_raise(handle HWND) int {
-   return int(C.go_window_raise(unsafe.Pointer(handle.hwnd)));
+func Window_raise(handle HANDLE) int {
+   return int(C.go_window_raise(handle.GetHandle()));
 }
 
 func (window HWND) Raise() int {
     return Window_raise(window);
 }
 
-func Window_minimize(handle HWND) int {
-   return int(C.go_window_minimize(unsafe.Pointer(handle.hwnd)));
+func Window_minimize(handle HANDLE) int {
+   return int(C.go_window_minimize(handle.GetHandle()));
 }
 
 func (window HWND) Minimize() int {
     return Window_minimize(window);
 }
 
-func Window_set_pos(handle HWND, x int, y int) {
-    C.go_window_set_pos(unsafe.Pointer(handle.hwnd), C.long(x), C.long(y));
+func Window_set_pos(handle HANDLE, x int, y int) {
+    C.go_window_set_pos(handle.GetHandle(), C.long(x), C.long(y));
 }
 
 func (window HWND) SetPos(x int, y int) {
     Window_set_pos(window, x, y);
 }
 
-func Window_set_pos_size(handle HWND, x int, y int, width uint, height uint) {
-    C.go_window_set_pos_size(unsafe.Pointer(handle.hwnd), C.long(x), C.long(y), C.ulong(width), C.ulong(height));
+func Window_set_pos_size(handle HANDLE, x int, y int, width uint, height uint) {
+    C.go_window_set_pos_size(handle.GetHandle(), C.long(x), C.long(y), C.ulong(width), C.ulong(height));
 }
 
 func (window HWND) SetPosSize(x int, y int, width uint, height uint) {
     Window_set_pos_size(window, x, y, width, height);
 }
 
-func Window_set_size(handle HWND, width uint, height uint) {
-    C.go_window_set_size(unsafe.Pointer(handle.hwnd), C.ulong(width), C.ulong(height));
+func Window_set_size(handle HANDLE, width uint, height uint) {
+    C.go_window_set_size(handle.GetHandle(), C.ulong(width), C.ulong(height));
 }
 
 func (window HWND) SetSize(width uint, height uint) {
     Window_set_size(window, width, height);
 }
 
-func Window_set_color(handle HWND, fore COLOR, back COLOR) int {
-   return int(C.go_window_set_color(unsafe.Pointer(handle.hwnd), C.ulong(fore), C.ulong(back)));
+func Window_set_color(handle HANDLE, fore COLOR, back COLOR) int {
+   return int(C.go_window_set_color(handle.GetHandle(), C.ulong(fore), C.ulong(back)));
 }
 
-func (window HWND) SetColor(fore COLOR, back COLOR) int {
-    return Window_set_color(window, fore, back);
+func Window_set_style(handle HANDLE, style uint, mask uint) {
+    C.go_window_set_style(handle.GetHandle(), C.ulong(style), C.ulong(mask));
 }
 
-func Window_set_style(handle HWND, style uint, mask uint) {
-    C.go_window_set_style(unsafe.Pointer(handle.hwnd), C.ulong(style), C.ulong(mask));
+func Window_click_default(window HANDLE, next HANDLE) {
+    C.go_window_click_default(window.GetHandle(), next.GetHandle());
 }
 
-func (window HWND) SetStyle(style uint, mask uint) {
-    Window_set_style(window, style, mask);
-}
-
-func Window_click_default(window HWND, next HWND) {
-    C.go_window_click_default(unsafe.Pointer(window.hwnd), unsafe.Pointer(next.hwnd));
-}
-
-func (window HWND) ClickDefault(next HWND) {
+func (window HWND) ClickDefault(next HANDLE) {
     Window_click_default(window, next);
 }
 
-func Window_default(window HWND, defaultitem HWND) {
-    C.go_window_default(unsafe.Pointer(window.hwnd), unsafe.Pointer(defaultitem.hwnd));
+func Window_default(window HWND, defaultitem HANDLE) {
+    C.go_window_default(unsafe.Pointer(window.hwnd), defaultitem.GetHandle());
 }
 
-func (window HWND) Default(defaultitem HWND) {
+func (window HWND) Default(defaultitem HANDLE) {
     Window_default(window, defaultitem);
 }
 
-func Window_destroy(handle HWND) int {
-    return int(C.go_window_destroy(unsafe.Pointer(handle.hwnd)));
+func Window_destroy(handle HANDLE) int {
+    return int(C.go_window_destroy(handle.GetHandle()));
 }
 
-func (window HWND) Destroy() int {
-    return Window_destroy(window);
+func Window_disable(handle HANDLE) {
+   C.go_window_disable(handle.GetHandle());
 }
 
-func Window_disable(handle HWND) {
-   C.go_window_disable(unsafe.Pointer(handle.hwnd));
+func Window_enable(handle HANDLE) {
+    C.go_window_enable(handle.GetHandle());
 }
 
-func (window HWND) Disable() {
-    Window_disable(window);
-}
-
-func Window_enable(handle HWND) {
-    C.go_window_enable(unsafe.Pointer(handle.hwnd));
-}
-
-func (window HWND) Enable() {
-    Window_enable(window);
-}
-
-func Window_from_id(handle HWND, cid int) HWND {
-    return HWND{C.go_window_from_id(unsafe.Pointer(handle.hwnd), C.int(cid))};
+func Window_from_id(handle HANDLE, cid int) HWND {
+    return HWND{C.go_window_from_id(handle.GetHandle(), C.int(cid))};
 }
 
 func (window HWND) FromID(cid int) HWND {
     return Window_from_id(window, cid);
 }
 
-func Window_get_data(window HWND, dataname string) POINTER {
+func Window_get_data(window HANDLE, dataname string) POINTER {
     cdataname := C.CString(dataname);
     defer C.free(unsafe.Pointer(cdataname));
 
-    return POINTER(C.go_window_get_data(unsafe.Pointer(window.hwnd), cdataname));
+    return POINTER(C.go_window_get_data(window.GetHandle(), cdataname));
 }
 
-func (window HWND) GetData(dataname string) POINTER {
-    return Window_get_data(window, dataname);
+func Window_set_data(window HANDLE, dataname string, data POINTER) {
+    cdataname := C.CString(dataname);
+    defer C.free(unsafe.Pointer(cdataname));
+
+    C.go_window_set_data(window.GetHandle(), cdataname, unsafe.Pointer(data));
 }
 
-func Window_get_font(handle HWND) string {
-   cfontname := C.go_window_get_font(unsafe.Pointer(handle.hwnd));
+func Window_get_font(handle HANDLE) string {
+   cfontname := C.go_window_get_font(handle.GetHandle());
    fontname := C.GoString(cfontname);
    C.dw_free(unsafe.Pointer(cfontname));
    return fontname;
 }
 
-func (window HWND) GetFont() string {
-    return Window_get_font(window);
-}
-
-func Window_set_font(handle HWND, fontname string) int {
+func Window_set_font(handle HANDLE, fontname string) int {
     cfontname := C.CString(fontname);
     defer C.free(unsafe.Pointer(cfontname));
 
-    return int(C.go_window_set_font(unsafe.Pointer(handle.hwnd), cfontname));
+    return int(C.go_window_set_font(handle.GetHandle(), cfontname));
 }
 
-func (window HWND) SetFont(fontname string) int {
-    return Window_set_font(window, fontname);
-}
-
-func Window_get_pos_size(handle HWND) (int, int, uint, uint) {
+func Window_get_pos_size(handle HANDLE) (int, int, uint, uint) {
     var x, y C.long;
     var width, height C.ulong;
-    C.go_window_get_pos_size(unsafe.Pointer(handle.hwnd), &x, &y, &width, &height);
+    C.go_window_get_pos_size(handle.GetHandle(), &x, &y, &width, &height);
     return int(x), int(y), uint(width), uint(height);
 }
 
@@ -553,47 +670,31 @@ func (window HWND) GetPosSize() (int, int, uint, uint) {
     return Window_get_pos_size(window);
 }
 
-func Window_get_preferred_size(handle HWND) (int, int) {
+func Window_get_preferred_size(handle HANDLE) (int, int) {
     var width, height C.int;
-    C.go_window_get_preferred_size(unsafe.Pointer(handle.hwnd), &width, &height);
+    C.go_window_get_preferred_size(handle.GetHandle(), &width, &height);
     return int(width), int(height);
 }
 
-func (window HWND) GetPreferredSize() (int, int) {
-    return Window_get_preferred_size(window);
-}
-
-func Window_get_text(handle HWND) string {
-    ctext := C.go_window_get_text(unsafe.Pointer(handle.hwnd));
+func Window_get_text(handle HANDLE) string {
+    ctext := C.go_window_get_text(handle.GetHandle());
     text := C.GoString(ctext);
     C.dw_free(unsafe.Pointer(ctext));
     return text;
 }
 
-func (window HWND) GetText() string {
-    return Window_get_text(window);
-}
-
-func Window_set_text(handle HWND, text string) {
+func Window_set_text(handle HANDLE, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
 
-    C.go_window_set_text(unsafe.Pointer(handle.hwnd), ctext);
+    C.go_window_set_text(handle.GetHandle(), ctext);
 }
 
-func (window HWND) SetText(text string) {
-    Window_set_text(window, text);
-}
-
-func Window_set_tooltip(handle HWND, bubbletext string) {
+func Window_set_tooltip(handle HANDLE, bubbletext string) {
     cbubbletext := C.CString(bubbletext);
     defer C.free(unsafe.Pointer(cbubbletext));
 
-    C.go_window_set_tooltip(unsafe.Pointer(handle.hwnd), cbubbletext);
-}
-
-func (window HWND) SetTooltip(bubbletext string) {
-    Window_set_tooltip(window, bubbletext);
+    C.go_window_set_tooltip(handle.GetHandle(), cbubbletext);
 }
 
 func Window_redraw(handle HWND) {
@@ -604,8 +705,8 @@ func (window HWND) Redraw() {
     Window_redraw(window);
 }
 
-func Window_capture(handle HWND) {
-    C.go_window_capture(unsafe.Pointer(handle.hwnd));
+func Window_capture(handle HANDLE) {
+    C.go_window_capture(handle.GetHandle());
 }
 
 func (window HWND) Capture() {
@@ -620,56 +721,108 @@ func (window HWND) Release() {
     Window_release();
 }
 
-func Window_set_bitmap(window HWND, id uint, filename string) {
+func Window_set_bitmap(window HANDLE, id uint, filename string) {
     cfilename := C.CString(filename);
     defer C.free(unsafe.Pointer(cfilename));
 
-    C.go_window_set_bitmap(unsafe.Pointer(window.hwnd), C.ulong(id), cfilename);
+    C.go_window_set_bitmap(window.GetHandle(), C.ulong(id), cfilename);
 }
 
 func (window HWND) SetBitmap(id uint, filename string) {
     Window_set_bitmap(window, id, filename);
 }
 
-func Window_set_border(handle HWND, border int) {
-    C.go_window_set_border(unsafe.Pointer(handle.hwnd), C.int(border));
+func Window_set_border(handle HANDLE, border int) {
+    C.go_window_set_border(handle.GetHandle(), C.int(border));
 }
 
 func (window HWND) SetBorder(border int) {
     Window_set_border(window, border);
 }
 
-func Window_set_focus(handle HWND) {
-    C.go_window_set_focus(unsafe.Pointer(handle.hwnd));
+func Window_set_focus(handle HANDLE) {
+    C.go_window_set_focus(handle.GetHandle());
 }
 
-func (window HWND) SetFocus() {
-    Window_set_focus(window);
-}
-
-func Window_set_gravity(handle HWND, horz int, vert int) {
-    C.go_window_set_gravity(unsafe.Pointer(handle.hwnd), C.int(horz), C.int(vert));
+func Window_set_gravity(handle HANDLE, horz int, vert int) {
+    C.go_window_set_gravity(handle.GetHandle(), C.int(horz), C.int(vert));
 }
 
 func (window HWND) SetGravity(horz int, vert int) {
     Window_set_gravity(window, horz, vert);
 }
 
-func Window_set_icon(handle HWND, icon HICN) {
-    C.go_window_set_icon(unsafe.Pointer(handle.hwnd), unsafe.Pointer(icon));
+func Window_set_icon(handle HANDLE, icon HICN) {
+    C.go_window_set_icon(handle.GetHandle(), unsafe.Pointer(icon));
 }
 
 func (window HWND) SetIcon(icon HICN) {
     Window_set_icon(window, icon);
 }
 
-func Window_set_pointer(handle HWND, cursortype int) {
-    C.go_window_set_pointer(unsafe.Pointer(handle.hwnd), C.int(cursortype));
+func Window_set_pointer(handle HANDLE, cursortype int) {
+    C.go_window_set_pointer(handle.GetHandle(), C.int(cursortype));
+}
+
+/* Start Generic Section ---
+ * These need to be implemented by basically every class/type 
+ */
+func (window HWND) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HWND) Disable() {
+    Window_disable(window);
+}
+
+func (window HWND) Enable() {
+    Window_enable(window);
+}
+
+func (window HWND) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HWND) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HWND) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HWND) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HWND) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HWND) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HWND) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HWND) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HWND) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
 }
 
 func (window HWND) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
+
+func (window HWND) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+/* End Generic Section */
 
 func Main() {
     C.dw_main();
@@ -691,83 +844,99 @@ func Box_new(btype int, pad int) HWND {
     return HWND{C.go_box_new(C.int(btype), C.int(pad))};
 }
 
-func Box_pack_at_index(box HWND, item HWND, index int, width int, height int, hsize int, vsize int, pad int) {
-    C.go_box_pack_at_index(unsafe.Pointer(box.hwnd), unsafe.Pointer(item.hwnd), C.int(index), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
+func Box_pack_at_index(box HANDLE, item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
+    C.go_box_pack_at_index(box.GetHandle(), item.GetHandle(), C.int(index), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
 
-func (window HWND) PackAtIndex(item HWND, index int, width int, height int, hsize int, vsize int, pad int) {
+func (window HWND) PackAtIndex(item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_at_index(window, item, index, width, height, hsize, vsize, pad);
 }
 
-func Box_pack_end(box HWND, item HWND, width int, height int, hsize int, vsize int, pad int) {
-   C.go_box_pack_end(unsafe.Pointer(box.hwnd), unsafe.Pointer(item.hwnd), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
+func Box_pack_end(box HANDLE, item HANDLE, width int, height int, hsize int, vsize int, pad int) {
+   C.go_box_pack_end(box.GetHandle(), item.GetHandle(), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
 
-func (window HWND) PackEnd(item HWND, width int, height int, hsize int, vsize int, pad int) {
+func (window HWND) PackEnd(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_end(window, item, width, height, hsize, vsize, pad);
 }
 
-func Box_pack_start(box HWND, item HWND, width int, height int, hsize int, vsize int, pad int) {
-   C.go_box_pack_start(unsafe.Pointer(box.hwnd), unsafe.Pointer(item.hwnd), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
+func Box_pack_start(box HANDLE, item HANDLE, width int, height int, hsize int, vsize int, pad int) {
+   C.go_box_pack_start(box.GetHandle(), item.GetHandle(), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
 
-func (window HWND) PackStart(item HWND, width int, height int, hsize int, vsize int, pad int) {
+func (window HWND) PackStart(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_start(window, item, width, height, hsize, vsize, pad);
 }
 
-func Box_unpack(handle HWND) int {
-   return int(C.go_box_unpack(unsafe.Pointer(handle.hwnd)));
+func Box_unpack(handle HANDLE) int {
+   return int(C.go_box_unpack(handle.GetHandle()));
 }
 
 func (window HWND) Unpack() int {
     return Box_unpack(window);
 }
 
-func Box_unpack_at_index(handle HWND, index int) HWND {
-    return HWND{C.go_box_unpack_at_index(unsafe.Pointer(handle.hwnd), C.int(index))};
+func Box_unpack_at_index(handle HANDLE, index int) HANDLE {
+    return HANDLE(HWND{C.go_box_unpack_at_index(handle.GetHandle(), C.int(index))});
 }
 
-func (window HWND) UnpackAtIndex(index int) HWND {
+func (window HWND) UnpackAtIndex(index int) HANDLE {
     return Box_unpack_at_index(window, index);
 }
 
-func Text_new(text string, id uint) HWND {
+func Text_new(text string, id uint) HGENERIC {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   return HWND{C.go_text_new(ctext, C.ulong(id))};
+   return HGENERIC{C.go_text_new(ctext, C.ulong(id))};
 }
 
-func Status_text_new(text string, id uint) HWND {
+func Status_text_new(text string, id uint) HGENERIC {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   return HWND{C.go_status_text_new(ctext, C.ulong(id))};
+   return HGENERIC{C.go_status_text_new(ctext, C.ulong(id))};
 }
 
-func Entryfield_new(text string, id uint) HWND {
+func Entryfield_new(text string, id uint) HENTRYFIELD {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   return HWND{C.go_entryfield_new(ctext, C.ulong(id))};
+   return HENTRYFIELD{C.go_entryfield_new(ctext, C.ulong(id))};
 }
 
-func Entryfield_password_new(text string, id uint) HWND {
+func EntryfieldNew(text string, id uint) HENTRYFIELD {
+   return Entryfield_new(text, id);
+}
+
+func Entryfield_password_new(text string, id uint) HENTRYFIELD {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   return HWND{C.go_entryfield_password_new(ctext, C.ulong(id))};
+   return HENTRYFIELD{C.go_entryfield_password_new(ctext, C.ulong(id))};
 }
 
-func Entryfield_set_limit(handle HWND, limit int) {
-   C.go_entryfield_set_limit(unsafe.Pointer(handle.hwnd), C.int(limit));
+func EntryfieldPasswordNew(text string, id uint) HENTRYFIELD {
+   return Entryfield_password_new(text, id);
 }
 
-func Button_new(text string, id uint) HWND {
+func Entryfield_set_limit(handle HANDLE, limit int) {
+   C.go_entryfield_set_limit(handle.GetHandle(), C.int(limit));
+}
+
+func (handle HENTRYFIELD) SetLimit(limit int) {
+   Entryfield_set_limit(handle, limit);
+}
+
+func Button_new(text string, id uint) HBUTTON {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   return HWND{C.go_button_new(ctext, C.ulong(id))};
+   return HBUTTON{C.go_button_new(ctext, C.ulong(id))};
+}
+
+func ButtonNew(text string, id uint) HBUTTON {
+    return Button_new(text, id);
 }
 
 func Clipboard_get_text() string {
@@ -777,11 +946,19 @@ func Clipboard_get_text() string {
    return text;
 }
 
+func ClipboardGetText() string {
+    return Clipboard_get_text();
+}
+
 func Clipboard_set_text(text string) {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
    C.dw_clipboard_set_text(ctext, C.int(C.strlen(ctext)));
+}
+
+func ClipboardSetText(text string) {
+    Clipboard_set_text(text);
 }
 
 func File_browse(title string, defpath string, ext string, flags int) string {
@@ -797,8 +974,16 @@ func File_browse(title string, defpath string, ext string, flags int) string {
    return C.GoString(result);
 }
 
+func FileBrowse(title string, defpath string, ext string, flags int) string {
+    return File_browse(title, defpath, ext, flags);
+}
+
 func Color_choose(value COLOR) COLOR {
    return COLOR(C.dw_color_choose(C.ulong(value)));
+}
+
+func ColorChoose(value COLOR) COLOR {
+    return Color_choose(value);
 }
 
 func Timer_connect(interval int, sigfunc SIGNAL_FUNC, data POINTER) HTIMER {
@@ -812,12 +997,12 @@ func Timer_disconnect(id HTIMER) {
    }
 }
 
-func Signal_connect(window HWND, signame string, sigfunc SIGNAL_FUNC, data POINTER) {
+func Signal_connect(window HANDLE, signame string, sigfunc SIGNAL_FUNC, data POINTER) {
    csigname := C.CString(signame);
    defer C.free(unsafe.Pointer(csigname));
    
    backs = append(backs, unsafe.Pointer(sigfunc));
-   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(sigfunc), unsafe.Pointer(data), 0);
+   C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(sigfunc), unsafe.Pointer(data), 0);
 }
 
 func Beep(freq int, dur int) {
@@ -825,65 +1010,117 @@ func Beep(freq int, dur int) {
 }
 
 func Menu_new(id uint) HMENUI {
-    return HMENUI(C.go_menu_new(C.ulong(id)));
+    return HMENUI{C.go_menu_new(C.ulong(id))};
+}
+
+func MenuNew(id uint) HMENUI {
+    return Menu_new(id);
 }
 
 func Menubar_new(location HWND) HMENUI {
-    return HMENUI(C.go_menubar_new(unsafe.Pointer(location.hwnd)));
+    return HMENUI{C.go_menubar_new(unsafe.Pointer(location.hwnd))};
 }
 
-func Menu_append_item(menu HMENUI, title string, id uint, flags uint, end int, check int, submenu HMENUI) HWND {
+func (window HWND) MenubarNew() HMENUI {
+    return Menubar_new(window);
+}
+
+func Menu_append_item(menu HMENUI, title string, id uint, flags uint, end int, check int, submenu HMENUI) HMENU {
     ctitle := C.CString(title);
     defer C.free(unsafe.Pointer(ctitle));
 
-    return HWND{C.go_menu_append_item(unsafe.Pointer(menu), ctitle, C.ulong(id), C.ulong(flags), C.int(end), C.int(check), unsafe.Pointer(submenu))};
+    return HMENU{C.go_menu_append_item(menu.hmenui, ctitle, C.ulong(id), C.ulong(flags), C.int(end), C.int(check), submenu.hmenui)};
+}
+
+func (menui HMENUI) AppendItem(title string, id uint, flags uint, end int, check int, submenu HMENUI) HMENU {
+    return Menu_append_item(menui, title, id, flags, end, check, submenu);
 }
 
 func Menu_delete_item(menu HMENUI, id uint) {
-    C.go_menu_delete_item(unsafe.Pointer(menu), C.ulong(id));
+    C.go_menu_delete_item(menu.hmenui, C.ulong(id));
+}
+
+func (menui HMENUI) DeleteItem(id uint) {
+    Menu_delete_item(menui, id);
 }
 
 func Menu_destroy(menu HMENUI) {
-    C.go_menu_destroy(unsafe.Pointer(menu));
+    C.go_menu_destroy(menu.hmenui);
+}
+
+func (menui HMENUI) Destroy() {
+    Menu_destroy(menui);
 }
 
 func Menu_item_set_state(menu HMENUI, id uint, flags uint) {
-    C.go_menu_item_set_state(unsafe.Pointer(menu), C.ulong(id), C.ulong(flags));
+    C.go_menu_item_set_state(menu.hmenui, C.ulong(id), C.ulong(flags));
 }
 
-func Menu_popup(menu HMENUI, parent HWND, x int, y int) {
-    C.go_menu_popup(unsafe.Pointer(menu), unsafe.Pointer(parent.hwnd), C.int(x), C.int(y));
+func (menui HMENUI) SetState(id uint, flags uint) {
+    Menu_item_set_state(menui, id, flags);
 }
 
-func Notebook_new(id uint, top int) HWND {
-    return HWND{C.go_notebook_new(C.ulong(id), C.int(top))};
+func Menu_popup(menu HMENUI, parent HANDLE, x int, y int) {
+    C.go_menu_popup(menu.hmenui, parent.GetHandle(), C.int(x), C.int(y));
 }
 
-func Notebook_pack(handle HWND, pageid HNOTEPAGE, page HWND) {
-    C.go_notebook_pack(unsafe.Pointer(handle.hwnd), C.ulong(pageid), unsafe.Pointer(page.hwnd));
+func (menui HMENUI) Popup(parent HANDLE, x int, y int) {
+    Menu_popup(menui, parent, x, y);
 }
 
-func Notebook_page_destroy(handle HWND, pageid HNOTEPAGE) {
-    C.go_notebook_page_destroy(unsafe.Pointer(handle.hwnd), C.ulong(pageid));
+func Notebook_new(id uint, top int) HNOTEBOOK {
+    return HNOTEBOOK{C.go_notebook_new(C.ulong(id), C.int(top))};
 }
 
-func Notebook_page_get(handle HWND) HNOTEPAGE {
-    return HNOTEPAGE(C.go_notebook_page_get(unsafe.Pointer(handle.hwnd)));
+func NotebookNew(id uint, top int) HNOTEBOOK {
+    return Notebook_new(id, top);
 }
 
-func Notebook_page_new(handle HWND, flags uint, front int) HNOTEPAGE {
-    return HNOTEPAGE(C.go_notebook_page_new(unsafe.Pointer(handle.hwnd), C.ulong(flags), C.int(front)));
+func Notebook_pack(handle HANDLE, pageid HNOTEPAGE, page HANDLE) {
+    C.go_notebook_pack(handle.GetHandle(), pageid.pageid, page.GetHandle());
 }
 
-func Notebook_page_set(handle HWND, pageid HNOTEPAGE) {
-    C.go_notebook_page_set(unsafe.Pointer(handle.hwnd), C.ulong(pageid));
+func (handle HNOTEPAGE) Pack(page HANDLE) {
+    Notebook_pack(handle.hnotebook, handle, page);
 }
 
-func Notebook_page_set_text(handle HWND, pageid HNOTEPAGE, text string) {
+func Notebook_page_destroy(handle HANDLE, pageid HNOTEPAGE) {
+    C.go_notebook_page_destroy(handle.GetHandle(), pageid.pageid);
+}
+
+func (handle HNOTEPAGE) Destroy() {
+    Notebook_page_destroy(handle.hnotebook, handle);
+}
+
+func Notebook_page_get(handle HANDLE) HNOTEPAGE {
+    return HNOTEPAGE{C.go_notebook_page_get(handle.GetHandle()), handle};
+}
+
+func (handle HNOTEBOOK) PageGet() HNOTEPAGE {
+    return Notebook_page_get(handle);
+}
+
+func Notebook_page_new(handle HANDLE, flags uint, front int) HNOTEPAGE {
+    return HNOTEPAGE{C.go_notebook_page_new(handle.GetHandle(), C.ulong(flags), C.int(front)), handle};
+}
+
+func (handle HNOTEBOOK) PageNew(flags uint, front int) HNOTEPAGE {
+    return Notebook_page_new(handle, flags, front);
+}
+
+func Notebook_page_set(handle HANDLE, pageid HNOTEPAGE) {
+    C.go_notebook_page_set(handle.GetHandle(), pageid.pageid);
+}
+
+func Notebook_page_set_text(handle HANDLE, pageid HNOTEPAGE, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    C.go_notebook_page_set_text(unsafe.Pointer(handle.hwnd), C.ulong(pageid), ctext);
+    C.go_notebook_page_set_text(handle.GetHandle(), pageid.pageid, ctext);
+}
+
+func (handle HNOTEPAGE) SetText(text string) {
+    Notebook_page_set_text(handle.hnotebook, handle, text);
 }
 
 func Icon_load_from_file(filename string) HICN {
@@ -893,40 +1130,68 @@ func Icon_load_from_file(filename string) HICN {
     return HICN(C.go_icon_load_from_file(cfilename));
 }
 
+func IconLoadFromFile(filename string) HICN {
+    return Icon_load_from_file(filename);
+}
+
 func Icon_load(id uint) HICN {
     return HICN(C.go_icon_load(0, C.ulong(id)));
 }
 
-func Taskbar_delete(handle HWND, icon HICN) {
-    C.go_taskbar_delete(unsafe.Pointer(handle.hwnd), unsafe.Pointer(icon));
+func IconLoad(id uint) HICN {
+    return Icon_load(id);
 }
 
-func Taskbar_insert(handle HWND, icon HICN, bubbletext string) {
+func Taskbar_delete(handle HANDLE, icon HICN) {
+    C.go_taskbar_delete(handle.GetHandle(), unsafe.Pointer(icon));
+}
+
+func TaskbarDelete(handle HANDLE, icon HICN) {
+    Taskbar_delete(handle, icon);
+}
+
+func Taskbar_insert(handle HANDLE, icon HICN, bubbletext string) {
     cbubbletext := C.CString(bubbletext);
     defer C.free(unsafe.Pointer(cbubbletext));
     
-    C.go_taskbar_insert(unsafe.Pointer(handle.hwnd), unsafe.Pointer(icon), cbubbletext);
+    C.go_taskbar_insert(handle.GetHandle(), unsafe.Pointer(icon), cbubbletext);
 }
 
-func Combobox_new(text string, id uint) HWND {
+func TaskbarInsert(handle HANDLE, icon HICN, bubbletext string) {
+    Taskbar_insert(handle, icon, bubbletext);
+}
+
+func Combobox_new(text string, id uint) HLISTBOX {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    return HWND{C.go_combobox_new(ctext, C.ulong(id))};
+    return HLISTBOX{C.go_combobox_new(ctext, C.ulong(id))};
 }
 
-func Listbox_new(id uint, multi int) HWND {
-    return HWND{C.go_listbox_new(C.ulong(id), C.int(multi))};
+func ComboboxNew(text string, id uint) HLISTBOX {
+    return Combobox_new(text, id);
 }
 
-func Listbox_append(handle HWND, text string) {
+func Listbox_new(id uint, multi int) HLISTBOX {
+    return HLISTBOX{C.go_listbox_new(C.ulong(id), C.int(multi))};
+}
+
+func ListboxNew(id uint, multi int) HLISTBOX {
+    return Listbox_new(id, multi);
+}
+
+func Listbox_append(handle HANDLE, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    C.go_listbox_append(unsafe.Pointer(handle.hwnd), ctext);
+    C.go_listbox_append(handle.GetHandle(), ctext);
 }
 
-func Listbox_list_append(handle HWND, text []string) {
+func (handle HLISTBOX) Append(text string) {
+    Listbox_append(handle, text);
+}
+
+func Listbox_list_append(handle HANDLE, text []string) {
    count := len(text);
    ctext := C.go_string_array_make(C.int(count))
    defer C.go_string_array_free(ctext, C.int(count))
@@ -935,176 +1200,312 @@ func Listbox_list_append(handle HWND, text []string) {
         C.go_string_array_set(ctext, C.CString(s), C.int(i))
     }   
    
-   C.go_listbox_list_append(unsafe.Pointer(handle.hwnd), ctext, C.int(count));
+   C.go_listbox_list_append(handle.GetHandle(), ctext, C.int(count));
 }
 
-func Listbox_insert(handle HWND, text string, pos int) {
+func (handle HLISTBOX) AppendList(text []string) {
+    Listbox_list_append(handle, text);
+}
+
+func Listbox_insert(handle HANDLE, text string, pos int) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    C.go_listbox_insert(unsafe.Pointer(handle.hwnd), ctext, C.int(pos));
+    C.go_listbox_insert(handle.GetHandle(), ctext, C.int(pos));
 }
 
-func Listbox_clear(handle HWND) {
-    C.go_listbox_clear(unsafe.Pointer(handle.hwnd));
+func (handle HLISTBOX) Insert(text string, pos int) {
+    Listbox_insert(handle, text, pos);
 }
 
-func Listbox_count(handle HWND) int {
-    return int(C.go_listbox_count(unsafe.Pointer(handle.hwnd)));
+func Listbox_clear(handle HANDLE) {
+    C.go_listbox_clear(handle.GetHandle());
 }
 
-func Listbox_set_top(handle HWND, top int) {
-    C.go_listbox_set_top(unsafe.Pointer(handle.hwnd), C.int(top));
+func (handle HLISTBOX) Clear() {
+    Listbox_clear(handle);
 }
 
-func Listbox_select(handle HWND, index C.int, state C.int) {
-    C.go_listbox_select(unsafe.Pointer(handle.hwnd), index, state);
+func Listbox_count(handle HANDLE) int {
+    return int(C.go_listbox_count(handle.GetHandle()));
 }
 
-func Listbox_delete(handle HWND, index int) {
-    C.go_listbox_delete(unsafe.Pointer(handle.hwnd), C.int(index));
+func (handle HLISTBOX) Count() int {
+    return Listbox_count(handle);
 }
 
-func Listbox_get_text(handle HWND, index int) string {
+func Listbox_set_top(handle HANDLE, top int) {
+    C.go_listbox_set_top(handle.GetHandle(), C.int(top));
+}
+
+func (handle HLISTBOX) SetTop(top int) {
+    Listbox_set_top(handle, top);
+}
+
+func Listbox_select(handle HANDLE, index int, state int) {
+    C.go_listbox_select(handle.GetHandle(), C.int(index), C.int(state));
+}
+
+func (handle HLISTBOX) Select(index int, state int) {
+    Listbox_select(handle, index, state);
+}
+
+func Listbox_delete(handle HANDLE, index int) {
+    C.go_listbox_delete(handle.GetHandle(), C.int(index));
+}
+
+func (handle HLISTBOX) Delete(index int) {
+    Listbox_delete(handle, index);
+}
+
+func Listbox_get_text(handle HANDLE, index int) string {
     var buf [201]C.char;
     
-    C.go_listbox_get_text(unsafe.Pointer(handle.hwnd), C.int(index), &buf[0], 200);
+    C.go_listbox_get_text(handle.GetHandle(), C.int(index), &buf[0], 200);
     return C.GoString((*C.char)(unsafe.Pointer(&buf[0])));
 }
 
-func Listbox_set_text(handle HWND, index int, text string) {
+func (handle HLISTBOX) GetText(index int) string {
+    return Listbox_get_text(handle, index);
+}
+
+func Listbox_set_text(handle HANDLE, index int, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    C.go_listbox_set_text(unsafe.Pointer(handle.hwnd), C.int(index), ctext);
+    C.go_listbox_set_text(handle.GetHandle(), C.int(index), ctext);
 }
 
-func Listbox_selected(handle HWND) int {
-    return int(C.go_listbox_selected(unsafe.Pointer(handle.hwnd)));
+func (handle HLISTBOX) SetText(index int, text string) {
+    Listbox_set_text(handle, index, text);
 }
 
-func Listbox_selected_multi(handle HWND, where int) int {
-    return int(C.go_listbox_selected_multi(unsafe.Pointer(handle.hwnd), C.int(where)));
+func Listbox_selected(handle HANDLE) int {
+    return int(C.go_listbox_selected(handle.GetHandle()));
+}
+
+func (handle HLISTBOX) Selected() int {
+    return Listbox_selected(handle);
+}
+
+func Listbox_selected_multi(handle HANDLE, where int) int {
+    return int(C.go_listbox_selected_multi(handle.GetHandle(), C.int(where)));
+}
+
+func (handle HLISTBOX) SelectedMulti(where int) int {
+    return Listbox_selected_multi(handle, where);
 }
 
 func Screen_width() int {
     return int(C.dw_screen_width());
 }
 
+func ScreenWidth() int {
+    return Screen_width();
+}
+
 func Screen_height() int {
     return int(C.dw_screen_height());
+}
+
+func ScreenHeight() int {
+    return Screen_height();
 }
 
 func Color_depth_get() uint {
     return uint(C.dw_color_depth_get());
 }
 
+func ColorDepthGet() uint {
+    return Color_depth_get();
+}
+
 func Color_foreground_set(color COLOR) {
     C.dw_color_foreground_set(C.ulong(color));
+}
+
+func ColorForegroundSet(color COLOR) {
+    Color_foreground_set(color);
 }
 
 func Color_background_set(color COLOR) {
     C.dw_color_background_set(C.ulong(color));
 }
 
-func Spinbutton_new(text string, id C.ulong) HWND {
+func ColorBackgroundSet(color COLOR) {
+    Color_background_set(color);
+}
+
+func Spinbutton_new(text string, id C.ulong) HSPINBUTTON {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    return HWND{C.go_spinbutton_new(ctext, id)};
+    return HSPINBUTTON{C.go_spinbutton_new(ctext, id)};
 }
 
-func Spinbutton_set_pos(handle HWND, position int) {
-    C.go_spinbutton_set_pos(unsafe.Pointer(handle.hwnd), C.long(position));
+func Spinbutton_set_pos(handle HANDLE, position int) {
+    C.go_spinbutton_set_pos(handle.GetHandle(), C.long(position));
 }
 
-func Spinbutton_set_limits(handle HWND, upper int, lower int) {
-    C.go_spinbutton_set_limits(unsafe.Pointer(handle.hwnd), C.long(upper), C.long(lower));
+func (handle HSPINBUTTON) SetPos(position int) {
+    Spinbutton_set_pos(handle, position);
 }
 
-func Spinbutton_get_pos(handle HWND) int {
-    return int(C.go_spinbutton_get_pos(unsafe.Pointer(handle.hwnd)));
+func Spinbutton_set_limits(handle HANDLE, upper int, lower int) {
+    C.go_spinbutton_set_limits(handle.GetHandle(), C.long(upper), C.long(lower));
 }
 
-func Radiobutton_new(text string, id uint) HWND {
+func (handle HSPINBUTTON) SetLimits(upper int, lower int) {
+    Spinbutton_set_limits(handle, upper, lower);
+}
+
+func Spinbutton_get_pos(handle HANDLE) int {
+    return int(C.go_spinbutton_get_pos(handle.GetHandle()));
+}
+
+func (handle HSPINBUTTON) GetPos() int {
+    return Spinbutton_get_pos(handle);
+}
+
+func Radiobutton_new(text string, id uint) HBUTTON {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    return HWND{C.go_radiobutton_new(ctext, C.ulong(id))};
+    return HBUTTON{C.go_radiobutton_new(ctext, C.ulong(id))};
 }
 
-func Checkbox_new(text string, id uint) HWND {
+func RadioButtonNew(text string id uint) HBUTTON {
+    return Radiobutton_new(text, id); 
+}
+
+func Checkbox_new(text string, id uint) HBUTTON {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
     
-    return HWND{C.go_checkbox_new(ctext, C.ulong(id))};
+    return HBUTTON{C.go_checkbox_new(ctext, C.ulong(id))};
 }
 
-func Checkbox_get(handle HWND) int {
-    return int(C.go_checkbox_get(unsafe.Pointer(handle.hwnd)));
+func CheckButtonNew(text string id uint) HBUTTON {
+    return Checkbox_new(text, id);
 }
 
-func Checkbox_set(handle HWND, value int) {
-    C.go_checkbox_set(unsafe.Pointer(handle.hwnd), C.int(value));
+func Checkbox_get(handle HANDLE) int {
+    return int(C.go_checkbox_get(handle.GetHandle()));
 }
 
-func Percent_new(id C.ulong) HWND {
-    return HWND{C.go_percent_new(id)};
+func (handle HBUTTON) Get() int {
+    return Checkbox_get(handle);
 }
 
-func Percent_set_pos(handle HWND, position uint) {
-   C.go_percent_set_pos(unsafe.Pointer(handle.hwnd), C.uint(position));
+func Checkbox_set(handle HANDLE, value int) {
+    C.go_checkbox_set(handle.GetHandle(), C.int(value));
 }
 
-func Slider_new(vertical int, increments int, id uint) HWND {
-    return HWND{C.go_slider_new(C.int(vertical), C.int(increments), C.ulong(id))};
+func (handle HBUTTON) Set(value int) {
+    Checkbox_set(handle, value);
 }
 
-func Scrollbar_new(vertical int, id uint) HWND {
-    return HWND{C.go_scrollbar_new(C.int(vertical), C.ulong(id))};
+func Percent_new(id C.ulong) HPERCENT {
+    return HPERCENT{C.go_percent_new(id)};
 }
 
-func Slider_get_pos(handle HWND) uint {
-    return uint(C.go_slider_get_pos(unsafe.Pointer(handle.hwnd)));
+func PercentNew(id C.ulong) HPERCENT {
+    return Percent_new(id);
 }
 
-func Slider_set_pos(handle HWND, position uint) {
-    C.go_slider_set_pos(unsafe.Pointer(handle.hwnd), C.uint(position));
+func Percent_set_pos(handle HANDLE, position uint) {
+   C.go_percent_set_pos(handle.GetHandle(), C.uint(position));
 }
 
-func Scrollbar_get_pos(handle HWND) uint {
-    return uint(C.go_scrollbar_get_pos(unsafe.Pointer(handle.hwnd)));
+func (handle HPERCENT) SetPos(position uint) {
+    Percent_set_pos(handle, position);
 }
 
-func Scrollbar_set_pos(handle HWND, position uint) {
-    C.go_scrollbar_set_pos(unsafe.Pointer(handle.hwnd), C.uint(position));
+func Slider_new(vertical int, increments int, id uint) HSLIDER {
+    return HSLIDER{C.go_slider_new(C.int(vertical), C.int(increments), C.ulong(id))};
 }
 
-func Scrollbar_set_range(handle HWND, srange uint, visible uint) {
-    C.go_scrollbar_set_range(unsafe.Pointer(handle.hwnd), C.uint(srange), C.uint(visible));
+func SliderNew(vertical int, increments int, id uint) HSLIDER {
+    return Slider_new(vertical, increments, id);
 }
 
-func Scrollbox_new(btype int, pad int) HWND {
-    return HWND{C.go_scrollbox_new(C.int(btype), C.int(pad))};
+func Scrollbar_new(vertical int, id uint) HSCROLLBAR {
+    return HSCROLLBAR{C.go_scrollbar_new(C.int(vertical), C.ulong(id))};
 }
 
-func Scrollbox_get_pos(handle HWND, orient int) int {
-    return int(C.go_scrollbox_get_pos(unsafe.Pointer(handle.hwnd), C.int(orient)));
+func ScrollbarNew(vertical int, id uint) HSCROLLBAR {
+    return Scrollbar_new(vertical, id);
 }
 
-func Scrollbox_get_range(handle HWND, orient int) int {
-    return int(C.go_scrollbox_get_range(unsafe.Pointer(handle.hwnd), C.int(orient)));
+func Slider_get_pos(handle HANDLE) uint {
+    return uint(C.go_slider_get_pos(handle.GetHandle()));
 }
 
-func Groupbox_new(btype C.int, pad int, title string) HWND {
+func (handle HSLIDER) GetPos() uint {
+    return Slider_get_pos(handle);
+}
+
+func Slider_set_pos(handle HANDLE, position uint) {
+    C.go_slider_set_pos(handle.GetHandle(), C.uint(position));
+}
+
+func (handle HSLIDER) SetPos(position uint) {
+    Slider_set_pos(handle, position);
+}
+
+func Scrollbar_get_pos(handle HANDLE) uint {
+    return uint(C.go_scrollbar_get_pos(handle.GetHandle()));
+}
+
+func (handle HSCROLLBAR) GetPos() uint {
+    return Scrollbar_get_pos(handle);
+}
+
+func Scrollbar_set_pos(handle HANDLE, position uint) {
+    C.go_scrollbar_set_pos(handle.GetHandle(), C.uint(position));
+}
+
+func (handle HSCROLLBAR) SetPos(position uint) {
+    Scrollbar_set_pos(handle, position);
+}
+
+func Scrollbar_set_range(handle HANDLE, srange uint, visible uint) {
+    C.go_scrollbar_set_range(handle.GetHandle(), C.uint(srange), C.uint(visible));
+}
+
+func (handle HSCROLLBAR) SetRange(srange uint, visible uint) {
+    Scrollbar_set_range(handle, srange, visible);
+}
+
+func Scrollbox_new(btype int, pad int) HSCROLLBOX {
+    return HSCROLLBOX{C.go_scrollbox_new(C.int(btype), C.int(pad))};
+}
+
+func Scrollbox_get_pos(handle HANDLE) (int, int) {
+    return int(C.go_scrollbox_get_pos(handle.GetHandle(), C.int(C.DW_HORZ))), int(C.go_scrollbox_get_pos(handle.GetHandle(), C.int(C.DW_VERT)));
+}
+
+func (handle HSCROLLBOX) GetPos() (int, int) {
+    return Scrollbox_get_pos(handle);
+}
+
+func Scrollbox_get_range(handle HANDLE) (int, int) {
+    return int(C.go_scrollbox_get_range(handle.GetHandle(), C.int(C.DW_HORZ))), int(C.go_scrollbox_get_range(handle.GetHandle(), C.int(C.DW_VERT)));
+}
+
+func (handle HSCROLLBOX) GetRange() (int, int) {
+    return Scrollbox_get_range(handle);
+}
+
+func Groupbox_new(btype C.int, pad int, title string) HBOX {
     ctitle := C.CString(title);
     defer C.free(unsafe.Pointer(ctitle));
     
-    return HWND{C.go_groupbox_new(btype, C.int(pad), ctitle)};
+    return HBOX{C.go_groupbox_new(btype, C.int(pad), ctitle)};
 }
 
-func Render_new(id uint) HWND {
-    return HWND{C.go_render_new(C.ulong(id))};
+func Render_new(id uint) HRENDER {
+    return HRENDER{C.go_render_new(C.ulong(id))};
 }
 
 func Font_choose(currfont string) string {
@@ -1115,10 +1516,18 @@ func Font_choose(currfont string) string {
     return C.GoString(newfont);
 }
 
+func FontChoose(currfont string) string {
+    return Font_choose(currfont);
+}
+
 func Font_set_default(fontname string) {
     cfontname := C.CString(fontname);
     defer C.free(unsafe.Pointer(cfontname));
     C.dw_font_set_default(cfontname);
+}
+
+func FontSetFefault(fontname string) {
+    Font_set_default(fontname);
 }
 
 func Font_text_extents_get(handle HWND, pixmap HPIXMAP, text string) (int, int) {
@@ -1139,19 +1548,31 @@ func (pixmap HPIXMAP) GetTextExtents(text string) (int, int) {
     return Font_text_extents_get(NOHWND, pixmap, text);
 }
 
-func Pixmap_new(handle HWND, width uint, height uint, depth uint) HPIXMAP {
-    return HPIXMAP{C.go_pixmap_new(unsafe.Pointer(handle.hwnd), C.ulong(width), C.ulong(height), C.ulong(depth))};
+func Pixmap_new(handle HANDLE, width uint, height uint, depth uint) HPIXMAP {
+    return HPIXMAP{C.go_pixmap_new(handle.GetHandle(), C.ulong(width), C.ulong(height), C.ulong(depth))};
 }
 
-func Pixmap_new_from_file(handle HWND, filename string) HPIXMAP {
+func PixmapNew(handle HANDLE, width uint, height uint, depth uint) HPIXMAP {
+    return Pixmap_new(handle, width, height, depth);
+}
+
+func Pixmap_new_from_file(handle HANDLE, filename string) HPIXMAP {
     cfilename := C.CString(filename);
     defer C.free(unsafe.Pointer(cfilename));
     
-    return HPIXMAP{C.go_pixmap_new_from_file(unsafe.Pointer(handle.hwnd), cfilename)};
+    return HPIXMAP{C.go_pixmap_new_from_file(handle.GetHandle(), cfilename)};
 }
 
-func Pixmap_grab(handle HWND, id uint) HPIXMAP {
-    return HPIXMAP{C.go_pixmap_grab(unsafe.Pointer(handle.hwnd), C.ulong(id))};
+func PixmapNewFromFile(handle HANDLE, filename string) HPIXMAP {
+    return Pixmap_new_from_file(handle, filename);
+}
+
+func Pixmap_grab(handle HANDLE, id uint) HPIXMAP {
+    return HPIXMAP{C.go_pixmap_grab(handle.GetHandle(), C.ulong(id))};
+}
+
+func PixmapGrab(handle HANDLE, id uint) HPIXMAP {
+    return Pixmap_grab(handle, id);
 }
 
 func (window HWND) PixmapGrab(id uint) HPIXMAP {
@@ -1335,165 +1756,289 @@ func Pointer_query_pos() (int, int) {
    return int(x), int(y);
 }
 
+func PointerGetPos() (int, int) {
+    return Pointer_query_pos();
+}
+
 func Pointer_set_pos(x int, y int) {
    C.dw_pointer_set_pos(C.long(x), C.long(y));
+}
+
+func PointerSetPos(x int, y int) {
+    Pointer_set_pos(x, y);
 }
 
 func Flush() {
     C.dw_flush();
 }
 
-func Tree_new(id uint) HWND {
-    return HWND{C.go_tree_new(C.ulong(id))};
+func Tree_new(id uint) HTREE {
+    return HTREE{C.go_tree_new(C.ulong(id))};
 }
 
-func Tree_insert(handle HWND, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
+func Tree_insert(handle HANDLE, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
    
-   return HTREEITEM(C.go_tree_insert(unsafe.Pointer(handle.hwnd), ctitle, unsafe.Pointer(icon), unsafe.Pointer(parent), unsafe.Pointer(itemdata)));
+   return HTREEITEM{C.go_tree_insert(handle.GetHandle(), ctitle, unsafe.Pointer(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle};
 }
 
-func Tree_insert_after(handle HWND, item HTREEITEM, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
+func (handle HTREE) Insert(title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
+    return Tree_insert(handle, title, icon, parent, itemdata);
+}
+
+func Tree_insert_after(handle HANDLE, item HTREEITEM, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
    
-   return HTREEITEM(C.go_tree_insert_after(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item), ctitle, unsafe.Pointer(icon), unsafe.Pointer(parent), unsafe.Pointer(itemdata)));
+   return HTREEITEM{C.go_tree_insert_after(handle.GetHandle(), item.htreeitem, ctitle, unsafe.Pointer(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle};
 }
 
-func Tree_clear(handle HWND) {
-   C.go_tree_clear(unsafe.Pointer(handle.hwnd));
+func (handle HTREE) InsertAfter(item HTREEITEM, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
+    return Tree_insert_after(handle, item, title, icon, parent, itemdata);
 }
 
-func Tree_item_delete(handle HWND, item HTREEITEM) {
-   C.go_tree_item_delete(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item));
+func Tree_clear(handle HANDLE) {
+   C.go_tree_clear(handle.GetHandle());
 }
 
-func Tree_item_change(handle HWND, item HTREEITEM, title string, icon HICN) {
+func (handle HTREE) Clear() {
+    Tree_clear(handle);
+}
+
+func Tree_item_delete(handle HANDLE, item HTREEITEM) {
+   C.go_tree_item_delete(handle.GetHandle(), item.htreeitem);
+}
+
+func (handle HTREEITEM) Delete() {
+    Tree_item_delete(handle.htree, handle);
+}
+
+func Tree_item_change(handle HANDLE, item HTREEITEM, title string, icon HICN) {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
    
-   C.go_tree_item_change(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item), ctitle, unsafe.Pointer(icon));
+   C.go_tree_item_change(handle.GetHandle(), item.htreeitem, ctitle, unsafe.Pointer(icon));
 }
 
-func Tree_item_expand(handle HWND, item HTREEITEM) {
-   C.go_tree_item_expand(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item));
+func (handle HTREEITEM) Change(title string, icon HICN) {
+    Tree_item_change(handle.htree, handle, title, icon);
 }
 
-func Tree_item_collapse(handle HWND, item HTREEITEM) {
-   C.go_tree_item_collapse(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item));
+func Tree_item_expand(handle HANDLE, item HTREEITEM) {
+   C.go_tree_item_expand(handle.GetHandle(), item.htreeitem);
 }
 
-func Tree_item_select(handle HWND, item HTREEITEM) {
-   C.go_tree_item_select(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item));
+func (handle HTREEITEM) Expand() {
+    Tree_item_expand(handle.htree, handle);
 }
 
-func Tree_item_set_data(handle HWND, item HTREEITEM, itemdata POINTER) {
-   C.go_tree_item_set_data(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item), unsafe.Pointer(itemdata));
+func Tree_item_collapse(handle HANDLE, item HTREEITEM) {
+   C.go_tree_item_collapse(handle.GetHandle(), item.htreeitem);
 }
 
-func Tree_item_get_data(handle HWND, item HTREEITEM) unsafe.Pointer {
-   return unsafe.Pointer(C.go_tree_item_get_data(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item)));
+func (handle HTREEITEM) Collapse() {
+    Tree_item_collapse(handle.htree, handle);
 }
 
-func Tree_get_title(handle HWND, item HTREEITEM) string {
-   ctitle := C.go_tree_get_title(unsafe.Pointer(handle.hwnd), unsafe.Pointer(item));
+func Tree_item_select(handle HANDLE, item HTREEITEM) {
+   C.go_tree_item_select(handle.GetHandle(), item.htreeitem);
+}
+
+func (handle HTREEITEM) Select() {
+    Tree_item_select(handle.htree, handle);
+}
+
+func Tree_item_set_data(handle HANDLE, item HTREEITEM, itemdata POINTER) {
+   C.go_tree_item_set_data(handle.GetHandle(), item.htreeitem, unsafe.Pointer(itemdata));
+}
+
+func (handle HTREEITEM) SetData(itemdata POINTER) {
+    Tree_item_set_data(handle.htree, handle, itemdata);
+}
+
+func Tree_item_get_data(handle HANDLE, item HTREEITEM) POINTER {
+   return POINTER(C.go_tree_item_get_data(handle.GetHandle(), item.htreeitem));
+}
+
+func (handle HTREEITEM) GetData() POINTER {
+    return Tree_item_get_data(handle.htree, handle);
+}
+
+func Tree_get_title(handle HANDLE, item HTREEITEM) string {
+   ctitle := C.go_tree_get_title(handle.GetHandle(), item.htreeitem);
    title := C.GoString(ctitle);
    C.dw_free(unsafe.Pointer(ctitle));
    return title;
 }
 
-func Html_new(id uint) HWND {
-    return HWND{C.go_html_new(C.ulong(id))};
+func (handle HTREEITEM) GetTitle() string {
+    return Tree_get_title(handle.htree, handle);
 }
 
-func Html_action(hwnd HWND, action int) {
-   C.go_html_action(unsafe.Pointer(hwnd.hwnd), C.int(action));
+func Html_new(id uint) HHTML {
+    return HHTML{C.go_html_new(C.ulong(id))};
 }
 
-func Html_raw(handle HWND, code string) int {
+func HtmlNew(id uint) HHTML {
+    return Html_new(id);
+}
+
+func Html_action(handle HANDLE, action int) {
+   C.go_html_action(handle.GetHandle(), C.int(action));
+}
+
+func (handle HHTML) Action(action int) {
+    Html_action(handle, action);
+}
+
+func Html_raw(handle HANDLE, code string) int {
    ccode := C.CString(code);
    defer C.free(unsafe.Pointer(ccode));
    
-   return int(C.go_html_raw(unsafe.Pointer(handle.hwnd), ccode));
+   return int(C.go_html_raw(handle.GetHandle(), ccode));
 }
 
-func Html_url(handle HWND, url string) int {
+func (handle HHTML) Raw(code string) {
+    Html_raw(handle, code);
+}
+
+func Html_url(handle HANDLE, url string) int {
    curl := C.CString(url);
    defer C.free(unsafe.Pointer(curl));
    
-   return int(C.go_html_url(unsafe.Pointer(handle.hwnd), curl));
+   return int(C.go_html_url(handle.GetHandle(), curl));
 }
 
-func Mle_new(id uint) HWND {
-    return HWND{C.go_mle_new(C.ulong(id))};
+func (handle HHTML) URL(url string) int {
+    return Html_url(handle, url);
 }
 
-func Mle_import(handle HWND, buffer string, startpoint int) int {
+func Mle_new(id uint) HMLE {
+    return HMLE{C.go_mle_new(C.ulong(id))};
+}
+
+func MLENew(id uint) HMLE {
+    return Mle_new(id);
+}
+
+func Mle_import(handle HANDLE, buffer string, startpoint int) int {
    cbuffer := C.CString(buffer);
    defer C.free(unsafe.Pointer(cbuffer));
    
-   return int(C.go_mle_import(unsafe.Pointer(handle.hwnd), cbuffer, C.int(startpoint)));
+   return int(C.go_mle_import(handle.GetHandle(), cbuffer, C.int(startpoint)));
 }
 
-func Mle_export(handle HWND, startpoint int, length int) string {
+func (handle HMLE) Import(buffer string, startpoint int) int {
+    return Mle_import(handle, buffer, startpoint);
+}
+
+func Mle_export(handle HANDLE, startpoint int, length int) string {
    cbuf := C.calloc(1, C.size_t(length+1));
-   C.go_mle_export(unsafe.Pointer(handle.hwnd), (*C.char)(cbuf), C.int(startpoint), C.int(length));
+   C.go_mle_export(handle.GetHandle(), (*C.char)(cbuf), C.int(startpoint), C.int(length));
    buf := C.GoString((*C.char)(cbuf));
    C.free(cbuf);
    return buf;
 }
 
-func Mle_get_size(handle HWND) (int, int) {
+func (handle HMLE) Export(startpoint int, length int) string {
+    return Mle_export(handle, startpoint, length);
+}
+
+func Mle_get_size(handle HANDLE) (int, int) {
    var bytes, lines C.ulong;
-   C.go_mle_get_size(unsafe.Pointer(handle.hwnd), &bytes, &lines);
+   C.go_mle_get_size(handle.GetHandle(), &bytes, &lines);
    return int(bytes), int(lines);
 }
 
-func Mle_delete(handle HWND, startpoint int, length int) {
-   C.go_mle_delete(unsafe.Pointer(handle.hwnd), C.int(startpoint), C.int(length));
+func (handle HMLE) GetSize() (int, int) {
+    return Mle_get_size(handle);
 }
 
-func Mle_clear(handle HWND) {
-   C.go_mle_clear(unsafe.Pointer(handle.hwnd));
+func Mle_delete(handle HANDLE, startpoint int, length int) {
+   C.go_mle_delete(handle.GetHandle(), C.int(startpoint), C.int(length));
 }
 
-func Mle_freeze(handle HWND) {
-   C.go_mle_freeze(unsafe.Pointer(handle.hwnd));
+func (handle HMLE) Delete(startpoint int, length int) {
+    Mle_delete(handle, startpoint, length);
 }
 
-func Mle_thaw(handle HWND) {
-   C.go_mle_thaw(unsafe.Pointer(handle.hwnd));
+func Mle_clear(handle HANDLE) {
+   C.go_mle_clear(handle.GetHandle());
 }
 
-func Mle_set_cursor(handle HWND, point int) {
-   C.go_mle_set_cursor(unsafe.Pointer(handle.hwnd), C.int(point));
+func (handle HMLE) Clear() {
+    Mle_clear(handle);
 }
 
-func Mle_set_visible(handle HWND, line int) {
-   C.go_mle_set_visible(unsafe.Pointer(handle.hwnd), C.int(line));
+func Mle_freeze(handle HANDLE) {
+   C.go_mle_freeze(handle.GetHandle());
 }
 
-func Mle_set_editable(handle HWND, state int) {
-   C.go_mle_set_editable(unsafe.Pointer(handle.hwnd), C.int(state));
+func (handle HMLE) Freeze() {
+    Mle_freeze(handle);
 }
 
-func Mle_set_word_wrap(handle HWND, state int) {
-   C.go_mle_set_word_wrap(unsafe.Pointer(handle.hwnd), C.int(state));
+func Mle_thaw(handle HANDLE) {
+   C.go_mle_thaw(handle.GetHandle());
 }
 
-func Mle_search(handle HWND, text string, point int, flags uint) int {
+func (handle HMLE) Thaw() {
+    Mle_thaw(handle);
+}
+
+func Mle_set_cursor(handle HANDLE, point int) {
+   C.go_mle_set_cursor(handle.GetHandle(), C.int(point));
+}
+
+func (handle HMLE) SetCursor(point int) {
+    Mle_set_cursor(handle, point);
+}
+
+func Mle_set_visible(handle HANDLE, line int) {
+   C.go_mle_set_visible(handle.GetHandle(), C.int(line));
+}
+
+func (handle HMLE) SetVisible(line int) {
+    Mle_set_visible(handle, line);
+}
+
+func Mle_set_editable(handle HANDLE, state int) {
+   C.go_mle_set_editable(handle.GetHandle(), C.int(state));
+}
+
+func (handle HMLE) SetEditable(state int) {
+    Mle_set_editable(handle, state);
+}
+
+func Mle_set_word_wrap(handle HANDLE, state int) {
+   C.go_mle_set_word_wrap(handle.GetHandle(), C.int(state));
+}
+
+func (handle HMLE) SetWordWrap(state int) {
+    Mle_set_word_wrap(handle, state);
+}
+
+func Mle_search(handle HANDLE, text string, point int, flags uint) int {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   return int(C.go_mle_search(unsafe.Pointer(handle.hwnd), ctext, C.int(point), C.ulong(flags)));
+   return int(C.go_mle_search(handle.GetHandle(), ctext, C.int(point), C.ulong(flags)));
 }
 
-func Container_new(id uint, multi int) HWND {
-    return HWND{C.go_container_new(C.ulong(id), C.int(multi))};
+func (handle HMLE) Search(text string, point int, flags uint) int {
+    return Mle_search(handle, text, point, flags);
 }
 
-func Container_setup(handle HWND, flags []uint, titles []string, separator int) int {
+func Container_new(id uint, multi int) HCONTAINER {
+    return HCONTAINER{C.go_container_new(C.ulong(id), C.int(multi)), false};
+}
+
+func ContainerNew(id uint, multi int) HCONTAINER {
+    return Container_new(id, multi);
+}
+
+func Container_setup(handle HANDLE, flags []uint, titles []string, separator int) int {
     count := len(flags);
     if len(titles) < count {
         count = len(titles);
@@ -1510,10 +2055,14 @@ func Container_setup(handle HWND, flags []uint, titles []string, separator int) 
         cflags[n] = C.ulong(flags[n]);
     }
     flagsHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cflags)));
-    return int(C.go_container_setup(unsafe.Pointer(handle.hwnd), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count), C.int(separator)));
+    return int(C.go_container_setup(handle.GetHandle(), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count), C.int(separator)));
 }
 
-func Filesystem_setup(handle HWND, flags []uint, titles []string) int {
+func (handle HCONTAINER) Setup(flags []uint, titles []string, separator int) int {
+    return Container_setup(handle, flags, titles, separator);
+}
+
+func Filesystem_setup(handle HANDLE, flags []uint, titles []string) int {
     count := len(flags);
     if len(titles) < count {
         count = len(titles);
@@ -1530,55 +2079,64 @@ func Filesystem_setup(handle HWND, flags []uint, titles []string) int {
         cflags[n] = C.ulong(flags[n]);
     }
     flagsHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cflags)));
-    return int(C.go_filesystem_setup(unsafe.Pointer(handle.hwnd), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count)));
+    return int(C.go_filesystem_setup(handle.GetHandle(), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count)));
 }
 
-func Container_alloc(handle HWND, rowcount int) POINTER {
-   return POINTER(C.go_container_alloc(unsafe.Pointer(handle.hwnd), C.int(rowcount)));
+func (handle HCONTAINER) FileSytemSetup(flags []uint, titles []string) int {
+    handle.filesystem = true;
+    return Filesystem_setup(handle, flags, titles);
 }
 
-func Container_set_item(handle HWND, ptr POINTER, column int, row int, data unsafe.Pointer) {
-   C.go_container_set_item(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), data);
+func Container_alloc(handle HANDLE, rowcount int) POINTER {
+   return POINTER(C.go_container_alloc(handle.GetHandle(), C.int(rowcount)));
 }
 
-func Container_set_item_ulong(handle HWND, ptr POINTER, column int, row int, val uint) {
-   C.go_container_set_item_ulong(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), C.ulong(val));
+func (handle HCONTAINER) Alloc(rowcount int) POINTER {
+    return Container_alloc(handle, rowcount);
 }
 
-func Container_set_item_icon(handle HWND, ptr POINTER, column int, row int, icon HICN) {
-   C.go_container_set_item_icon(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), unsafe.Pointer(icon));
+func Container_set_item(handle HANDLE, ptr POINTER, column int, row int, data unsafe.Pointer) {
+   C.go_container_set_item(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), data);
 }
 
-func Container_set_item_time(handle HWND, ptr POINTER, column int, row int, seconds int, minutes int, hours int) {
-   C.go_container_set_item_time(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+func Container_set_item_ulong(handle HANDLE, ptr POINTER, column int, row int, val uint) {
+   C.go_container_set_item_ulong(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), C.ulong(val));
 }
 
-func Container_set_item_date(handle HWND, ptr POINTER, column int, row int, day int, month int, year int) {
-   C.go_container_set_item_date(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
+func Container_set_item_icon(handle HANDLE, ptr POINTER, column int, row int, icon HICN) {
+   C.go_container_set_item_icon(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), unsafe.Pointer(icon));
 }
 
-func Container_change_item(handle HWND, column int, row int, data unsafe.Pointer) {
-   C.go_container_change_item(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), data);
+func Container_set_item_time(handle HANDLE, ptr POINTER, column int, row int, seconds int, minutes int, hours int) {
+   C.go_container_set_item_time(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
 }
 
-func Container_change_item_ulong(handle HWND, column int, row int, val uint) {
-   C.go_container_change_item_ulong(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), C.ulong(val));
+func Container_set_item_date(handle HANDLE, ptr POINTER, column int, row int, day int, month int, year int) {
+   C.go_container_set_item_date(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
 }
 
-func Container_change_item_icon(handle HWND, column int, row int, icon HICN) {
-   C.go_container_change_item_icon(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), unsafe.Pointer(icon));
+func Container_change_item(handle HANDLE, column int, row int, data unsafe.Pointer) {
+   C.go_container_change_item(handle.GetHandle(), C.int(column), C.int(row), data);
 }
 
-func Container_change_item_time(handle HWND, column int, row int, seconds int, minutes int, hours int) {
-   C.go_container_change_item_time(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+func Container_change_item_ulong(handle HANDLE, column int, row int, val uint) {
+   C.go_container_change_item_ulong(handle.GetHandle(), C.int(column), C.int(row), C.ulong(val));
 }
 
-func Container_change_item_date(handle HWND, column int, row int, day int, month int, year int) {
-   C.go_container_change_item_date(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
+func Container_change_item_icon(handle HANDLE, column int, row int, icon HICN) {
+   C.go_container_change_item_icon(handle.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(icon));
 }
 
-func Container_set_column_width(handle HWND, column int, width int) {
-   C.go_container_set_column_width(unsafe.Pointer(handle.hwnd), C.int(column), C.int(width));
+func Container_change_item_time(handle HANDLE, column int, row int, seconds int, minutes int, hours int) {
+   C.go_container_change_item_time(handle.GetHandle(), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+}
+
+func Container_change_item_date(handle HANDLE, column int, row int, day int, month int, year int) {
+   C.go_container_change_item_date(handle.GetHandle(), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
+}
+
+func Container_set_column_width(handle HANDLE, column int, width int) {
+   C.go_container_set_column_width(handle.GetHandle(), C.int(column), C.int(width));
 }
 
 func Container_set_row_title(ptr POINTER, row int, title string) {
@@ -1587,152 +2145,152 @@ func Container_set_row_title(ptr POINTER, row int, title string) {
    /* TODO: Probably need to have a way to free this or leak */
 }
 
-func Container_set_row_data(ptr unsafe.Pointer row int, data POINTER) {
-   C.dw_container_set_row_title(ptr, C.int(row), (*C.char)(data));
+func Container_set_row_data(ptr POINTER, row int, data POINTER) {
+   C.dw_container_set_row_title(unsafe.Pointer(ptr), C.int(row), (*C.char)(data));
 }
 
-func Container_change_row_title(handle HWND, row int, title string) {
+func Container_change_row_title(handle HANDLE, row int, title string) {
    ctitle := C.CString(title);
-   C.go_container_change_row_title(unsafe.Pointer(handle.hwnd), C.int(row), ctitle);
+   C.go_container_change_row_title(handle.GetHandle(), C.int(row), ctitle);
 }
 
-func Container_change_row_data(handle HWND, row int, data unsafe.Pointer) {
-   C.go_container_change_row_data(unsafe.Pointer(handle.hwnd), C.int(row), data);
+func Container_change_row_data(handle HANDLE, row int, data unsafe.Pointer) {
+   C.go_container_change_row_data(handle.GetHandle(), C.int(row), data);
 }
 
-func Container_insert(handle HWND, ptr POINTER, rowcount int) {
-   C.go_container_insert(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(rowcount));
+func Container_insert(handle HANDLE, ptr POINTER, rowcount int) {
+   C.go_container_insert(handle.GetHandle(), unsafe.Pointer(ptr), C.int(rowcount));
 }
 
-func Container_clear(handle HWND, redraw int) {
-   C.go_container_clear(unsafe.Pointer(handle.hwnd), C.int(redraw));
+func Container_clear(handle HANDLE, redraw int) {
+   C.go_container_clear(handle.GetHandle(), C.int(redraw));
 }
 
-func Container_delete(handle HWND, rowcount int) {
-   C.go_container_delete(unsafe.Pointer(handle.hwnd), C.int(rowcount));
+func Container_delete(handle HANDLE, rowcount int) {
+   C.go_container_delete(handle.GetHandle(), C.int(rowcount));
 }
 
-func Container_query_start(handle HWND, flags uint) string {
-   cresult := C.go_container_query_start(unsafe.Pointer(handle.hwnd), C.ulong(flags));
+func Container_query_start(handle HANDLE, flags uint) string {
+   cresult := C.go_container_query_start(handle.GetHandle(), C.ulong(flags));
    result := C.GoString(cresult);
    /* TODO: Do I need to free this? */
    return result;
 }
 
-func Container_query_next(handle HWND, flags uint) string {
-   cresult := C.go_container_query_next(unsafe.Pointer(handle.hwnd), C.ulong(flags));
+func Container_query_next(handle HANDLE, flags uint) string {
+   cresult := C.go_container_query_next(handle.GetHandle(), C.ulong(flags));
    result := C.GoString(cresult);
    /* TODO: Do I need to free this? */
    return result;
 }
 
-func Container_scroll(handle HWND, direction int, rows int) {
-   C.go_container_scroll(unsafe.Pointer(handle.hwnd), C.int(direction), C.long(rows));
+func Container_scroll(handle HANDLE, direction int, rows int) {
+   C.go_container_scroll(handle.GetHandle(), C.int(direction), C.long(rows));
 }
 
-func Container_cursor(handle HWND, text string) {
+func Container_cursor(handle HANDLE, text string) {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   C.go_container_cursor(unsafe.Pointer(handle.hwnd), ctext);
+   C.go_container_cursor(handle.GetHandle(), ctext);
 }
 
-func Container_delete_row(handle HWND, text string) {
+func Container_delete_row(handle HANDLE, text string) {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
-   C.go_container_delete_row(unsafe.Pointer(handle.hwnd), ctext);
+   C.go_container_delete_row(handle.GetHandle(), ctext);
 }
 
-func Container_optimize(handle HWND) {
-   C.go_container_optimize(unsafe.Pointer(handle.hwnd));
+func Container_optimize(handle HANDLE) {
+   C.go_container_optimize(handle.GetHandle());
 }
 
-func Container_set_stripe(handle HWND, oddcolor COLOR, evencolor COLOR) {
-   C.go_container_set_stripe(unsafe.Pointer(handle.hwnd), C.ulong(oddcolor), C.ulong(evencolor));
+func Container_set_stripe(handle HANDLE, oddcolor COLOR, evencolor COLOR) {
+   C.go_container_set_stripe(handle.GetHandle(), C.ulong(oddcolor), C.ulong(evencolor));
 }
 
-func Container_get_column_type(handle HWND, column int) uint {
-   return uint(C.go_container_get_column_type(unsafe.Pointer(handle.hwnd), C.int(column)));
+func Container_get_column_type(handle HANDLE, column int) uint {
+   return uint(C.go_container_get_column_type(handle.GetHandle(), C.int(column)));
 }
 
-func Filesystem_get_column_type(handle HWND, column int) uint {
-   return uint(C.go_filesystem_get_column_type(unsafe.Pointer(handle.hwnd), C.int(column)));
+func Filesystem_get_column_type(handle HANDLE, column int) uint {
+   return uint(C.go_filesystem_get_column_type(handle.GetHandle(), C.int(column)));
 }
 
-func Filesystem_set_column_title(handle HWND, title string) {
+func Filesystem_set_column_title(handle HANDLE, title string) {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
    
-   C.go_filesystem_set_column_title(unsafe.Pointer(handle.hwnd), ctitle);
+   C.go_filesystem_set_column_title(handle.GetHandle(), ctitle);
 }
 
-func Filesystem_set_item(handle HWND, ptr POINTER, column int, row int, data unsafe.Pointer) {
-   C.go_filesystem_set_item(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), data);
+func Filesystem_set_item(handle HANDLE, ptr POINTER, column int, row int, data unsafe.Pointer) {
+   C.go_filesystem_set_item(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), data);
 }
 
-func Filesystem_set_item_ulong(handle HWND, ptr POINTER, column int, row int, val uint) {
-   C.go_filesystem_set_item_ulong(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), C.ulong(val));
+func Filesystem_set_item_ulong(handle HANDLE, ptr POINTER, column int, row int, val uint) {
+   C.go_filesystem_set_item_ulong(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), C.ulong(val));
 }
 
-func Filesystem_set_item_icon(handle HWND, ptr POINTER, column int, row int, icon HICN) {
-   C.go_filesystem_set_item_icon(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), unsafe.Pointer(icon));
+func Filesystem_set_item_icon(handle HANDLE, ptr POINTER, column int, row int, icon HICN) {
+   C.go_filesystem_set_item_icon(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), unsafe.Pointer(icon));
 }
 
-func Filesystem_set_item_time(handle HWND, ptr POINTER, column int, row int, seconds int, minutes int, hours int) {
-   C.go_filesystem_set_item_time(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+func Filesystem_set_item_time(handle HANDLE, ptr POINTER, column int, row int, seconds int, minutes int, hours int) {
+   C.go_filesystem_set_item_time(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
 }
 
-func Filesystem_set_item_date(handle HWND, ptr POINTER, column int, row int, day int, month int, year int) {
-   C.go_filesystem_set_item_date(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
+func Filesystem_set_item_date(handle HANDLE, ptr POINTER, column int, row int, day int, month int, year int) {
+   C.go_filesystem_set_item_date(handle.GetHandle(), unsafe.Pointer(ptr), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
 }
 
-func Filesystem_set_file(handle HWND, ptr POINTER, row int, filename string, icon HICN) {
+func Filesystem_set_file(handle HANDLE, ptr POINTER, row int, filename string, icon HICN) {
    cfilename := C.CString(filename);
    defer C.free(unsafe.Pointer(cfilename));
    
-   C.go_filesystem_set_file(unsafe.Pointer(handle.hwnd), unsafe.Pointer(ptr), C.int(row), cfilename, unsafe.Pointer(icon));
+   C.go_filesystem_set_file(handle.GetHandle(), unsafe.Pointer(ptr), C.int(row), cfilename, unsafe.Pointer(icon));
 }
 
-func Filesystem_change_item(handle HWND, column int, row int, data unsafe.Pointer) {
-   C.go_filesystem_change_item(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), data);
+func Filesystem_change_item(handle HANDLE, column int, row int, data unsafe.Pointer) {
+   C.go_filesystem_change_item(handle.GetHandle(), C.int(column), C.int(row), data);
 }
 
-func Filesystem_change_item_ulong(handle HWND, column int, row int, val uint) {
-   C.go_filesystem_change_item_ulong(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), C.ulong(val));
+func Filesystem_change_item_ulong(handle HANDLE, column int, row int, val uint) {
+   C.go_filesystem_change_item_ulong(handle.GetHandle(), C.int(column), C.int(row), C.ulong(val));
 }
 
-func Filesystem_change_item_icon(handle HWND, column int, row int, icon HICN) {
-   C.go_filesystem_change_item_icon(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), unsafe.Pointer(icon));
+func Filesystem_change_item_icon(handle HANDLE, column int, row int, icon HICN) {
+   C.go_filesystem_change_item_icon(handle.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(icon));
 }
 
-func Filesystem_change_item_time(handle HWND, column int, row int, seconds int, minutes int, hours int) {
-   C.go_filesystem_change_item_time(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
+func Filesystem_change_item_time(handle HANDLE, column int, row int, seconds int, minutes int, hours int) {
+   C.go_filesystem_change_item_time(handle.GetHandle(), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
 }
 
-func Filesystem_change_item_date(handle HWND, column int, row int, day int, month int, year int) {
-   C.go_filesystem_change_item_date(unsafe.Pointer(handle.hwnd), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
+func Filesystem_change_item_date(handle HANDLE, column int, row int, day int, month int, year int) {
+   C.go_filesystem_change_item_date(handle.GetHandle(), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
 }
 
-func Filesystem_change_file(handle HWND, row int, filename string, icon HICN) {
+func Filesystem_change_file(handle HANDLE, row int, filename string, icon HICN) {
    cfilename := C.CString(filename);
    defer C.free(unsafe.Pointer(cfilename));
    
-   C.go_filesystem_change_file(unsafe.Pointer(handle.hwnd), C.int(row), cfilename, unsafe.Pointer(icon));
+   C.go_filesystem_change_file(handle.GetHandle(), C.int(row), cfilename, unsafe.Pointer(icon));
 }
 
-func Calendar_new(id uint) HWND {
-    return HWND{C.go_calendar_new(C.ulong(id))};
+func Calendar_new(id uint) HCALENDAR {
+    return HCALENDAR{C.go_calendar_new(C.ulong(id))};
 }
 
-func Calendar_set_date(handle HWND, year uint, month uint, day uint) {
-   C.go_calendar_set_date(unsafe.Pointer(handle.hwnd), C.uint(year), C.uint(month), C.uint(day));
+func Calendar_set_date(handle HANDLE, year uint, month uint, day uint) {
+   C.go_calendar_set_date(handle.GetHandle(), C.uint(year), C.uint(month), C.uint(day));
 }
 
-func Calendar_get_date(handle HWND) (uint, uint, uint) {
+func Calendar_get_date(handle HANDLE) (uint, uint, uint) {
    var year, month, day C.uint;
    
-   C.go_calendar_get_date(unsafe.Pointer(handle.hwnd), &year, &month, &day);
+   C.go_calendar_get_date(handle.GetHandle(), &year, &month, &day);
    return uint(year), uint(month), uint(day);
 }
 
@@ -2049,10 +2607,10 @@ func go_int_callback_item_context(pfunc unsafe.Pointer, window unsafe.Pointer, t
 func go_int_callback_item_select(pfunc unsafe.Pointer, window unsafe.Pointer, item unsafe.Pointer, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.int) C.int {
    if (flags & go_flags_no_data) == go_flags_no_data {
       thisfunc := *(*func(HWND, HTREEITEM, string, POINTER) int)(pfunc);
-      return C.int(thisfunc(HWND{window}, HTREEITEM(item), C.GoString(text), POINTER(itemdata)));
+      return C.int(thisfunc(HWND{window}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(itemdata)));
    }
    thisfunc := *(*func(HWND, HTREEITEM, string, POINTER, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, HTREEITEM(item), C.GoString(text), POINTER(data), POINTER(itemdata)));
+   return C.int(thisfunc(HWND{window}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(data), POINTER(itemdata)));
 }
 
 //export go_int_callback_numeric
@@ -2079,10 +2637,10 @@ func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ul
 func go_int_callback_tree(pfunc unsafe.Pointer, window unsafe.Pointer, tree unsafe.Pointer, data unsafe.Pointer, flags C.int) C.int {
    if (flags & go_flags_no_data) == go_flags_no_data {
       thisfunc := *(*func(HWND, HTREEITEM) int)(pfunc);
-      return C.int(thisfunc(HWND{window}, HTREEITEM(tree)));
+      return C.int(thisfunc(HWND{window}, HTREEITEM{tree, HWND{window}}));
    }
    thisfunc := *(*func(HWND, HTREEITEM, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, HTREEITEM(tree), POINTER(data)));
+   return C.int(thisfunc(HWND{window}, HTREEITEM{tree, HWND{window}}, POINTER(data)));
 }
 
 //export go_int_callback_timer

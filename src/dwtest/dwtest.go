@@ -20,7 +20,8 @@ const (
 var FIXEDFONT = "10.monospace"
 
 // Page 1
-var notebookbox1, copypastefield, entryfield, cursortogglebutton, mainwindow, noncheckable_menuitem, checkable_menuitem dw.HWND
+var notebookbox1, cursortogglebutton, mainwindow, noncheckable_menuitem, checkable_menuitem dw.HWND
+var copypastefield, entryfield dw.HENTRYFIELD
 var current_color dw.COLOR = dw.RGB(100, 100, 100)
 var cursor_arrow bool = true
 var timerid dw.HTIMER
@@ -205,11 +206,11 @@ func colorchoose_callback(window dw.HWND, data dw.POINTER) int {
 func cursortoggle_callback(window dw.HWND, data dw.POINTER) int {
     if cursor_arrow {
         dw.Window_set_text(cursortogglebutton, "Set Cursor pointer - ARROW");
-        dw.Window_set_pointer(dw.POINTER_TO_HWND(data), dw.POINTER_CLOCK);
+        dw.Window_set_pointer(dw.POINTER_TO_HANDLE(data), dw.POINTER_CLOCK);
         cursor_arrow = false;
     } else {
         dw.Window_set_text(cursortogglebutton, "Set Cursor pointer - CLOCK");
-        dw.Window_set_pointer(dw.POINTER_TO_HWND(data), dw.POINTER_DEFAULT);
+        dw.Window_set_pointer(dw.POINTER_TO_HANDLE(data), dw.POINTER_DEFAULT);
         cursor_arrow = true;
     }
     return FALSE;
@@ -240,7 +241,7 @@ func motion_notify_event(window dw.HWND, x int, y int, buttonmask int, data dw.P
 }
 
 func show_window_callback(window dw.HWND, data dw.POINTER) int {
-    thiswindow := dw.POINTER_TO_HWND(data);
+    thiswindow := dw.POINTER_TO_HANDLE(data);
 
     if thiswindow != dw.NOHWND {
         dw.Window_show(thiswindow);
@@ -253,10 +254,10 @@ func context_menu_event(window dw.HWND, x int, y int, buttonmask int, data dw.PO
     hwndMenu := dw.Menu_new(0);
     menuitem := dw.Menu_append_item(hwndMenu, "~Quit", dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU);
 
-    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&exit_callback_func), dw.HWND_TO_POINTER(mainwindow));
+    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&exit_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
     dw.Menu_append_item(hwndMenu, dw.MENU_SEPARATOR, dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU);
     menuitem = dw.Menu_append_item(hwndMenu, "~Show Window", dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU);
-    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&show_window_callback_func), dw.HWND_TO_POINTER(mainwindow));
+    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&show_window_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
     px, py := dw.Pointer_query_pos();
     /* Use the toplevel window handle here.... because on the Mac..
      * using the control itself, when a different tab is active
@@ -499,7 +500,7 @@ func render_select_event_callback(window dw.HWND, index int, data dw.POINTER) in
 /* Callback to handle user selection of the scrollbar position */
 func scrollbar_valuechanged_callback(hwnd dw.HWND, value int, data dw.POINTER) int {
     if data != nil {
-        stext := dw.POINTER_TO_HWND(data);
+        stext := dw.POINTER_TO_HANDLE(data);
 
         if hwnd == vscrollbar {
             current_row = value;
@@ -627,35 +628,35 @@ func keypress_callback(window dw.HWND, ch uint8, vk int, state int, data dw.POIN
 
 // Page 3 and 4 Callbacks
 func item_enter_cb(window dw.HWND, text string, data dw.POINTER) int {
-    message := fmt.Sprintf("DW_SIGNAL_ITEM_ENTER: Window: %x Text: %s", dw.HWND_TO_UINTPTR(window), text);
-    dw.Window_set_text(dw.POINTER_TO_HWND(data), message);
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_ENTER: Window: %x Text: %s", dw.HANDLE_TO_UINTPTR(window), text);
+    dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message);
     return FALSE;
 }
 
 func item_context_cb(window dw.HWND, text string, x int, y int, data dw.POINTER, itemdata dw.POINTER) int {
-    message := fmt.Sprintf("DW_SIGNAL_ITEM_CONTEXT: Window: %x Text: %s x: %d y: %d Itemdata: %x", dw.HWND_TO_UINTPTR(window), 
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_CONTEXT: Window: %x Text: %s x: %d y: %d Itemdata: %x", dw.HANDLE_TO_UINTPTR(window), 
           text, x, y, uintptr(itemdata));
-    dw.Window_set_text(dw.POINTER_TO_HWND(data), message);
+    dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message);
     return FALSE;
 }
 
 func list_select_cb(window dw.HWND, item int, data dw.POINTER) int {
-    message := fmt.Sprintf("DW_SIGNAL_LIST_SELECT: Window: %x Item: %d", dw.HWND_TO_UINTPTR(window), item);
-    dw.Window_set_text(dw.POINTER_TO_HWND(data), message);
+    message := fmt.Sprintf("DW_SIGNAL_LIST_SELECT: Window: %x Item: %d", dw.HANDLE_TO_UINTPTR(window), item);
+    dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message);
     return FALSE;
 }
 
 func item_select_cb(window dw.HWND, item dw.HTREEITEM, text string, data dw.POINTER, itemdata dw.POINTER) int {
-    message := fmt.Sprintf("DW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x", dw.HWND_TO_UINTPTR(window),
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x", dw.HANDLE_TO_UINTPTR(window),
             uintptr(dw.POINTER(item)), text, uintptr(itemdata));
-    dw.Window_set_text(dw.POINTER_TO_HWND(data), message);
+    dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message);
     return FALSE;
 }
 
 func container_select_cb(window dw.HWND, item dw.HTREEITEM, text string, data dw.POINTER, itemdata dw.POINTER)  int {
-    message := fmt.Sprintf("DW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x", dw.HWND_TO_UINTPTR(window),
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x", dw.HANDLE_TO_UINTPTR(window),
             uintptr(dw.POINTER(item)), text, uintptr(itemdata));
-    dw.Window_set_text(dw.POINTER_TO_HWND(data), message);
+    dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message);
     mle_point = dw.Mle_import(container_mle, message, mle_point);
     str := dw.Container_query_start(container, dw.CRA_SELECTED);
     for len(str) > 0 {
@@ -695,9 +696,9 @@ func column_click_cb(window dw.HWND, column_num int, data dw.POINTER) int {
             stype = "BitmapOrIcon";
         }
     }
-    message := fmt.Sprintf("DW_SIGNAL_COLUMN_CLICK: Window: %x Column: %d Type: %s Itemdata: %x", dw.HWND_TO_UINTPTR(window),
+    message := fmt.Sprintf("DW_SIGNAL_COLUMN_CLICK: Window: %x Column: %d Type: %s Itemdata: %x", dw.HANDLE_TO_UINTPTR(window),
             column_num, stype);
-    dw.Window_set_text(dw.POINTER_TO_HWND(data), message);
+    dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message);
     return FALSE;
 }
 
@@ -816,7 +817,7 @@ func menu_add() {
     /* add menus to the menubar */
     menu := dw.Menu_new(0);
     menuitem := dw.Menu_append_item(menu, "~Quit", dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
-    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&exit_callback_func), dw.HWND_TO_POINTER(mainwindow));
+    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&exit_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
     /*
      * Add the "File" menu to the menubar...
      */
@@ -839,7 +840,7 @@ func menu_add() {
 
     menu = dw.Menu_new(0);
     menuitem = dw.Menu_append_item(menu, "~About", dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
-    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&helpabout_callback_func), dw.HWND_TO_POINTER(mainwindow));
+    dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&helpabout_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
     /*
      * Add the "Help" menu to the menubar...
      */
@@ -927,12 +928,12 @@ func archive_add() {
 
     dw.Signal_connect(browsefilebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&browse_file_callback_func), nil);
     dw.Signal_connect(browsefolderbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&browse_folder_callback_func), nil);
-    dw.Signal_connect(copybutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&copy_clicked_callback_func), dw.HWND_TO_POINTER(copypastefield));
-    dw.Signal_connect(pastebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&paste_clicked_callback_func), dw.HWND_TO_POINTER(copypastefield));
+    dw.Signal_connect(copybutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&copy_clicked_callback_func), dw.HANDLE_TO_POINTER(copypastefield));
+    dw.Signal_connect(pastebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&paste_clicked_callback_func), dw.HANDLE_TO_POINTER(copypastefield));
     dw.Signal_connect(okbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&beep_callback_func), nil);
-    dw.Signal_connect(cancelbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&exit_callback_func), dw.HWND_TO_POINTER(mainwindow));
-    dw.Signal_connect(cursortogglebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&cursortoggle_callback_func), dw.HWND_TO_POINTER(mainwindow));
-    dw.Signal_connect(colorchoosebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&colorchoose_callback_func), dw.HWND_TO_POINTER(mainwindow));
+    dw.Signal_connect(cancelbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&exit_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
+    dw.Signal_connect(cursortogglebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&cursortoggle_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
+    dw.Signal_connect(colorchoosebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&colorchoose_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
 }
 
 // Create Page 2
@@ -1045,8 +1046,8 @@ func text_add() {
     dw.Signal_connect(textbox2, dw.SIGNAL_CONFIGURE, dw.SIGNAL_FUNC(&configure_event_func), nil);
     dw.Signal_connect(textbox2, dw.SIGNAL_MOTION_NOTIFY, dw.SIGNAL_FUNC(&motion_notify_event_func), dw.POINTER(uintptr(1)));
     dw.Signal_connect(textbox2, dw.SIGNAL_BUTTON_PRESS, dw.SIGNAL_FUNC(&motion_notify_event_func), nil);
-    dw.Signal_connect(hscrollbar, dw.SIGNAL_VALUE_CHANGED, dw.SIGNAL_FUNC(&scrollbar_valuechanged_callback_func), dw.HWND_TO_POINTER(status1));
-    dw.Signal_connect(vscrollbar, dw.SIGNAL_VALUE_CHANGED, dw.SIGNAL_FUNC(&scrollbar_valuechanged_callback_func), dw.HWND_TO_POINTER(status1));
+    dw.Signal_connect(hscrollbar, dw.SIGNAL_VALUE_CHANGED, dw.SIGNAL_FUNC(&scrollbar_valuechanged_callback_func), dw.HANDLE_TO_POINTER(status1));
+    dw.Signal_connect(vscrollbar, dw.SIGNAL_VALUE_CHANGED, dw.SIGNAL_FUNC(&scrollbar_valuechanged_callback_func), dw.HANDLE_TO_POINTER(status1));
     dw.Signal_connect(imagestretchcheck, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&refresh_callback_func), nil);
     dw.Signal_connect(button1, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&refresh_callback_func), nil);
     dw.Signal_connect(button2, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&print_callback_func), nil);
@@ -1076,8 +1077,8 @@ func tree_add() {
     dw.Box_pack_start(notebookbox3, tree_status, 100, -1, TRUE, FALSE, 1);
 
     /* set up our signal trappers... */
-    dw.Signal_connect(tree, dw.SIGNAL_ITEM_CONTEXT, dw.SIGNAL_FUNC(&item_context_cb_func), dw.HWND_TO_POINTER(tree_status));
-    dw.Signal_connect(tree, dw.SIGNAL_ITEM_SELECT, dw.SIGNAL_FUNC(&item_select_cb_func), dw.HWND_TO_POINTER(tree_status));
+    dw.Signal_connect(tree, dw.SIGNAL_ITEM_CONTEXT, dw.SIGNAL_FUNC(&item_context_cb_func), dw.HANDLE_TO_POINTER(tree_status));
+    dw.Signal_connect(tree, dw.SIGNAL_ITEM_SELECT, dw.SIGNAL_FUNC(&item_select_cb_func), dw.HANDLE_TO_POINTER(tree_status));
 
     t1 := dw.Tree_insert(tree, "tree folder 1", foldericon, nil, dw.POINTER(uintptr(1)));
     t2 := dw.Tree_insert(tree, "tree folder 2", foldericon, nil, dw.POINTER(uintptr(2)));
@@ -1122,7 +1123,7 @@ func container_add() {
         if z == 0 {
              thisicon = foldericon;
         } 
-        fmt.Printf("Initial: container: %x containerinfo: %x icon: %x\n", uintptr(dw.HWND_TO_POINTER(container)),
+        fmt.Printf("Initial: container: %x containerinfo: %x icon: %x\n", uintptr(dw.HANDLE_TO_POINTER(container)),
                   uintptr(containerinfo), uintptr(dw.POINTER(thisicon)));
         dw.Filesystem_set_file(container, containerinfo, z, fmt.Sprintf("Filename %d", z+1), thisicon);
         dw.Filesystem_set_item_icon(container, containerinfo, 0, z, thisicon);
@@ -1157,10 +1158,10 @@ func container_add() {
     mle_point = dw.Mle_import(container_mle, fmt.Sprintf("[%d]\r\n\r\n", mle_point), mle_point);
     dw.Mle_set_cursor(container_mle, mle_point);
     /* connect our event trappers... */
-    dw.Signal_connect(container, dw.SIGNAL_ITEM_ENTER, dw.SIGNAL_FUNC(&item_enter_cb_func), dw.HWND_TO_POINTER(container_status));
-    dw.Signal_connect(container, dw.SIGNAL_ITEM_CONTEXT, dw.SIGNAL_FUNC(&item_context_cb_func), dw.HWND_TO_POINTER(container_status));
-    dw.Signal_connect(container, dw.SIGNAL_ITEM_SELECT, dw.SIGNAL_FUNC(&container_select_cb_func), dw.HWND_TO_POINTER(container_status));
-    dw.Signal_connect(container, dw.SIGNAL_COLUMN_CLICK, dw.SIGNAL_FUNC(&column_click_cb_func), dw.HWND_TO_POINTER(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_ENTER, dw.SIGNAL_FUNC(&item_enter_cb_func), dw.HANDLE_TO_POINTER(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_CONTEXT, dw.SIGNAL_FUNC(&item_context_cb_func), dw.HANDLE_TO_POINTER(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_ITEM_SELECT, dw.SIGNAL_FUNC(&container_select_cb_func), dw.HANDLE_TO_POINTER(container_status));
+    dw.Signal_connect(container, dw.SIGNAL_COLUMN_CLICK, dw.SIGNAL_FUNC(&column_click_cb_func), dw.HANDLE_TO_POINTER(container_status));
 }
 
 // Page 5
@@ -1387,7 +1388,7 @@ func main() {
    /* Set the default field */
    dw.Window_default(mainwindow, copypastefield);
 
-   dw.Signal_connect(mainwindow, dw.SIGNAL_DELETE, dw.SIGNAL_FUNC(&exit_callback_func), dw.HWND_TO_POINTER(mainwindow));
+   dw.Signal_connect(mainwindow, dw.SIGNAL_DELETE, dw.SIGNAL_FUNC(&exit_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
    /*
    * The following is a special case handler for the Mac and other platforms which contain
    * an application object which can be closed.  It function identically to a window delete/close
@@ -1395,7 +1396,7 @@ func main() {
    * handled or you allow the default handler to take place the entire application will close.
    * On platforms which do not have an application object this line will be ignored.
    */
-   dw.Signal_connect(dw.DESKTOP, dw.SIGNAL_DELETE, dw.SIGNAL_FUNC(&exit_callback_func), dw.HWND_TO_POINTER(mainwindow));
+   dw.Signal_connect(dw.DESKTOP, dw.SIGNAL_DELETE, dw.SIGNAL_FUNC(&exit_callback_func), dw.HANDLE_TO_POINTER(mainwindow));
    timerid = dw.Timer_connect(2000, dw.SIGNAL_FUNC(&timer_callback_func), nil);
    dw.Window_set_size(mainwindow, 640, 550);
    dw.Window_show(mainwindow);

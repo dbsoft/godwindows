@@ -15,11 +15,11 @@ import "dw"
 
 type DWIB unsafe.Pointer
 
-func Load(handle DWIB, name string) dw.HWND {
+func Load(handle DWIB, name string) dw.HANDLE {
    cname := C.CString(name);
    defer C.free(unsafe.Pointer(cname));
    
-   return dw.POINTER_TO_HWND(dw.POINTER(C.goib_load(unsafe.Pointer(handle), cname)));
+   return dw.POINTER_TO_HANDLE(dw.POINTER(C.goib_load(unsafe.Pointer(handle), cname)));
 }
 
 func Load_at_index(handle DWIB, name string, dataname string, window dw.HWND, box dw.HWND, index int) int {
@@ -28,11 +28,11 @@ func Load_at_index(handle DWIB, name string, dataname string, window dw.HWND, bo
    cdataname := C.CString(dataname);
    defer C.free(unsafe.Pointer(cdataname));
    
-   return int(C.goib_load_at_index(unsafe.Pointer(handle), cname, cdataname, unsafe.Pointer(dw.HWND_TO_POINTER(window)), unsafe.Pointer(dw.HWND_TO_POINTER(box)), C.int(index)));
+   return int(C.goib_load_at_index(unsafe.Pointer(handle), cname, cdataname, unsafe.Pointer(dw.HANDLE_TO_POINTER(window)), unsafe.Pointer(dw.HANDLE_TO_POINTER(box)), C.int(index)));
 }
 
-func Show(handle dw.HWND) {
-   C.goib_show(unsafe.Pointer(dw.HWND_TO_POINTER(handle)));
+func Show(handle dw.HANDLE) {
+   C.goib_show(unsafe.Pointer(dw.HANDLE_TO_POINTER(handle)));
 }
 
 func Open(filename string) DWIB {
@@ -60,10 +60,10 @@ func Locale_set(loc string) int {
    return int(C.goib_locale_set(cloc));
 }
 
-func Window_get_handle(handle dw.HWND, dataname string) dw.HWND {
+func Window_get_handle(handle dw.HANDLE, dataname string) dw.HANDLE {
    cdataname := C.CString(dataname);
    defer C.free(unsafe.Pointer(cdataname));
 
-   return dw.POINTER_TO_HWND(dw.POINTER(C.goib_window_get_handle(unsafe.Pointer(dw.HWND_TO_POINTER(handle)), cdataname)));
+   return dw.POINTER_TO_HANDLE(dw.POINTER(C.goib_window_get_handle(unsafe.Pointer(dw.HANDLE_TO_POINTER(handle)), cdataname)));
 }
 

@@ -1101,6 +1101,7 @@ extern int go_int_callback_item_context(void *pfunc, void *window, char *text, i
 extern int go_int_callback_item_select(void *pfunc, void *window, void *item, char *text, void *data, void *itemdata, int flags);
 extern int go_int_callback_numeric(void *pfunc, void* window, int val, void *data, int flags);
 extern int go_int_callback_ulong(void *pfunc, void* window, unsigned long val, void *data, int flags);
+extern int go_int_callback_notepage(void *pfunc, void* window, unsigned long val, void *data, int flags);
 extern int go_int_callback_tree(void *pfunc, void* window, void *item, void *data, int flags);
 extern int go_int_callback_timer(void *pfunc, void *data, int flags);
 extern int go_int_callback_print(void *pfunc, void *print, void *pixmap, int page_num, void *data, int flags);
@@ -1196,12 +1197,22 @@ static int DWSIGNAL go_callback_numeric(HWND window, int val, void *data)
    return 0;
 }
 
-static int DWSIGNAL go_callback_ulong(HWND window, unsigned long val, void *data)
+/*static int DWSIGNAL go_callback_ulong(HWND window, unsigned long val, void *data)
 {
    if(data)
    {
       void **param = (void **)data;
       return go_int_callback_ulong(param[0], (void *)window, val, param[1], DW_POINTER_TO_INT(param[2]));
+   }
+   return 0;
+}*/
+
+static int DWSIGNAL go_callback_notepage(HWND window, unsigned long val, void *data)
+{
+   if(data)
+   {
+      void **param = (void **)data;
+      return go_int_callback_notepage(param[0], (void *)window, val, param[1], DW_POINTER_TO_INT(param[2]));
    }
    return 0;
 }
@@ -1323,7 +1334,7 @@ static void go_signal_connect(void *window, char *signame, void *sigfunc, void *
       }
       else if(strcmp(signame, DW_SIGNAL_SWITCH_PAGE) == 0)
       {
-         func = (void *)go_callback_ulong;
+         func = (void *)go_callback_notepage;
       }
       else if(strcmp(signame, DW_SIGNAL_TREE_EXPAND) == 0)
       {

@@ -2866,10 +2866,10 @@ func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ul
 func go_int_callback_notepage(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ulong, data unsafe.Pointer, flags C.int) C.int {
    if (flags & go_flags_no_data) == go_flags_no_data {
       thisfunc := *(*func(HANDLE, HNOTEPAGE) int)(pfunc);
-      return C.int(thisfunc(HWND{window}, HNOTEPAGE{val, HWND{window}}));
+      return C.int(thisfunc(HWND{window}, HNOTEPAGE{val, HNOTEBOOK{window}}));
    }
    thisfunc := *(*func(HANDLE, HNOTEPAGE, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, HNOTEPAGE{val, HWND{window}}, POINTER(data)));
+   return C.int(thisfunc(HWND{window}, HNOTEPAGE{val, HNOTEBOOK{window}}, POINTER(data)));
 }
 
 //export go_int_callback_tree

@@ -438,13 +438,13 @@ func print_callback(window dw.HANDLE, data dw.POINTER) int {
 
 
 /* This gets called when a part of the graph needs to be repainted. */
-func text_expose(hwnd dw.HRENDER, x int, y int, width int, height int, data dw.POINTER) int {
+func text_expose(hwnd dw.HANDLE, x int, y int, width int, height int, data dw.POINTER) int {
     if render_type != 1 {
         var hpm dw.HPIXMAP
 
-        if hwnd == textbox1 {
+        if hwnd.GetHandle() == textbox1.GetHandle() {
             hpm = text1pm;
-        } else if hwnd == textbox2 {
+        } else if hwnd.GetHandle() == textbox2.GetHandle() {
             hpm = text2pm;
         } else {
             return TRUE;

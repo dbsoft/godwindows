@@ -1091,20 +1091,20 @@ static void go_print_cancel(void *print)
     return dw_print_cancel((HPRINT)print);
 }
 
-extern int go_int_callback_basic(void *pfunc, void* window, void *data, int flags);
-extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data, int flags);
-extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8, int flags);
-extern int go_int_callback_mouse(void *pfunc, void* window, int x, int y, int mask, void *data, int flags);
-extern int go_int_callback_expose(void *pfunc, void* window, int x, int y, int width, int height, void *data, int flags);
-extern int go_int_callback_string(void *pfunc, void* window, char *str, void *data, int flags);
-extern int go_int_callback_item_context(void *pfunc, void *window, char *text, int x, int y, void *data, void *itemdata, int flags);
-extern int go_int_callback_item_select(void *pfunc, void *window, void *item, char *text, void *data, void *itemdata, int flags);
-extern int go_int_callback_numeric(void *pfunc, void* window, int val, void *data, int flags);
-extern int go_int_callback_ulong(void *pfunc, void* window, unsigned long val, void *data, int flags);
-extern int go_int_callback_notepage(void *pfunc, void* window, unsigned long val, void *data, int flags);
-extern int go_int_callback_tree(void *pfunc, void* window, void *item, void *data, int flags);
-extern int go_int_callback_timer(void *pfunc, void *data, int flags);
-extern int go_int_callback_print(void *pfunc, void *print, void *pixmap, int page_num, void *data, int flags);
+extern int go_int_callback_basic(void *pfunc, void* window, void *data, unsigned int flags);
+extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data, unsigned int flags);
+extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8, unsigned int flags);
+extern int go_int_callback_mouse(void *pfunc, void* window, int x, int y, int mask, void *data, unsigned int flags);
+extern int go_int_callback_expose(void *pfunc, void* window, int x, int y, int width, int height, void *data, unsigned int flags);
+extern int go_int_callback_string(void *pfunc, void* window, char *str, void *data, unsigned int flags);
+extern int go_int_callback_item_context(void *pfunc, void *window, char *text, int x, int y, void *data, void *itemdata, unsigned int flags);
+extern int go_int_callback_item_select(void *pfunc, void *window, void *item, char *text, void *data, void *itemdata, unsigned int flags);
+extern int go_int_callback_numeric(void *pfunc, void* window, int val, void *data, unsigned int flags);
+extern int go_int_callback_ulong(void *pfunc, void* window, unsigned long val, void *data, unsigned int flags);
+extern int go_int_callback_notepage(void *pfunc, void* window, unsigned long val, void *data, unsigned int flags);
+extern int go_int_callback_tree(void *pfunc, void* window, void *item, void *data, unsigned int flags);
+extern int go_int_callback_timer(void *pfunc, void *data, unsigned int flags);
+extern int go_int_callback_print(void *pfunc, void *print, void *pixmap, int page_num, void *data, unsigned int flags);
 extern void go_callback_remove(void *pfunc);
 
 static int DWSIGNAL go_callback_basic(HWND window, void *data)
@@ -1247,7 +1247,7 @@ static int DWSIGNAL go_callback_print(HPRINT print, HPIXMAP pixmap, int page_num
     return 0;
 }
 
-static void *go_print_new(char *jobname, unsigned long flags, unsigned int pages, void *drawfunc, void *drawdata, int sflags)
+static void *go_print_new(char *jobname, unsigned long flags, unsigned int pages, void *drawfunc, void *drawdata, unsigned int sflags)
 {
     void **param = malloc(sizeof(void *) * 3);
    
@@ -1255,13 +1255,13 @@ static void *go_print_new(char *jobname, unsigned long flags, unsigned int pages
     {
        param[0] = drawfunc;
        param[1] = drawdata;
-       param[2] = DW_INT_TO_POINTER(sflags);
+       param[2] = DW_UINT_TO_POINTER(sflags);
        return (void*)dw_print_new(jobname, flags, pages, DW_SIGNAL_FUNC(go_callback_print), param);
     }
     return NULL;
 }
 
-static int go_timer_connect(int interval, void *sigfunc, void *data, int flags)
+static int go_timer_connect(int interval, void *sigfunc, void *data, unsigned int flags)
 {
    void **param = malloc(sizeof(void *) * 3);
    
@@ -1269,7 +1269,7 @@ static int go_timer_connect(int interval, void *sigfunc, void *data, int flags)
    {
       param[0] = sigfunc;
       param[1] = data;
-      param[2] = DW_INT_TO_POINTER(flags);
+      param[2] = DW_UINT_TO_POINTER(flags);
       return dw_timer_connect(interval, DW_SIGNAL_FUNC(go_callback_timer), param);
    }
    return 0;
@@ -1285,7 +1285,7 @@ static void DWSIGNAL go_signal_free(HWND window, void *data)
    }
 }
 
-static void go_signal_connect(void *window, char *signame, void *sigfunc, void *data, int flags)
+static void go_signal_connect(void *window, char *signame, void *sigfunc, void *data, unsigned int flags)
 {
    void **param = malloc(sizeof(void *) * 3);
    void *func = (void *)go_callback_basic;
@@ -1294,7 +1294,7 @@ static void go_signal_connect(void *window, char *signame, void *sigfunc, void *
    {
       param[0] = sigfunc;
       param[1] = data;
-      param[2] = DW_INT_TO_POINTER(flags);
+      param[2] = DW_UINT_TO_POINTER(flags);
       
       if(strcmp(signame, DW_SIGNAL_CONFIGURE) == 0)
       {

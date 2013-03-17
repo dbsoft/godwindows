@@ -3209,7 +3209,7 @@ func Filesystem_setup(handle HANDLE, flags []uint, titles []string) int {
     return int(C.go_filesystem_setup(handle.GetHandle(), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count)));
 }
 
-func (handle HCONTAINER) FileSystemSetup(flags []uint, titles []string) int {
+func (handle *HCONTAINER) FileSystemSetup(flags []uint, titles []string) int {
     handle.filesystem = true;
     return Filesystem_setup(handle, flags, titles);
 }
@@ -3218,7 +3218,7 @@ func Container_alloc(handle HANDLE, rowcount int) HCONTINS {
    return HCONTINS{C.go_container_alloc(handle.GetHandle(), C.int(rowcount)), rowcount, handle, false};
 }
 
-func (handle HCONTAINER) Alloc(rowcount int) HCONTINS {
+func (handle *HCONTAINER) Alloc(rowcount int) HCONTINS {
     contins := Container_alloc(handle, rowcount);
     contins.filesystem = handle.filesystem;
     return contins;
@@ -3494,9 +3494,7 @@ func Filesystem_set_column_title(handle HANDLE, title string) {
 }
 
 func (handle HCONTAINER) SetColumnTitle(title string) {
-    if handle.filesystem == true {
-        Filesystem_set_column_title(handle, title);
-    }
+    Filesystem_set_column_title(handle, title);
 }
 
 func Filesystem_set_item(handle HANDLE, contins HCONTINS, column int, row int, data POINTER) {
@@ -5014,10 +5012,6 @@ func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ul
 
 //export go_int_callback_notepage
 func go_int_callback_notepage(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ulong, data unsafe.Pointer, flags C.uint) C.int {
-   if (flags & go_flags_no_data) == go_flags_no_data {
-      thisfunc := *(*func(HANDLE, HNOTEPAGE) int)(pfunc);
-      return C.int(thisfunc(HWND{window}, HNOTEPAGE{val, HNOTEBOOK{window}}));
-   }
    switch flags {
    case (9 << 8): // HNOTEBOOK
        thisfunc := *(*func(HNOTEBOOK, HNOTEPAGE, POINTER) int)(pfunc);

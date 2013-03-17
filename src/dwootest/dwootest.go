@@ -885,8 +885,8 @@ func container_add() {
     container_status := dw.StatusTextNew("", 0);
     notebookbox4.PackStart(container_status, 100, -1, dw.TRUE, dw.FALSE, 1);
 
-    container.SetColumnTitle("Test");
     container.FileSystemSetup(flags, titles);
+    container.SetColumnTitle("Test");
     container.SetStripe(dw.CLR_DEFAULT, dw.CLR_DEFAULT);
     containerinfo := container.Alloc(3);
 
@@ -907,7 +907,7 @@ func container_add() {
     }
     containerinfo.Insert();
 
-    container.Alloc(1);
+    containerinfo = container.Alloc(1);
     containerinfo.SetFile(0, "Yikes", foldericon);
     containerinfo.SetItemIcon(0, 0, foldericon);
     containerinfo.SetItemULong(1, 0, 324);

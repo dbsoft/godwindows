@@ -19,6 +19,18 @@ type HANDLE interface {
    GetHandle() unsafe.Pointer
    GetType() C.uint
 }
+type DRAWABLE interface {
+    DrawPoint(x int, y int)
+    DrawLine(x1 int, y1 int, x2 int, y2 int)
+    DrawPolygon(flags int, x []int, y []int)
+    DrawRect(fill int, x int, y int, width int, height int)
+    DrawArc(flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int)
+    DrawText(x int, y int, text string)
+    BitBltStretchWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int, srcwidth int, srcheight int) int
+    BitBltStretchPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int
+    BitBltWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int)
+    BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int)
+}
 type HWND struct {
     hwnd unsafe.Pointer
 }
@@ -649,6 +661,10 @@ func Window_new(owner HWND, title string, flags uint) HWND {
     return HWND{C.go_window_new(unsafe.Pointer(owner.hwnd), ctitle, C.ulong(flags))};
 }
 
+func WindowNew(owner HWND, title string, flags uint) HWND {
+    return Window_new(owner, title, flags);
+}
+
 func Window_show(handle HANDLE) int {
    return int(C.go_window_show(handle.GetHandle()));
 }
@@ -854,7 +870,11 @@ func Window_set_bitmap(window HANDLE, id uint, filename string) {
     C.go_window_set_bitmap(window.GetHandle(), C.ulong(id), cfilename);
 }
 
-func (window HWND) SetBitmap(id uint, filename string) {
+func (window HBUTTON) SetBitmap(id uint, filename string) {
+    Window_set_bitmap(window, id, filename);
+}
+
+func (window HBITMAP) SetBitmap(id uint, filename string) {
     Window_set_bitmap(window, id, filename);
 }
 
@@ -948,6 +968,926 @@ func (window HWND) SetPointer(cursortype int) {
 func (window HWND) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
+
+func (window HENTRYFIELD) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HENTRYFIELD) Disable() {
+    Window_disable(window);
+}
+
+func (window HENTRYFIELD) Enable() {
+    Window_enable(window);
+}
+
+func (window HENTRYFIELD) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HENTRYFIELD) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HENTRYFIELD) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HENTRYFIELD) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HENTRYFIELD) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HENTRYFIELD) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HENTRYFIELD) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HENTRYFIELD) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HENTRYFIELD) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HENTRYFIELD) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HENTRYFIELD) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HENTRYFIELD) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HTEXT) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HTEXT) Disable() {
+    Window_disable(window);
+}
+
+func (window HTEXT) Enable() {
+    Window_enable(window);
+}
+
+func (window HTEXT) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HTEXT) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HTEXT) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HTEXT) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HTEXT) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HTEXT) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HTEXT) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HTEXT) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HTEXT) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HTEXT) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HTEXT) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HTREE) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HTREE) Disable() {
+    Window_disable(window);
+}
+
+func (window HTREE) Enable() {
+    Window_enable(window);
+}
+
+func (window HTREE) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HTREE) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HTREE) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HTREE) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HTREE) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HTREE) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HTREE) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HTREE) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HTREE) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HTREE) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HTREE) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HTREE) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HCONTAINER) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HCONTAINER) Disable() {
+    Window_disable(window);
+}
+
+func (window HCONTAINER) Enable() {
+    Window_enable(window);
+}
+
+func (window HCONTAINER) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HCONTAINER) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HCONTAINER) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HCONTAINER) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HCONTAINER) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HCONTAINER) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HCONTAINER) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HCONTAINER) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HCONTAINER) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HCONTAINER) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HCONTAINER) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HCONTAINER) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HMLE) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HMLE) Disable() {
+    Window_disable(window);
+}
+
+func (window HMLE) Enable() {
+    Window_enable(window);
+}
+
+func (window HMLE) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HMLE) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HMLE) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HMLE) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HMLE) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HMLE) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HMLE) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HMLE) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HMLE) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HMLE) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HMLE) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HMLE) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HBUTTON) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HBUTTON) Disable() {
+    Window_disable(window);
+}
+
+func (window HBUTTON) Enable() {
+    Window_enable(window);
+}
+
+func (window HBUTTON) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HBUTTON) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HBUTTON) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HBUTTON) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HBUTTON) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HBUTTON) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HBUTTON) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HBUTTON) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HBUTTON) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HBUTTON) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HBUTTON) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HBUTTON) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HSPINBUTTON) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HSPINBUTTON) Disable() {
+    Window_disable(window);
+}
+
+func (window HSPINBUTTON) Enable() {
+    Window_enable(window);
+}
+
+func (window HSPINBUTTON) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HSPINBUTTON) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HSPINBUTTON) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HSPINBUTTON) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HSPINBUTTON) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HSPINBUTTON) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HSPINBUTTON) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HSPINBUTTON) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HSPINBUTTON) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HSPINBUTTON) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HSPINBUTTON) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HSPINBUTTON) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HNOTEBOOK) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HNOTEBOOK) Disable() {
+    Window_disable(window);
+}
+
+func (window HNOTEBOOK) Enable() {
+    Window_enable(window);
+}
+
+func (window HNOTEBOOK) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HNOTEBOOK) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HNOTEBOOK) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HNOTEBOOK) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HNOTEBOOK) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HNOTEBOOK) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HNOTEBOOK) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HNOTEBOOK) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HNOTEBOOK) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HNOTEBOOK) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HNOTEBOOK) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HNOTEBOOK) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HLISTBOX) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HLISTBOX) Disable() {
+    Window_disable(window);
+}
+
+func (window HLISTBOX) Enable() {
+    Window_enable(window);
+}
+
+func (window HLISTBOX) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HLISTBOX) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HLISTBOX) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HLISTBOX) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HLISTBOX) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HLISTBOX) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HLISTBOX) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HLISTBOX) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HLISTBOX) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HLISTBOX) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HPERCENT) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HPERCENT) Disable() {
+    Window_disable(window);
+}
+
+func (window HPERCENT) Enable() {
+    Window_enable(window);
+}
+
+func (window HPERCENT) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HPERCENT) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HPERCENT) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HPERCENT) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HPERCENT) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HPERCENT) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HPERCENT) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HPERCENT) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HPERCENT) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HPERCENT) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HPERCENT) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HPERCENT) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HSLIDER) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HSLIDER) Disable() {
+    Window_disable(window);
+}
+
+func (window HSLIDER) Enable() {
+    Window_enable(window);
+}
+
+func (window HSLIDER) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HSLIDER) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HSLIDER) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HSLIDER) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HSLIDER) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HSLIDER) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HSLIDER) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HSLIDER) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HSLIDER) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HSLIDER) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HSLIDER) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HSLIDER) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HSCROLLBAR) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HSCROLLBAR) Disable() {
+    Window_disable(window);
+}
+
+func (window HSCROLLBAR) Enable() {
+    Window_enable(window);
+}
+
+func (window HSCROLLBAR) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HSCROLLBAR) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HSCROLLBAR) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HSCROLLBAR) GetText() string {
+    return Window_get_text(window);
+}
+
+func (window HSCROLLBAR) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HSCROLLBAR) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HSCROLLBAR) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HSCROLLBAR) SetText(text string) {
+    Window_set_text(window, text);
+}
+
+func (window HSCROLLBAR) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HSCROLLBAR) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HSCROLLBAR) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HSCROLLBAR) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HCALENDAR) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HCALENDAR) Disable() {
+    Window_disable(window);
+}
+
+func (window HCALENDAR) Enable() {
+    Window_enable(window);
+}
+
+func (window HCALENDAR) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HCALENDAR) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HCALENDAR) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HCALENDAR) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HCALENDAR) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HCALENDAR) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HCALENDAR) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HCALENDAR) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HCALENDAR) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HCALENDAR) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HBITMAP) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HBITMAP) Disable() {
+    Window_disable(window);
+}
+
+func (window HBITMAP) Enable() {
+    Window_enable(window);
+}
+
+func (window HBITMAP) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HBITMAP) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HBITMAP) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HBITMAP) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HBITMAP) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HBITMAP) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HBITMAP) SetTooltip(bubbletext string) {
+    Window_set_tooltip(window, bubbletext);
+}
+
+func (window HBITMAP) SetPointer(cursortype int) {
+    Window_set_pointer(window, cursortype);
+}
+
+func (window HBITMAP) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HBITMAP) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HHTML) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HHTML) Disable() {
+    Window_disable(window);
+}
+
+func (window HHTML) Enable() {
+    Window_enable(window);
+}
+
+func (window HHTML) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HHTML) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HHTML) GetPreferredSize() (int, int) {
+    return Window_get_preferred_size(window);
+}
+
+func (window HHTML) SetFocus() {
+    Window_set_focus(window);
+}
+
+func (window HHTML) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
+
+func (window HHTML) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HSPLITBAR) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HSPLITBAR) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HSPLITBAR) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HBOX) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HBOX) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HBOX) SetColor(fore COLOR, back COLOR) int {
+    return Window_set_color(window, fore, back);
+}
+
+func (window HBOX) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HSCROLLBOX) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HSCROLLBOX) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HSCROLLBOX) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HRENDER) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HRENDER) GetData(dataname string) POINTER {
+    return Window_get_data(window, dataname);
+}
+
+func (window HRENDER) GetFont() string {
+    return Window_get_font(window);
+}
+
+func (window HRENDER) GetTextExtents(text string) (int, int) {
+    return Font_text_extents_get(window, NOHPIXMAP, text);
+}
+
+func (window HRENDER) SetFont(fontname string) int {
+    return Window_set_font(window, fontname);
+}
+
+func (window HRENDER) Unpack() int {
+    return Box_unpack(window);
+}
+
+func (window HMENUITEM) Destroy() int {
+    return Window_destroy(window);
+}
+
+func (window HMENUITEM) SetStyle(style uint, mask uint) {
+    Window_set_style(window, style, mask);
+}
 /* End Generic Section */
 
 func Main() {
@@ -970,11 +1910,23 @@ func Box_new(btype int, pad int) HBOX {
     return HBOX{C.go_box_new(C.int(btype), C.int(pad))};
 }
 
+func BoxNew(btype int, pad int) HBOX {
+    return Box_new(btype, pad);
+}
+
 func Box_pack_at_index(box HANDLE, item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
     C.go_box_pack_at_index(box.GetHandle(), item.GetHandle(), C.int(index), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
 
 func (window HWND) PackAtIndex(item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_at_index(window, item, index, width, height, hsize, vsize, pad);
+}
+
+func (window HBOX) PackAtIndex(item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_at_index(window, item, index, width, height, hsize, vsize, pad);
+}
+
+func (window HSCROLLBOX) PackAtIndex(item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_at_index(window, item, index, width, height, hsize, vsize, pad);
 }
 
@@ -986,6 +1938,14 @@ func (window HWND) PackEnd(item HANDLE, width int, height int, hsize int, vsize 
     Box_pack_end(window, item, width, height, hsize, vsize, pad);
 }
 
+func (window HBOX) PackEnd(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_end(window, item, width, height, hsize, vsize, pad);
+}
+
+func (window HSCROLLBOX) PackEnd(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_end(window, item, width, height, hsize, vsize, pad);
+}
+
 func Box_pack_start(box HANDLE, item HANDLE, width int, height int, hsize int, vsize int, pad int) {
    C.go_box_pack_start(box.GetHandle(), item.GetHandle(), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
@@ -994,12 +1954,16 @@ func (window HWND) PackStart(item HANDLE, width int, height int, hsize int, vsiz
     Box_pack_start(window, item, width, height, hsize, vsize, pad);
 }
 
-func Box_unpack(handle HANDLE) int {
-   return int(C.go_box_unpack(handle.GetHandle()));
+func (window HBOX) PackStart(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_start(window, item, width, height, hsize, vsize, pad);
 }
 
-func (window HWND) Unpack() int {
-    return Box_unpack(window);
+func (window HSCROLLBOX) PackStart(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
+    Box_pack_start(window, item, width, height, hsize, vsize, pad);
+}
+
+func Box_unpack(handle HANDLE) int {
+   return int(C.go_box_unpack(handle.GetHandle()));
 }
 
 func Box_unpack_at_index(handle HANDLE, index int) HANDLE {
@@ -1010,6 +1974,14 @@ func (window HWND) UnpackAtIndex(index int) HANDLE {
     return Box_unpack_at_index(window, index);
 }
 
+func (window HBOX) UnpackAtIndex(index int) HANDLE {
+    return Box_unpack_at_index(window, index);
+}
+
+func (window HSCROLLBOX) UnpackAtIndex(index int) HANDLE {
+    return Box_unpack_at_index(window, index);
+}
+
 func Text_new(text string, id uint) HTEXT {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -1017,11 +1989,19 @@ func Text_new(text string, id uint) HTEXT {
    return HTEXT{C.go_text_new(ctext, C.ulong(id))};
 }
 
+func TextNew(text string, id uint) HTEXT {
+    return Text_new(text, id);
+}
+
 func Status_text_new(text string, id uint) HTEXT {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
    
    return HTEXT{C.go_status_text_new(ctext, C.ulong(id))};
+}
+
+func StatusTextNew(text string, id uint) HTEXT {
+    return Status_text_new(text, id);
 }
 
 func Entryfield_new(text string, id uint) HENTRYFIELD {
@@ -1469,6 +2449,10 @@ func Spinbutton_new(text string, id C.ulong) HSPINBUTTON {
     return HSPINBUTTON{C.go_spinbutton_new(ctext, id)};
 }
 
+func SpinButtonNew(text string, id C.ulong) HSPINBUTTON {
+    return Spinbutton_new(text, id);
+}
+
 func Spinbutton_set_pos(handle HANDLE, position int) {
     C.go_spinbutton_set_pos(handle.GetHandle(), C.long(position));
 }
@@ -1607,6 +2591,10 @@ func Scrollbox_new(btype int, pad int) HSCROLLBOX {
     return HSCROLLBOX{C.go_scrollbox_new(C.int(btype), C.int(pad))};
 }
 
+func ScrollBoxNew(btype int, pad int) HSCROLLBOX {
+    return Scrollbox_new(btype, pad);
+}
+
 func Scrollbox_get_pos(handle HANDLE) (int, int) {
     return int(C.go_scrollbox_get_pos(handle.GetHandle(), C.int(C.DW_HORZ))), int(C.go_scrollbox_get_pos(handle.GetHandle(), C.int(C.DW_VERT)));
 }
@@ -1674,10 +2662,6 @@ func Font_text_extents_get(handle HANDLE, pixmap HPIXMAP, text string) (int, int
    return int(width), int(height);
 }
 
-func (window HWND) GetTextExtents(text string) (int, int) {
-    return Font_text_extents_get(window, NOHPIXMAP, text);
-}
-
 func (pixmap HPIXMAP) GetTextExtents(text string) (int, int) {
     return Font_text_extents_get(NOHWND, pixmap, text);
 }
@@ -1709,7 +2693,7 @@ func PixmapGrab(handle HANDLE, id uint) HPIXMAP {
     return Pixmap_grab(handle, id);
 }
 
-func (window HWND) PixmapGrab(id uint) HPIXMAP {
+func (window HRENDER) PixmapGrab(id uint) HPIXMAP {
     return Pixmap_grab(window, id);
 }
 
@@ -1721,11 +2705,11 @@ func Pixmap_stretch_bitblt(dest HANDLE, destp HPIXMAP, xdest int, ydest int, wid
     return int(C.go_pixmap_stretch_bitblt(dest.GetHandle(), unsafe.Pointer(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), src.GetHandle(), unsafe.Pointer(srcp.hpixmap), C.int(xsrc), C.int(ysrc), C.int(srcwidth), C.int(srcheight))); 
 }
 
-func (window HWND) BitBltStretchPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
+func (window HRENDER) BitBltStretchPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
     return Pixmap_stretch_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc, srcwidth, srcheight);
 }
 
-func (window HWND) BitBltStretchWindow(xdest int, ydest int, width int, height int, src HWND, xsrc int, ysrc int, srcwidth int, srcheight int) int {
+func (window HRENDER) BitBltStretchWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int, srcwidth int, srcheight int) int {
     return Pixmap_stretch_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc, srcwidth, srcheight);
 }
 
@@ -1733,15 +2717,15 @@ func (pixmap HPIXMAP) BitBltStretchPixmap(xdest int, ydest int, width int, heigh
     return Pixmap_stretch_bitblt(NOHWND, pixmap, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc, srcwidth, srcheight);
 }
 
-func (pixmap HPIXMAP) BitBltStretchWindow(xdest int, ydest int, width int, height int, src HWND, xsrc int, ysrc int, srcwidth int, srcheight int) int {
+func (pixmap HPIXMAP) BitBltStretchWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int, srcwidth int, srcheight int) int {
     return Pixmap_stretch_bitblt(NOHWND, pixmap, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc, srcwidth, srcheight);
 }
 
-func (window HWND) BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int) {
+func (window HRENDER) BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int) {
     Pixmap_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc);
 }
 
-func (window HWND) BitBltWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int) {
+func (window HRENDER) BitBltWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int) {
     Pixmap_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc);
 }
 
@@ -1800,7 +2784,7 @@ func Draw_point(handle HANDLE, pixmap HPIXMAP, x int, y int) {
     C.go_draw_point(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x), C.int(y));
 }
 
-func (window HWND) DrawPoint(x int, y int) {
+func (window HRENDER) DrawPoint(x int, y int) {
     Draw_point(window, NOHPIXMAP, x, y);
 }
 
@@ -1812,7 +2796,7 @@ func Draw_line(handle HANDLE, pixmap HPIXMAP, x1 int, y1 int, x2 int, y2 int) {
     C.go_draw_line(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
 }
 
-func (window HWND) DrawLine(x1 int, y1 int, x2 int, y2 int) {
+func (window HRENDER) DrawLine(x1 int, y1 int, x2 int, y2 int) {
     Draw_line(window, NOHPIXMAP, x1, y1, x2, y2);
 }
 
@@ -1837,7 +2821,7 @@ func Draw_polygon(handle HANDLE, pixmap HPIXMAP, flags int, x []int, y []int) {
     C.go_draw_polygon(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(flags), C.int(count), (*C.int)(unsafe.Pointer(xHeader.Data)), (*C.int)(unsafe.Pointer(yHeader.Data)));
 }
 
-func (window HWND) DrawPolygon(flags int, x []int, y []int) {
+func (window HRENDER) DrawPolygon(flags int, x []int, y []int) {
     Draw_polygon(window, NOHPIXMAP, flags, x, y);
 }
 
@@ -1849,7 +2833,7 @@ func Draw_rect(handle HANDLE, pixmap HPIXMAP, fill int, x int, y int, width int,
     C.go_draw_rect(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(fill), C.int(x), C.int(y), C.int(width), C.int(height));
 }
 
-func (window HWND) DrawRect(fill int, x int, y int, width int, height int) {
+func (window HRENDER) DrawRect(fill int, x int, y int, width int, height int) {
     Draw_rect(window, NOHPIXMAP, fill, x, y, width, height);
 }
 
@@ -1861,7 +2845,7 @@ func Draw_arc(handle HANDLE, pixmap HPIXMAP, flags int, xorigin int, yorigin int
     C.go_draw_arc(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(flags), C.int(xorigin), C.int(yorigin), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
 }
 
-func (window HWND) DrawArc(flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
+func (window HRENDER) DrawArc(flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
     Draw_arc(window, NOHPIXMAP, flags, xorigin, yorigin, x1, y1, x2, y2);
 }
 
@@ -1876,7 +2860,7 @@ func Draw_text(handle HANDLE, pixmap HPIXMAP, x int, y int, text string) {
     C.go_draw_text(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x), C.int(y), ctext);
 }
 
-func (window HWND) DrawText(x int, y int, text string) {
+func (window HRENDER) DrawText(x int, y int, text string) {
     Draw_text(window, NOHPIXMAP, x, y, text);
 }
 
@@ -1908,6 +2892,10 @@ func Flush() {
 
 func Tree_new(id uint) HTREE {
     return HTREE{C.go_tree_new(C.ulong(id))};
+}
+
+func TreeNew(id uint) HTREE {
+    return Tree_new(id);
 }
 
 func Tree_insert(handle HANDLE, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
@@ -2217,7 +3205,7 @@ func Filesystem_setup(handle HANDLE, flags []uint, titles []string) int {
     return int(C.go_filesystem_setup(handle.GetHandle(), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count)));
 }
 
-func (handle HCONTAINER) FileSytemSetup(flags []uint, titles []string) int {
+func (handle HCONTAINER) FileSystemSetup(flags []uint, titles []string) int {
     handle.filesystem = true;
     return Filesystem_setup(handle, flags, titles);
 }
@@ -2501,6 +3489,12 @@ func Filesystem_set_column_title(handle HANDLE, title string) {
    C.go_filesystem_set_column_title(handle.GetHandle(), ctitle);
 }
 
+func (handle HCONTAINER) SetColumnTitle(title string) {
+    if handle.filesystem == true {
+        Filesystem_set_column_title(handle, title);
+    }
+}
+
 func Filesystem_set_item(handle HANDLE, contins HCONTINS, column int, row int, data POINTER) {
    C.go_filesystem_set_item(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), unsafe.Pointer(data));
 }
@@ -2681,7 +3675,7 @@ func init() {
 
 var go_flags_no_data C.uint = 1;
 
-func (window HWND) ConnectDelete(sigfunc func(window HANDLE) int) {
+func (window HWND) ConnectDelete(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_DELETE);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2689,7 +3683,7 @@ func (window HWND) ConnectDelete(sigfunc func(window HANDLE) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectClicked(sigfunc func(window HANDLE) int) {
+func (window HBUTTON) ConnectClicked(sigfunc func(window HBUTTON) int) {
    csigname := C.CString(C.DW_SIGNAL_CLICKED);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2697,7 +3691,7 @@ func (window HWND) ConnectClicked(sigfunc func(window HANDLE) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectSetFocus(sigfunc func(window HANDLE) int) {
+func (window HWND) ConnectSetFocus(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_SET_FOCUS);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2705,7 +3699,7 @@ func (window HWND) ConnectSetFocus(sigfunc func(window HANDLE) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectKeyPress(sigfunc func(window HANDLE, ch uint8, vk int, state int, utf8 string) int) {
+func (window HWND) ConnectKeyPress(sigfunc func(window HWND, ch uint8, vk int, state int, utf8 string) int) {
    csigname := C.CString(C.DW_SIGNAL_KEY_PRESS);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2713,7 +3707,15 @@ func (window HWND) ConnectKeyPress(sigfunc func(window HANDLE, ch uint8, vk int,
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectMotion(sigfunc func(window HANDLE, x int, y int, mask int) int) {
+func (window HRENDER) ConnectKeyPress(sigfunc func(window HRENDER, ch uint8, vk int, state int, utf8 string) int) {
+   csigname := C.CString(C.DW_SIGNAL_KEY_PRESS);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
+}
+
+func (window HRENDER) ConnectMotion(sigfunc func(window HRENDER, x int, y int, mask int) int) {
    csigname := C.CString(C.DW_SIGNAL_MOTION_NOTIFY);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2721,7 +3723,7 @@ func (window HWND) ConnectMotion(sigfunc func(window HANDLE, x int, y int, mask 
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectButtonPress(sigfunc func(window HWND, x int, y int, mask int) int) {
+func (window HRENDER) ConnectButtonPress(sigfunc func(window HRENDER, x int, y int, mask int) int) {
    csigname := C.CString(C.DW_SIGNAL_BUTTON_PRESS);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2729,7 +3731,7 @@ func (window HWND) ConnectButtonPress(sigfunc func(window HWND, x int, y int, ma
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectButtonRelease(sigfunc func(window HWND, x int, y int, mask int) int) {
+func (window HRENDER) ConnectButtonRelease(sigfunc func(window HRENDER, x int, y int, mask int) int) {
    csigname := C.CString(C.DW_SIGNAL_BUTTON_RELEASE);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2737,7 +3739,7 @@ func (window HWND) ConnectButtonRelease(sigfunc func(window HWND, x int, y int, 
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectExpose(sigfunc func(window HWND, x int, y int, width int, height int) int) {
+func (window HRENDER) ConnectExpose(sigfunc func(window HRENDER, x int, y int, width int, height int) int) {
    csigname := C.CString(C.DW_SIGNAL_EXPOSE);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2745,7 +3747,7 @@ func (window HWND) ConnectExpose(sigfunc func(window HWND, x int, y int, width i
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectItemEnter(sigfunc func(window HWND, str string) int) {
+func (window HTREE) ConnectItemEnter(sigfunc func(window HTREE, str string) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2753,7 +3755,15 @@ func (window HWND) ConnectItemEnter(sigfunc func(window HWND, str string) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectItemContext(sigfunc func(window HWND, text string, x int, y int, itemdata POINTER) int) {
+func (window HCONTAINER) ConnectItemEnter(sigfunc func(window HCONTAINER, str string) int) {
+   csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
+}
+
+func (window HTREE) ConnectItemContext(sigfunc func(window HTREE, text string, x int, y int, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_CONTEXT);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2761,7 +3771,14 @@ func (window HWND) ConnectItemContext(sigfunc func(window HWND, text string, x i
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectItemSelect(sigfunc func(window HWND, item HTREEITEM, text string, itemdata POINTER) int) {
+func (window HCONTAINER) ConnectItemContext(sigfunc func(window HCONTAINER, text string, x int, y int, itemdata POINTER) int) {
+   csigname := C.CString(C.DW_SIGNAL_ITEM_CONTEXT);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
+}
+func (window HTREE) ConnectItemSelect(sigfunc func(window HTREE, item HTREEITEM, text string, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2769,7 +3786,7 @@ func (window HWND) ConnectItemSelect(sigfunc func(window HWND, item HTREEITEM, t
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectListSelect(sigfunc func(window HWND, index int) int) {
+func (window HLISTBOX) ConnectListSelect(sigfunc func(window HLISTBOX, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_LIST_SELECT);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2777,7 +3794,7 @@ func (window HWND) ConnectListSelect(sigfunc func(window HWND, index int) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectValueChanged(sigfunc func(window HWND, index int) int) {
+func (window HSCROLLBAR) ConnectValueChanged(sigfunc func(window HSCROLLBAR, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2785,7 +3802,23 @@ func (window HWND) ConnectValueChanged(sigfunc func(window HWND, index int) int)
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectColumnClick(sigfunc func(window HWND, index int) int) {
+func (window HSLIDER) ConnectValueChanged(sigfunc func(window HSLIDER, index int) int) {
+   csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
+}
+
+func (window HSPINBUTTON) ConnectValueChanged(sigfunc func(window HSPINBUTTON, index int) int) {
+   csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
+}
+
+func (window HCONTAINER) ConnectColumnClick(sigfunc func(window HCONTAINER, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_COLUMN_CLICK);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2793,7 +3826,7 @@ func (window HWND) ConnectColumnClick(sigfunc func(window HWND, index int) int) 
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectSwitchPage(sigfunc func(window HWND, index uint) int) {
+func (window HNOTEBOOK) ConnectSwitchPage(sigfunc func(window HNOTEBOOK, index uint) int) {
    csigname := C.CString(C.DW_SIGNAL_SWITCH_PAGE);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -2801,8 +3834,16 @@ func (window HWND) ConnectSwitchPage(sigfunc func(window HWND, index uint) int) 
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HWND) ConnectTreeExpand(sigfunc func(window HWND, item HTREEITEM) int) {
+func (window HTREE) ConnectTreeExpand(sigfunc func(window HTREE, item HTREEITEM) int) {
    csigname := C.CString(C.DW_SIGNAL_TREE_EXPAND);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
+}
+
+func (window HMENUITEM) ConnectClicked(sigfunc func(window HMENUITEM) int) {
+   csigname := C.CString(C.DW_SIGNAL_CLICKED);
    defer C.free(unsafe.Pointer(csigname));
    
    backs = append(backs, unsafe.Pointer(&sigfunc));

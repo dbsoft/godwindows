@@ -2097,6 +2097,10 @@ func Timer_connect(interval int, sigfunc SIGNAL_FUNC, data POINTER) HTIMER {
    return HTIMER{C.go_timer_connect(C.int(interval), unsafe.Pointer(sigfunc), unsafe.Pointer(data), 0)};
 }
 
+func TimerNew() HTIMER {
+    return HTIMER{0};
+}
+
 func Timer_disconnect(id HTIMER) {
    if id.tid > 0 {
       C.dw_timer_disconnect(C.int(id.tid));
@@ -3747,6 +3751,14 @@ func (window HRENDER) ConnectExpose(sigfunc func(window HRENDER, x int, y int, w
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+func (window HRENDER) ConnectConfigure(sigfunc func(window HRENDER, width int, height int) int) {
+   csigname := C.CString(C.DW_SIGNAL_CONFIGURE);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
+}
+
 func (window HTREE) ConnectItemEnter(sigfunc func(window HTREE, str string) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
    defer C.free(unsafe.Pointer(csigname));
@@ -3778,7 +3790,16 @@ func (window HCONTAINER) ConnectItemContext(sigfunc func(window HCONTAINER, text
    backs = append(backs, unsafe.Pointer(&sigfunc));
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
+
 func (window HTREE) ConnectItemSelect(sigfunc func(window HTREE, item HTREEITEM, text string, itemdata POINTER) int) {
+   csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT);
+   defer C.free(unsafe.Pointer(csigname));
+   
+   backs = append(backs, unsafe.Pointer(&sigfunc));
+   C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
+}
+
+func (window HCONTAINER) ConnectItemSelect(sigfunc func(window HCONTAINER, item HTREEITEM, text string, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -3826,7 +3847,7 @@ func (window HCONTAINER) ConnectColumnClick(sigfunc func(window HCONTAINER, inde
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (window HNOTEBOOK) ConnectSwitchPage(sigfunc func(window HNOTEBOOK, index uint) int) {
+func (window HNOTEBOOK) ConnectSwitchPage(sigfunc func(window HNOTEBOOK, pageid HNOTEPAGE) int) {
    csigname := C.CString(C.DW_SIGNAL_SWITCH_PAGE);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -3857,7 +3878,7 @@ func (id HTIMER) Connect(sigfunc func() int, interval int) {
    }
 }
 
-func (id HTIMER) Disconnect(sigfunc func() int) {
+func (id HTIMER) Disconnect() {
    if id.tid > 0 {
       C.dw_timer_disconnect(C.int(id.tid));
    }

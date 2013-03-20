@@ -16,26 +16,17 @@ var FIXEDFONT = "10.monospace"
 var mainwindow dw.HWND
 
 // Page 1
-var notebookbox1 dw.HBOX
-var cursortogglebutton dw.HBUTTON
-var noncheckable_menuitem, checkable_menuitem dw.HMENUITEM
-var copypastefield, entryfield dw.HENTRYFIELD
 var current_color dw.COLOR = dw.RGB(100, 100, 100)
 var cursor_arrow bool = true
 var timerid dw.HTIMER
 
 // Page 2
-var notebookbox2 dw.HBOX
 var textbox1, textbox2 dw.HRENDER
 var status1, status2 dw.HTEXT
 var vscrollbar, hscrollbar dw.HSCROLLBAR
-var rendcombo dw.HLISTBOX 
 var imagexspin, imageyspin dw.HSPINBUTTON
 var imagestretchcheck dw.HBUTTON
 var text1pm, text2pm, image dw.HPIXMAP
-var image_x = 20
-var image_y = 20
-var image_stretch int = dw.FALSE
 var font_width = 8
 var font_height = 12
 var rows = 10
@@ -46,35 +37,14 @@ var current_row = 0
 var current_col = 0
 var max_linewidth = 0
 
-// Page 3
-var notebookbox3 dw.HBOX
-var tree dw.HTREE
-
 // Page 4
-var notebookbox4 dw.HBOX
-var container_mle dw.HMLE
-var container dw.HCONTAINER
 var mle_point = 0
 
 // Page 5
-var notebookbox5, buttonboxperm, buttonsbox dw.HBOX
-var combobox1, combobox2 dw.HLISTBOX
-var cal dw.HCALENDAR
-var spinbutton dw.HSPINBUTTON
-var slider dw.HSLIDER
-var percent dw.HPERCENT
-
-// Page 7
-var notebookbox7 dw.HBOX
-var html dw.HHTML
-
-// Page 8
-var notebookbox8 dw.HBOX
-var scrollbox dw.HSCROLLBOX
-var MAX_WIDGETS = 20
-
 var iteration = 0;
 
+// Page 8
+var MAX_WIDGETS = 20
 
 // Miscellaneous
 var fileicon, foldericon dw.HICN
@@ -168,8 +138,8 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
             }
         }
         if hpma == dw.NOHPIXMAP {
-            text_expose(textbox1);
-            text_expose(textbox2);
+            text_expose(textbox1, text1pm);
+            text_expose(textbox2, text2pm);
         }
     }
 }
@@ -193,9 +163,9 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
     x := []int{ 20, 180, 180, 230, 180, 180, 20 };
     y := []int{ 50, 50, 20, 70, 120, 90, 90 };
 
-    image_x = imagexspin.GetPos();
-    image_y = imageyspin.GetPos();
-    image_stretch = imagestretchcheck.Get();
+    image_x := imagexspin.GetPos();
+    image_y := imageyspin.GetPos();
+    image_stretch := imagestretchcheck.Get();
 
     dw.ColorForegroundSet(dw.CLR_WHITE);
     drawable.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, width, height);
@@ -229,7 +199,7 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
 
     /* If we aren't drawing direct do a bitblt */
     if direct == dw.FALSE && hpma == dw.NOHPIXMAP {
-        text_expose(textbox2);
+        text_expose(textbox2, text2pm);
     }
 }
 
@@ -301,18 +271,8 @@ func context_menu() {
 }
 
 /* This gets called when a part of the graph needs to be repainted. */
-func text_expose(hwnd dw.HRENDER) int {
+func text_expose(hwnd dw.HRENDER, hpm dw.HPIXMAP) int {
     if render_type != 1 {
-        var hpm dw.HPIXMAP
-
-        if hwnd == textbox1 {
-            hpm = text1pm;
-        } else if hwnd == textbox2 {
-            hpm = text2pm;
-        } else {
-            return dw.TRUE;
-        }
-
         width := hpm.GetWidth();
         height := hpm.GetHeight();
 
@@ -426,7 +386,7 @@ func resolve_keymodifiers(mask int) string {
 }
 
 
-func button_callback() {
+func button_callback(combobox1 dw.HLISTBOX, combobox2 dw.HLISTBOX, spinbutton dw.HSPINBUTTON, cal dw.HCALENDAR) {
     idx := combobox1.Selected();
     buf1 := combobox1.GetText(idx);
     idx = combobox2.Selected();
@@ -436,12 +396,12 @@ func button_callback() {
     message := fmt.Sprintf("spinbutton: %d\ncombobox1: \"%s\"\ncombobox2: \"%s\"\ncalendar: %d-%d-%d",
                   spvalue,
                   buf1, buf2,
-                  y, m, d );
+                  y, m, d);
     dw.Messagebox( "Values", dw.MB_OK | dw.MB_INFORMATION, message);
 }
 
 // Create the menu
-func menu_add() {
+func menu_add(mainwindow dw.HWND) {
     mainmenubar := mainwindow.MenubarNew();
     /* add menus to the menubar */
     menu := dw.MenuNew(0);
@@ -453,11 +413,11 @@ func menu_add() {
     mainmenubar.AppendItem("~File", dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, menu);
 
     changeable_menu := dw.MenuNew(0);
-    checkable_menuitem = changeable_menu.AppendItem("~Checkable Menu Item", dw.MENU_AUTO, 0, dw.TRUE, dw.TRUE, dw.NOMENU);
+    checkable_menuitem := changeable_menu.AppendItem("~Checkable Menu Item", dw.MENU_AUTO, 0, dw.TRUE, dw.TRUE, dw.NOMENU);
     checkable_menuitem.ConnectClicked(func(window dw.HMENUITEM) int { dw.Messagebox("Menu Item Callback", dw.MB_OK | dw.MB_INFORMATION, "Checkable menu item selected"); return dw.FALSE });
 
 
-    noncheckable_menuitem = changeable_menu.AppendItem("~Non-checkable Menu Item", dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
+    noncheckable_menuitem := changeable_menu.AppendItem("~Non-checkable Menu Item", dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
     noncheckable_menuitem.ConnectClicked(func(window dw.HMENUITEM) int { dw.Messagebox("Menu Item Callback", dw.MB_OK | dw.MB_INFORMATION, "Non-checkable menu item selected"); return dw.FALSE });
     changeable_menu.AppendItem("~Disabled menu Item", dw.MENU_AUTO, dw.MIS_DISABLED | dw.MIS_CHECKED, dw.TRUE, dw.TRUE, dw.NOMENU);
     /* seperator */
@@ -485,9 +445,7 @@ func menu_add() {
     menu = dw.MenuNew(0);
     menuitem = menu.AppendItem("~About", dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
     menuitem.ConnectClicked(func(window dw.HMENUITEM) int {
-                                var env dw.Env;
-
-                                dw.Environment_query(&env);
+                                env := dw.EnvironmentGet();
                                 message := fmt.Sprintf("dwindows test\n\nOS: %s %s %s Version: %d.%d.%d.%d\n\ndwindows Version: %d.%d.%d",
                                                           env.OSName, env.BuildDate, env.BuildTime,
                                                           env.MajorVersion, env.MinorVersion, env.MajorBuild, env.MinorBuild,
@@ -503,29 +461,29 @@ func menu_add() {
 }
 
 // Create Page 1
-func archive_add() {
-    lbbox := dw.Box_new(dw.VERT, 10);
+func archive_add(notebookbox1 dw.HBOX) {
+    lbbox := dw.BoxNew(dw.VERT, 10);
 
-    dw.Box_pack_start(notebookbox1, lbbox, 150, 70, dw.TRUE, dw.TRUE, 0);
+    notebookbox1.PackStart(lbbox, 150, 70, dw.TRUE, dw.TRUE, 0);
 
     /* Copy and Paste */
-    browsebox := dw.Box_new(dw.HORZ, 0);
+    browsebox := dw.BoxNew(dw.HORZ, 0);
 
-    dw.Box_pack_start(lbbox, browsebox, 0, 0, dw.FALSE, dw.FALSE, 0);
+    lbbox.PackStart(browsebox, 0, 0, dw.FALSE, dw.FALSE, 0);
 
-    copypastefield = dw.Entryfield_new("", 0);
+    copypastefield := dw.EntryfieldNew("", 0);
 
-    dw.Entryfield_set_limit(copypastefield, 260);
+    copypastefield.SetLimit(260);
 
-    dw.Box_pack_start(browsebox, copypastefield, -1, -1, dw.TRUE, dw.FALSE, 4);
+    browsebox.PackStart(copypastefield, -1, -1, dw.TRUE, dw.FALSE, 4);
 
-    copybutton := dw.Button_new("Copy", 0);
+    copybutton := dw.ButtonNew("Copy", 0);
 
-    dw.Box_pack_start(browsebox, copybutton, -1, -1, dw.FALSE, dw.FALSE, 0);
+    browsebox.PackStart(copybutton, -1, -1, dw.FALSE, dw.FALSE, 0);
 
-    pastebutton := dw.Button_new("Paste", 0);
+    pastebutton := dw.ButtonNew("Paste", 0);
 
-    dw.Box_pack_start(browsebox, pastebutton, -1, -1, dw.FALSE, dw.FALSE, 0);
+    browsebox.PackStart(pastebutton, -1, -1, dw.FALSE, dw.FALSE, 0);
 
     /* Archive Name */
     stext := dw.TextNew("File to browse", 0);
@@ -538,7 +496,7 @@ func archive_add() {
 
     lbbox.PackStart(browsebox, 0, 0, dw.TRUE, dw.TRUE, 0);
 
-    entryfield = dw.EntryfieldNew("", 100);
+    entryfield := dw.EntryfieldNew("", 100);
 
     entryfield.SetLimit(260);
 
@@ -563,7 +521,7 @@ func archive_add() {
     cancelbutton := dw.ButtonNew("Exit", 1002);
     buttonbox.PackStart(cancelbutton, 130, 30, dw.TRUE, dw.TRUE, 2);
 
-    cursortogglebutton = dw.ButtonNew("Set Cursor pointer - CLOCK", 1003);
+    cursortogglebutton := dw.ButtonNew("Set Cursor pointer - CLOCK", 1003);
     buttonbox.PackStart(cursortogglebutton, 130, 30, dw.TRUE, dw.TRUE, 2);
 
     okbutton := dw.ButtonNew("Turn Off Annoying Beep!", 1001);
@@ -582,7 +540,7 @@ func archive_add() {
     okbutton.SetColor(dw.CLR_PALEGRAY, dw.CLR_DARKCYAN);
 
     browsefilebutton.ConnectClicked(func(window dw.HBUTTON) int {
-                                    tmp := dw.FileBrowse("Pick a file", "dwtest.c", "c", dw.FILE_OPEN);
+                                    tmp := dw.FileBrowse("Pick a file", "dwootest.go", "go", dw.FILE_OPEN);
                                     if len(tmp) > 0 {
                                         current_file = tmp;
                                         entryfield.SetText(current_file);
@@ -632,10 +590,13 @@ func archive_add() {
                                         return dw.FALSE;
                                     });
     colorchoosebutton.ConnectClicked(func(window dw.HBUTTON) int { current_color = dw.Color_choose(current_color); return dw.FALSE;});
+    
+    /* Set the default field */
+    mainwindow.Default(copypastefield);
 }
 
 // Create Page 2
-func text_add() {
+func text_add(notebookbox2 dw.HBOX) {
     depth := dw.ColorDepthGet();
 
     /* create a box to pack into the notebook page */
@@ -695,7 +656,7 @@ func text_add() {
     }
 
     /* create render box for number pixmap */
-    textbox1 = dw.RenderNew(100);
+    textbox1 := dw.RenderNew(100);
     textbox1.SetFont(FIXEDFONT);
     font_width, font_height = textbox1.GetTextExtents("(g");
     font_width = font_width / 2;
@@ -712,7 +673,7 @@ func text_add() {
     pagebox.PackStart(textboxA, 0, 0, dw.TRUE, dw.TRUE, 0);
 
     /* create render box for filecontents pixmap */
-    textbox2 = dw.RenderNew(101);
+    textbox2 := dw.RenderNew(101);
     textboxA.PackStart(textbox2, 10, 10, dw.TRUE, dw.TRUE, 0);
     textbox2.SetFont(FIXEDFONT);
     /* create horizonal scrollbar */
@@ -739,8 +700,8 @@ func text_add() {
     text1pm.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * width1, font_height * rows);
     text2pm.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * cols, font_height * rows);
     textbox1.ConnectButtonPress(func(window dw.HRENDER, x int, y int, buttonmask int) int { context_menu(); return dw.TRUE; });
-    textbox1.ConnectExpose(func(hwnd dw.HRENDER, x int, y int, width int, height int) int { return text_expose(hwnd); });
-    textbox2.ConnectExpose(func(hwnd dw.HRENDER, x int, y int, width int, height int) int { return text_expose(hwnd); });
+    textbox1.ConnectExpose(func(hwnd dw.HRENDER, x int, y int, width int, height int) int { return text_expose(hwnd, text1pm); });
+    textbox2.ConnectExpose(func(hwnd dw.HRENDER, x int, y int, width int, height int) int { return text_expose(hwnd, text2pm); });
     textbox2.ConnectConfigure(func(hwnd dw.HRENDER, width int, height int) int {
                                 old1 := text1pm;
                                 old2 := text2pm;
@@ -819,11 +780,11 @@ func text_add() {
                             });
 
 
-    dw.Taskbar_insert(textbox1, fileicon, "DWTest");
+    dw.TaskbarInsert(textbox1, fileicon, "DWTest");
 }
 
 // Page 3
-func tree_add() {
+func tree_add(notebookbox3 dw.HBOX) {
     /* create a box to pack into the notebook page */
     listbox := dw.ListboxNew(1024, dw.TRUE);
     notebookbox3.PackStart(listbox, 500, 200, dw.TRUE, dw.TRUE, 0);
@@ -834,7 +795,7 @@ func tree_add() {
     listbox.Append("Test 5");
 
     /* now a tree area under this box */
-    tree = dw.TreeNew(101);
+    tree := dw.TreeNew(101);
     notebookbox3.PackStart(tree, 500, 200, dw.TRUE, dw.TRUE, 1);
 
     /* and a status area to see whats going on */
@@ -864,7 +825,7 @@ func tree_add() {
 }
 
 // Page 4
-func container_add() {
+func container_add(notebookbox4 dw.HBOX) {
     var z int
     titles := []string{ "Type", "Size", "Time", "Date" };
     flags := []uint{   dw.CFA_BITMAPORICON | dw.CFA_LEFT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
@@ -878,7 +839,7 @@ func container_add() {
     notebookbox4.PackStart(containerbox, 500, 200, dw.TRUE, dw.TRUE, 0);
 
     /* now a container area under this box */
-    container = dw.ContainerNew(100, dw.TRUE);
+    container := dw.ContainerNew(100, dw.TRUE);
     notebookbox4.PackStart(container, 500, 200, dw.TRUE, dw.FALSE, 1);
 
     /* and a status area to see whats going on */
@@ -918,7 +879,7 @@ func container_add() {
     containerinfo.Insert();
     container.Optimize();
 
-    container_mle = dw.MLENew(111);
+    container_mle := dw.MLENew(111);
     containerbox.PackStart(container_mle, 500, 200, dw.TRUE, dw.TRUE, 0);
 
     mle_point = container_mle.Import("", -1);
@@ -985,63 +946,49 @@ func container_add() {
 }
 
 // Page 5
-func buttons_add() {
+func buttons_add(notebookbox5 dw.HBOX) {
     var i int;
     
     /* create a box to pack into the notebook page */
-    buttonsbox = dw.BoxNew(dw.VERT, 2);
+    buttonsbox := dw.BoxNew(dw.VERT, 2);
     notebookbox5.PackStart(buttonsbox, 25, 200, dw.TRUE, dw.TRUE, 0);
     buttonsbox.SetColor(dw.CLR_RED, dw.CLR_RED);
 
     calbox := dw.BoxNew(dw.HORZ, 0);
     notebookbox5.PackStart(calbox, 500, 200, dw.TRUE, dw.TRUE, 1);
-    cal = dw.CalendarNew(100);
+    cal := dw.CalendarNew(100);
     calbox.PackStart(cal, 180, 120, dw.TRUE, dw.TRUE, 0);
     /*
-     dw.Calendar_set_date(cal, 2001, 1, 1);
+     cal.SetDate(2001, 1, 1);
      */
     /*
      * Create our file toolbar boxes...
      */
-    buttonboxperm = dw.BoxNew(dw.VERT, 0);
+    buttonboxperm := dw.BoxNew(dw.VERT, 0);
     buttonsbox.PackStart(buttonboxperm, 25, 0, dw.FALSE, dw.TRUE, 2);
     buttonboxperm.SetColor(dw.CLR_WHITE, dw.CLR_WHITE);
     abutton1 := dw.BitmapButtonNewFromFile("Top Button", 0, fmt.Sprintf("%s/%s", SRCROOT, FILE_ICON_NAME));
     buttonboxperm.PackStart(abutton1, 100, 30, dw.FALSE, dw.FALSE, 0);
-    abutton1.ConnectClicked(func(window dw.HBUTTON) int { button_callback(); return dw.TRUE; });
     buttonboxperm.PackStart(dw.NOHWND, 25, 5, dw.FALSE, dw.FALSE, 0);
     abutton2 := dw.BitmapButtonNewFromFile("Bottom", 0, fmt.Sprintf("%s/%s", SRCROOT, FOLDER_ICON_NAME));
     buttonsbox.PackStart(abutton2, 25, 25, dw.FALSE, dw.FALSE, 0);
-    abutton2.ConnectClicked(func(window dw.HBUTTON) int { button_callback(); return dw.TRUE; });
     abutton2.SetBitmap(0, FILE_ICON_NAME);
 
-    create_button();
+    /* Pre-create the percent */
+    percent := dw.PercentNew(0);
+    
+    create_button(buttonboxperm, buttonsbox, percent);
+    
     /* make a combobox */
     combox := dw.BoxNew(dw.VERT, 2);
     notebookbox5.PackStart(combox, 25, 200, dw.TRUE, dw.FALSE, 0);
-    combobox1 = dw.ComboboxNew("fred", 0 ); /* no point in specifying an initial value */
+    combobox1 := dw.ComboboxNew("fred", 0 ); /* no point in specifying an initial value */
     combobox1.Append("fred" );
     combox.PackStart(combobox1, -1, -1, dw.TRUE, dw.FALSE, 0);
-    /*
-     dw_window_set_text( combobox, "initial value");
-     */
-    combobox1.ConnectListSelect(func(window dw.HLISTBOX, index int) int {
-                                    fmt.Printf("got combobox_select_event for index: %d, iteration: %d\n", index, iteration);
-                                    iteration++;
-                                    return dw.FALSE;
-                                });
 
 
-    combobox2 = dw.ComboboxNew("joe", 0); /* no point in specifying an initial value */
+    combobox2 := dw.ComboboxNew("joe", 0); /* no point in specifying an initial value */
     combox.PackStart(combobox2, -1, -1, dw.TRUE, dw.FALSE, 0);
-    /*
-     dw_window_set_text( combobox, "initial value");
-     */
-    combobox2.ConnectListSelect(func(window dw.HLISTBOX, index int) int {
-                                    fmt.Printf("got combobox_select_event for index: %d, iteration: %d\n", index, iteration);
-                                    iteration++;
-                                    return dw.FALSE;
-                                });
     /* add LOTS of items */
     fmt.Printf("before appending 500 items to combobox using dw_listbox_list_append()\n");
     text := make([]string, 500);
@@ -1054,23 +1001,36 @@ func buttons_add() {
     combobox2.Insert("inserted item 2", 2 );
     combobox2.Insert("inserted item 5", 5 );
     /* make a spinbutton */
-    spinbutton = dw.SpinButtonNew("", 0); /* no point in specifying text */
+    spinbutton := dw.SpinButtonNew("", 0); /* no point in specifying text */
     combox.PackStart(spinbutton, -1, -1, dw.TRUE, dw.FALSE, 0);
     spinbutton.SetLimits(100, 1);
     spinbutton.SetPos(30);
-    spinbutton.ConnectValueChanged(func(hwnd dw.HSPINBUTTON, value int) int { dw.Messagebox("DWTest", dw.MB_OK, fmt.Sprintf("New value from spinbutton: %d\n", value)); return dw.FALSE; });
 
     /* make a slider */
-    slider = dw.SliderNew(dw.FALSE, 11, 0); /* no point in specifying text */
+    slider := dw.SliderNew(dw.FALSE, 11, 0); /* no point in specifying text */
     combox.PackStart(slider, -1, -1, dw.TRUE, dw.FALSE, 0);
-    slider.ConnectValueChanged(func(hwnd dw.HSLIDER, value int) int { percent.SetPos(uint(value * 10)); return dw.FALSE; });
 
-    /* make a percent */
-    percent = dw.PercentNew(0);
+    /* Pack the percent */
     combox.PackStart(percent, -1, -1, dw.TRUE, dw.FALSE, 0);
+    
+    /* Connect the handlers */
+    abutton1.ConnectClicked(func(window dw.HBUTTON) int { button_callback(combobox1, combobox2, spinbutton, cal); return dw.TRUE; });
+    abutton2.ConnectClicked(func(window dw.HBUTTON) int { button_callback(combobox1, combobox2, spinbutton, cal); return dw.TRUE; });
+    combobox1.ConnectListSelect(func(window dw.HLISTBOX, index int) int {
+                                    fmt.Printf("got combobox_select_event for index: %d, iteration: %d\n", index, iteration);
+                                    iteration++;
+                                    return dw.FALSE;
+                                });
+    combobox2.ConnectListSelect(func(window dw.HLISTBOX, index int) int {
+                                    fmt.Printf("got combobox_select_event for index: %d, iteration: %d\n", index, iteration);
+                                    iteration++;
+                                    return dw.FALSE;
+                                });
+    spinbutton.ConnectValueChanged(func(hwnd dw.HSPINBUTTON, value int) int { dw.Messagebox("DWTest", dw.MB_OK, fmt.Sprintf("New value from spinbutton: %d\n", value)); return dw.FALSE; });
+    slider.ConnectValueChanged(func(hwnd dw.HSLIDER, value int) int { percent.SetPos(uint(value * 10)); return dw.FALSE; });
 }
 
-func create_button() {
+func create_button(buttonboxperm, buttonsbox dw.HBOX, percent dw.HPERCENT) {
     filetoolbarbox := dw.BoxNew(dw.VERT, 0);
     buttonboxperm.PackStart(filetoolbarbox, 0, 0, dw.TRUE, dw.TRUE, 0);
 
@@ -1096,11 +1056,11 @@ func create_button() {
 }
 
 // Page 8
-func scrollbox_add() {
+func scrollbox_add(notebookbox8 dw.HBOX) {
    var i int;
 
     /* create a box to pack into the notebook page */
-    scrollbox = dw.ScrollBoxNew(dw.VERT, 0);
+    scrollbox := dw.ScrollBoxNew(dw.VERT, 0);
     notebookbox8.PackStart(scrollbox, 0, 0, dw.TRUE, dw.TRUE, 1);
 
     abutton1 := dw.ButtonNew("Show Adjustments", 0);
@@ -1135,9 +1095,9 @@ func main() {
    dw.Init(dw.TRUE);
 
    /* Create our window */
-   mainwindow = dw.WindowNew(dw.DESKTOP, "dwindows test UTF8 中国語 (繁体) cañón", dw.FCF_SYSMENU | dw.FCF_TITLEBAR | dw.FCF_TASKLIST | dw.FCF_DLGBORDER | dw.FCF_SIZEBORDER | dw.FCF_MINMAX);
+   mainwindow := dw.WindowNew(dw.DESKTOP, "dwindows test UTF8 中国語 (繁体) cañón", dw.FCF_SYSMENU | dw.FCF_TITLEBAR | dw.FCF_TASKLIST | dw.FCF_DLGBORDER | dw.FCF_SIZEBORDER | dw.FCF_MINMAX);
 
-   menu_add();
+   menu_add(mainwindow);
 
    notebookbox := dw.BoxNew(dw.VERT, 5);
    mainwindow.PackStart(notebookbox, 0, 0, dw.TRUE, dw.TRUE, 0);
@@ -1157,45 +1117,45 @@ func main() {
                                     return dw.FALSE;
                                 });
 
-   notebookbox1 = dw.BoxNew(dw.VERT, 5);
+   notebookbox1 := dw.BoxNew(dw.VERT, 5);
    notebookpage1 := notebook.PageNew(0, dw.TRUE);
    notebookpage1.Pack(notebookbox1);
    notebookpage1.SetText("buttons and entry");
-   archive_add();
+   archive_add(notebookbox1);
 
-   notebookbox2 = dw.BoxNew(dw.VERT, 5);
+   notebookbox2 := dw.BoxNew(dw.VERT, 5);
    notebookpage2 := notebook.PageNew(1, dw.FALSE);
    notebookpage2.Pack(notebookbox2);
    notebookpage2.SetText("render");
-   text_add();
+   text_add(notebookbox2);
 
-   notebookbox3 = dw.BoxNew(dw.VERT, 5);
+   notebookbox3 := dw.BoxNew(dw.VERT, 5);
    notebookpage3 := notebook.PageNew(1, dw.FALSE);
    notebookpage3.Pack(notebookbox3);
    notebookpage3.SetText("tree");
-   tree_add();
+   tree_add(notebookbox3);
    
-   notebookbox4 = dw.BoxNew(dw.VERT, 5);
+   notebookbox4 := dw.BoxNew(dw.VERT, 5);
    notebookpage4 := notebook.PageNew(1, dw.FALSE);
    notebookpage4.Pack(notebookbox4);
    notebookpage4.SetText("container");
-   container_add();
+   container_add(notebookbox4);
 
-   notebookbox5 = dw.BoxNew(dw.VERT, 5);
+   notebookbox5 := dw.BoxNew(dw.VERT, 5);
    notebookpage5 := notebook.PageNew(1, dw.FALSE);
    notebookpage5.Pack(notebookbox5);
    notebookpage5.SetText("buttons");
-   buttons_add();
+   buttons_add(notebookbox5);
 
 /* DEPRECATED
-   notebookbox6 = dw.BoxNew(dw.VERT, 5);
+   notebookbox6 := dw.BoxNew(dw.VERT, 5);
    notebookpage6 := notebook.PageNew(1, dw.FALSE );
    notebookpage6.Pack(notebookbox6);
    notebookpage6.SetText("mdi");
-   mdi_add();
+   mdi_add(notebookbox6);
 */
 
-   notebookbox7 = dw.BoxNew(dw.VERT, 6);
+   notebookbox7 := dw.BoxNew(dw.VERT, 6);
    notebookpage7 := notebook.PageNew(1, dw.FALSE);
    notebookpage7.Pack(notebookbox7);
    notebookpage7.SetText("html");
@@ -1204,7 +1164,7 @@ func main() {
    if rawhtml.GetHandle() != nil {
        notebookbox7.PackStart(rawhtml, 0, 100, dw.TRUE, dw.FALSE, 0);
        rawhtml.Raw("<html><body><center><h1>dwtest</h1></center></body></html>");
-       html = dw.HtmlNew(1002);
+       html := dw.HtmlNew(1002);
        notebookbox7.PackStart(html, 0, 100, dw.TRUE, dw.TRUE, 0);
        html.URL("http://dwindows.netlabs.org");
    } else {
@@ -1212,14 +1172,11 @@ func main() {
        notebookbox7.PackStart(label, 0, 100, dw.TRUE, dw.TRUE, 0);
    }
 
-   notebookbox8 = dw.BoxNew(dw.VERT, 7);
+   notebookbox8 := dw.BoxNew(dw.VERT, 7);
    notebookpage8 := notebook.PageNew(1, dw.FALSE);
    notebookpage8.Pack(notebookbox8);
    notebookpage8.SetText("scrollbox");
-   scrollbox_add();
-
-   /* Set the default field */
-   mainwindow.Default(copypastefield);
+   scrollbox_add(notebookbox8);
 
    mainwindow.ConnectDelete(func(window dw.HWND) int { return exit_handler(); });
    /*
@@ -1243,7 +1200,7 @@ func main() {
    dw.Main();
 
    /* Now that the loop is done we can cleanup */
-   dw.Taskbar_delete(textbox1, fileicon);
+   dw.TaskbarDelete(textbox1, fileicon);
    mainwindow.Destroy();
    
    fmt.Printf("dwtest exiting...\n");

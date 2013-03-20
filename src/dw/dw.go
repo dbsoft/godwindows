@@ -645,6 +645,12 @@ func Environment_query(env *Env) {
     env.DWSubVersion = cenv.DWSubVersion;
 }
 
+func EnvironmentGet() Env {
+    var env Env;
+    Environment_query(&env);
+    return env;
+}
+
 func Messagebox(title string, flags int, message string) int {
     ctitle := C.CString(title);
     defer C.free(unsafe.Pointer(ctitle));
@@ -3869,7 +3875,7 @@ func (window HMENUITEM) ConnectClicked(sigfunc func(window HMENUITEM) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
-func (id HTIMER) Connect(sigfunc func() int, interval int) {
+func (id *HTIMER) Connect(sigfunc func() int, interval int) {
    if id.tid == 0 {
       backs = append(backs, unsafe.Pointer(&sigfunc));
       id.tid = C.go_timer_connect(C.int(interval), unsafe.Pointer(&sigfunc), nil, go_flags_no_data);

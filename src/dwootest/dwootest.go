@@ -120,9 +120,9 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
 
         dw.ColorForegroundSet(dw.CLR_WHITE);
         if hpma == dw.NOHPIXMAP {
-            text1pm.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(text1pm), dw.Pixmap_height(text1pm));
+            text1pm.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, text1pm.GetWidth(), text1pm.GetHeight());
         }
-        hpm.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, dw.Pixmap_width(hpm), dw.Pixmap_height(hpm));
+        hpm.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, hpm.GetWidth(), hpm.GetHeight());
 
         for i = 0; (i < nrows) && (i+row < len(lines)); i++ {
             fileline := i + row - 1;
@@ -656,7 +656,7 @@ func text_add(notebookbox2 dw.HBOX) {
     }
 
     /* create render box for number pixmap */
-    textbox1 := dw.RenderNew(100);
+    textbox1 = dw.RenderNew(100);
     textbox1.SetFont(FIXEDFONT);
     font_width, font_height = textbox1.GetTextExtents("(g");
     font_width = font_width / 2;
@@ -673,7 +673,7 @@ func text_add(notebookbox2 dw.HBOX) {
     pagebox.PackStart(textboxA, 0, 0, dw.TRUE, dw.TRUE, 0);
 
     /* create render box for filecontents pixmap */
-    textbox2 := dw.RenderNew(101);
+    textbox2 = dw.RenderNew(101);
     textboxA.PackStart(textbox2, 10, 10, dw.TRUE, dw.TRUE, 0);
     textbox2.SetFont(FIXEDFONT);
     /* create horizonal scrollbar */

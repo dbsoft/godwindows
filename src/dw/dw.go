@@ -2910,7 +2910,7 @@ func TreeNew(id uint) HTREE {
 
 func Tree_insert(handle HANDLE, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
    ctitle := C.CString(title);
-   defer C.free(unsafe.Pointer(ctitle));
+   //defer C.free(unsafe.Pointer(ctitle));
    
    return HTREEITEM{C.go_tree_insert(handle.GetHandle(), ctitle, unsafe.Pointer(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle};
 }
@@ -2921,7 +2921,7 @@ func (handle HTREE) Insert(title string, icon HICN, parent HTREEITEM, itemdata P
 
 func Tree_insert_after(handle HANDLE, item HTREEITEM, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
    ctitle := C.CString(title);
-   defer C.free(unsafe.Pointer(ctitle));
+   //defer C.free(unsafe.Pointer(ctitle));
    
    return HTREEITEM{C.go_tree_insert_after(handle.GetHandle(), item.htreeitem, ctitle, unsafe.Pointer(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle};
 }
@@ -2948,7 +2948,7 @@ func (handle HTREEITEM) Delete() {
 
 func Tree_item_change(handle HANDLE, item HTREEITEM, title string, icon HICN) {
    ctitle := C.CString(title);
-   defer C.free(unsafe.Pointer(ctitle));
+   //defer C.free(unsafe.Pointer(ctitle));
    
    C.go_tree_item_change(handle.GetHandle(), item.htreeitem, ctitle, unsafe.Pointer(icon));
 }

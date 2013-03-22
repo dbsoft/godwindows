@@ -31,6 +31,9 @@ type DRAWABLE interface {
     BitBltWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int)
     BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int)
 }
+type HGENERIC struct {
+    hwnd unsafe.Pointer
+}
 type HWND struct {
     hwnd unsafe.Pointer
 }
@@ -414,7 +417,7 @@ func RGB(red uint8, green uint8, blue uint8) COLOR {
 }
 
 func POINTER_TO_HANDLE(ptr POINTER) HANDLE {
-    return HANDLE(HWND{unsafe.Pointer(ptr)});
+    return HANDLE(HGENERIC{unsafe.Pointer(ptr)});
 }
 
 func HANDLE_TO_UINTPTR(handle HANDLE) uintptr {
@@ -427,6 +430,169 @@ func HANDLE_TO_POINTER(handle HANDLE) POINTER {
 
 func HNOTEPAGE_TO_UINT(handle HNOTEPAGE) uint {
     return uint(handle.pageid);
+}
+
+/* Functions to convert from HANDLE to specific types.. 
+ * These will only work if the hanldle was of the 
+ * correct type, or were HGENERIC. Use with care.
+ */
+func HANDLE_TO_HWND(handle HANDLE) HWND {
+    if(handle.GetType() == 1 || handle.GetType() == 0) {
+        return HWND{handle.GetHandle()};
+    }
+    return HWND{nil};
+}
+
+func HANDLE_TO_HENTRYFIELD(handle HANDLE) HENTRYFIELD {
+    if(handle.GetType() == 2 || handle.GetType() == 0) {
+        return HENTRYFIELD{handle.GetHandle()};
+    }
+    return HENTRYFIELD{nil};
+}
+
+func HANDLE_TO_HTEXT(handle HANDLE) HTEXT {
+    if(handle.GetType() == 3 || handle.GetType() == 0) {
+        return HTEXT{handle.GetHandle()};
+    }
+    return HTEXT{nil};
+}
+
+func HANDLE_TO_HTREE(handle HANDLE) HTREE {
+    if(handle.GetType() == 4 || handle.GetType() == 0) {
+        return HTREE{handle.GetHandle()};
+    }
+    return HTREE{nil};
+}
+
+func HANDLE_TO_HCONTAINER(handle HANDLE) HCONTAINER {
+    if(handle.GetType() == 5 || handle.GetType() == 0) {
+        filesystem := false;
+        if Window_get_data(HCONTAINER{handle.GetHandle(), false}, "_go_filesystem") != nil {
+            filesystem = true;
+        }
+        return HCONTAINER{handle.GetHandle(), filesystem};
+    }
+    return HCONTAINER{nil, false};
+}
+
+func HANDLE_TO_HMLE(handle HANDLE) HMLE {
+    if(handle.GetType() == 6 || handle.GetType() == 0) {
+        return HMLE{handle.GetHandle()};
+    }
+    return HMLE{nil};
+}
+
+func HANDLE_TO_HBUTTON(handle HANDLE) HBUTTON {
+    if(handle.GetType() == 7 || handle.GetType() == 0) {
+        return HBUTTON{handle.GetHandle()};
+    }
+    return HBUTTON{nil};
+}
+
+func HANDLE_TO_HSPINBUTTON(handle HANDLE) HSPINBUTTON {
+    if(handle.GetType() == 8 || handle.GetType() == 0) {
+        return HSPINBUTTON{handle.GetHandle()};
+    }
+    return HSPINBUTTON{nil};
+}
+
+func HANDLE_TO_HNOTEBOOK(handle HANDLE) HNOTEBOOK {
+    if(handle.GetType() == 9 || handle.GetType() == 0) {
+        return HNOTEBOOK{handle.GetHandle()};
+    }
+    return HNOTEBOOK{nil};
+}
+
+func HANDLE_TO_HBOX(handle HANDLE) HBOX {
+    if(handle.GetType() == 10 || handle.GetType() == 0) {
+        return HBOX{handle.GetHandle()};
+    }
+    return HBOX{nil};
+}
+
+func HANDLE_TO_HSCROLLBOX(handle HANDLE) HSCROLLBOX {
+    if(handle.GetType() == 11 || handle.GetType() == 0) {
+        return HSCROLLBOX{handle.GetHandle()};
+    }
+    return HSCROLLBOX{nil};
+}
+
+func HANDLE_TO_HMENUITEM(handle HANDLE) HMENUITEM {
+    if(handle.GetType() == 12 || handle.GetType() == 0) {
+        return HMENUITEM{handle.GetHandle()};
+    }
+    return HMENUITEM{nil};
+}
+
+func HANDLE_TO_HLISTBOX(handle HANDLE) HLISTBOX {
+    if(handle.GetType() == 13 || handle.GetType() == 0) {
+        return HLISTBOX{handle.GetHandle()};
+    }
+    return HLISTBOX{nil};
+}
+
+func HANDLE_TO_HPERCENT(handle HANDLE) HPERCENT {
+    if(handle.GetType() == 14 || handle.GetType() == 0) {
+        return HPERCENT{handle.GetHandle()};
+    }
+    return HPERCENT{nil};
+}
+
+func HANDLE_TO_HSLIDER(handle HANDLE) HSLIDER {
+    if(handle.GetType() == 15 || handle.GetType() == 0) {
+        return HSLIDER{handle.GetHandle()};
+    }
+    return HSLIDER{nil};
+}
+
+func HANDLE_TO_HSCROLLBAR(handle HANDLE) HSCROLLBAR {
+    if(handle.GetType() == 16 || handle.GetType() == 0) {
+        return HSCROLLBAR{handle.GetHandle()};
+    }
+    return HSCROLLBAR{nil};
+}
+
+func HANDLE_TO_HRENDER(handle HANDLE) HRENDER {
+    if(handle.GetType() == 17 || handle.GetType() == 0) {
+        return HRENDER{handle.GetHandle()};
+    }
+    return HRENDER{nil};
+}
+
+func HANDLE_TO_HHTML(handle HANDLE) HHTML {
+    if(handle.GetType() == 18 || handle.GetType() == 0) {
+        return HHTML{handle.GetHandle()};
+    }
+    return HHTML{nil};
+}
+
+func HANDLE_TO_HCALENDAR(handle HANDLE) HCALENDAR {
+    if(handle.GetType() == 19 || handle.GetType() == 0) {
+        return HCALENDAR{handle.GetHandle()};
+    }
+    return HCALENDAR{nil};
+}
+
+func HANDLE_TO_HBITMAP(handle HANDLE) HBITMAP {
+    if(handle.GetType() == 20 || handle.GetType() == 0) {
+        return HBITMAP{handle.GetHandle()};
+    }
+    return HBITMAP{nil};
+}
+
+func HANDLE_TO_HSPLITBAR(handle HANDLE) HSPLITBAR {
+    if(handle.GetType() == 21 || handle.GetType() == 0) {
+        return HSPLITBAR{handle.GetHandle()};
+    }
+    return HSPLITBAR{nil};
+}
+
+func (window HGENERIC) GetHandle() unsafe.Pointer {
+   return window.hwnd;
+}
+
+func (window HGENERIC) GetType() C.uint {
+   return 0;
 }
 
 func (window HWND) GetHandle() unsafe.Pointer {
@@ -3994,7 +4160,7 @@ func go_int_callback_basic(pfunc unsafe.Pointer, window unsafe.Pointer, data uns
         return C.int(thisfunc(HSPLITBAR{window}, POINTER(data)));
     case go_flags_no_data:
         thisfunc := *(*func(HANDLE) int)(pfunc);
-        return C.int(thisfunc(HWND{window}));
+        return C.int(thisfunc(HGENERIC{window}));
     case (1 << 8) | go_flags_no_data: // HWND
         thisfunc := *(*func(HWND) int)(pfunc);
         return C.int(thisfunc(HWND{window}));
@@ -4064,7 +4230,7 @@ func go_int_callback_basic(pfunc unsafe.Pointer, window unsafe.Pointer, data uns
         return C.int(thisfunc(HSPLITBAR{window}));
     }
     thisfunc := *(*func(HANDLE, POINTER) int)(pfunc);
-    return C.int(thisfunc(HWND{window}, POINTER(data)));
+    return C.int(thisfunc(HGENERIC{window}, POINTER(data)));
 }
 
 //export go_int_callback_configure
@@ -4139,7 +4305,7 @@ func go_int_callback_configure(pfunc unsafe.Pointer, window unsafe.Pointer, widt
        return C.int(thisfunc(HSPLITBAR{window}, int(width), int(height), POINTER(data)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, int, int) C.int)(pfunc);
-       return C.int(thisfunc(HWND{window}, int(width), int(height)));
+       return C.int(thisfunc(HGENERIC{window}, int(width), int(height)));
    case (1 << 8) | go_flags_no_data: // HWND
        thisfunc := *(*func(HWND, int, int) C.int)(pfunc);
        return C.int(thisfunc(HWND{window}, int(width), int(height)));
@@ -4209,7 +4375,7 @@ func go_int_callback_configure(pfunc unsafe.Pointer, window unsafe.Pointer, widt
        return C.int(thisfunc(HSPLITBAR{window}, int(width), int(height)));
    }
    thisfunc := *(*func(HANDLE, int, int, POINTER) C.int)(pfunc);
-   return C.int(thisfunc(HWND{window}, int(width), int(height), POINTER(data)));
+   return C.int(thisfunc(HGENERIC{window}, int(width), int(height), POINTER(data)));
 }
 
 //export go_int_callback_keypress
@@ -4284,7 +4450,7 @@ func go_int_callback_keypress(pfunc unsafe.Pointer, window unsafe.Pointer, ch C.
        return C.int(thisfunc(HSPLITBAR{window}, uint8(ch), int(vk), int(state), POINTER(data), C.GoString(utf8)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, uint8, int, int, string) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, uint8(ch), int(vk), int(state), C.GoString(utf8)));
+       return C.int(thisfunc(HGENERIC{window}, uint8(ch), int(vk), int(state), C.GoString(utf8)));
    case (1 << 8) | go_flags_no_data: // HWND
        thisfunc := *(*func(HWND, uint8, int, int, string) int)(pfunc);
        return C.int(thisfunc(HWND{window}, uint8(ch), int(vk), int(state), C.GoString(utf8)));
@@ -4354,7 +4520,7 @@ func go_int_callback_keypress(pfunc unsafe.Pointer, window unsafe.Pointer, ch C.
        return C.int(thisfunc(HSPLITBAR{window}, uint8(ch), int(vk), int(state), C.GoString(utf8)));
    }
    thisfunc := *(*func(HANDLE, uint8, int, int, POINTER, string) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, uint8(ch), int(vk), int(state), POINTER(data), C.GoString(utf8)));
+   return C.int(thisfunc(HGENERIC{window}, uint8(ch), int(vk), int(state), POINTER(data), C.GoString(utf8)));
 }
 
 //export go_int_callback_mouse
@@ -4429,7 +4595,7 @@ func go_int_callback_mouse(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int,
        return C.int(thisfunc(HSPLITBAR{window}, int(x), int(y), int(mask), POINTER(data)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, int, int, int) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, int(x), int(y), int(mask)));
+       return C.int(thisfunc(HGENERIC{window}, int(x), int(y), int(mask)));
    case (1 << 8) | go_flags_no_data: // HWND
        thisfunc := *(*func(HWND, int, int, int) int)(pfunc);
        return C.int(thisfunc(HWND{window}, int(x), int(y), int(mask)));
@@ -4499,7 +4665,7 @@ func go_int_callback_mouse(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int,
        return C.int(thisfunc(HSPLITBAR{window}, int(x), int(y), int(mask)));
    }
    thisfunc := *(*func(HANDLE, int, int, int, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, int(x), int(y), int(mask), POINTER(data)));
+   return C.int(thisfunc(HGENERIC{window}, int(x), int(y), int(mask), POINTER(data)));
 }
 
 //export go_int_callback_expose
@@ -4510,13 +4676,13 @@ func go_int_callback_expose(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int
        return C.int(thisfunc(HRENDER{window}, int(x), int(y), int(width), int(height), POINTER(data)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, int, int, int, int) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, int(x), int(y), int(width), int(height)));
+       return C.int(thisfunc(HGENERIC{window}, int(x), int(y), int(width), int(height)));
    case (17 << 8) | go_flags_no_data: // HRENDER
         thisfunc := *(*func(HRENDER, int, int, int, int) int)(pfunc);
         return C.int(thisfunc(HRENDER{window}, int(x), int(y), int(width), int(height)));
    }
    thisfunc := *(*func(HANDLE, int, int, int, int, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, int(x), int(y), int(width), int(height), POINTER(data)));
+   return C.int(thisfunc(HGENERIC{window}, int(x), int(y), int(width), int(height), POINTER(data)));
 }
 
 //export go_int_callback_string
@@ -4591,7 +4757,7 @@ func go_int_callback_string(pfunc unsafe.Pointer, window unsafe.Pointer, str *C.
        return C.int(thisfunc(HSPLITBAR{window}, C.GoString(str), POINTER(data)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, string) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, C.GoString(str)));
+       return C.int(thisfunc(HGENERIC{window}, C.GoString(str)));
    case (1 << 8) | go_flags_no_data: // HWND
        thisfunc := *(*func(HWND, string) int)(pfunc);
        return C.int(thisfunc(HWND{window}, C.GoString(str)));
@@ -4661,7 +4827,7 @@ func go_int_callback_string(pfunc unsafe.Pointer, window unsafe.Pointer, str *C.
        return C.int(thisfunc(HSPLITBAR{window}, C.GoString(str)));
    }
    thisfunc := *(*func(HANDLE, string, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, C.GoString(str), POINTER(data)));
+   return C.int(thisfunc(HGENERIC{window}, C.GoString(str), POINTER(data)));
 }
 
 //export go_int_callback_item_context
@@ -4679,7 +4845,7 @@ func go_int_callback_item_context(pfunc unsafe.Pointer, window unsafe.Pointer, t
        return C.int(thisfunc(HCONTAINER{window, filesystem}, C.GoString(text), int(x), int(y), POINTER(data), POINTER(itemdata)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, string, int, int, POINTER) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, C.GoString(text), int(x), int(y), POINTER(itemdata)));
+       return C.int(thisfunc(HGENERIC{window}, C.GoString(text), int(x), int(y), POINTER(itemdata)));
    case (4 << 8) | go_flags_no_data: // HTREE
        thisfunc := *(*func(HTREE, string, int, int, POINTER) int)(pfunc);
        return C.int(thisfunc(HTREE{window}, C.GoString(text), int(x), int(y), POINTER(itemdata)));
@@ -4692,7 +4858,7 @@ func go_int_callback_item_context(pfunc unsafe.Pointer, window unsafe.Pointer, t
        return C.int(thisfunc(HCONTAINER{window, filesystem}, C.GoString(text), int(x), int(y), POINTER(itemdata)));
    }
    thisfunc := *(*func(HANDLE, string, int, int, POINTER, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, C.GoString(text), int(x), int(y), POINTER(data), POINTER(itemdata)));
+   return C.int(thisfunc(HGENERIC{window}, C.GoString(text), int(x), int(y), POINTER(data), POINTER(itemdata)));
 }
 
 //export go_int_callback_item_select
@@ -4710,7 +4876,7 @@ func go_int_callback_item_select(pfunc unsafe.Pointer, window unsafe.Pointer, it
        return C.int(thisfunc(HCONTAINER{window, filesystem}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(data), POINTER(itemdata)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, HTREEITEM, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(itemdata)));
+       return C.int(thisfunc(HGENERIC{window}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(itemdata)));
    case (4 << 8) | go_flags_no_data: // HTREE
        thisfunc := *(*func(HTREE, HTREEITEM, string, POINTER) int)(pfunc);
        return C.int(thisfunc(HTREE{window}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(itemdata)));
@@ -4723,7 +4889,7 @@ func go_int_callback_item_select(pfunc unsafe.Pointer, window unsafe.Pointer, it
        return C.int(thisfunc(HCONTAINER{window, filesystem}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(itemdata)));
    }
    thisfunc := *(*func(HANDLE, HTREEITEM, string, POINTER, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(data), POINTER(itemdata)));
+   return C.int(thisfunc(HGENERIC{window}, HTREEITEM{item, HWND{window}}, C.GoString(text), POINTER(data), POINTER(itemdata)));
 }
 
 //export go_int_callback_numeric
@@ -4798,7 +4964,7 @@ func go_int_callback_numeric(pfunc unsafe.Pointer, window unsafe.Pointer, val C.
        return C.int(thisfunc(HSPLITBAR{window}, int(val), POINTER(data)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, int) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, int(val)));
+       return C.int(thisfunc(HGENERIC{window}, int(val)));
    case (1 << 8) | go_flags_no_data: // HWND
        thisfunc := *(*func(HWND, int) int)(pfunc);
        return C.int(thisfunc(HWND{window}, int(val)));
@@ -4868,7 +5034,7 @@ func go_int_callback_numeric(pfunc unsafe.Pointer, window unsafe.Pointer, val C.
        return C.int(thisfunc(HSPLITBAR{window}, int(val)));
    }
    thisfunc := *(*func(HANDLE, int, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, int(val), POINTER(data)));
+   return C.int(thisfunc(HGENERIC{window}, int(val), POINTER(data)));
 }
 
 //export go_int_callback_ulong
@@ -4943,7 +5109,7 @@ func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ul
         return C.int(thisfunc(HSPLITBAR{window}, uint(val), POINTER(data)));
     case go_flags_no_data:
         thisfunc := *(*func(HANDLE, uint) int)(pfunc);
-        return C.int(thisfunc(HWND{window}, uint(val)));
+        return C.int(thisfunc(HGENERIC{window}, uint(val)));
     case (1 << 8) | go_flags_no_data: // HWND
         thisfunc := *(*func(HWND, uint) int)(pfunc);
         return C.int(thisfunc(HWND{window}, uint(val)));
@@ -5013,7 +5179,7 @@ func go_int_callback_ulong(pfunc unsafe.Pointer, window unsafe.Pointer, val C.ul
         return C.int(thisfunc(HSPLITBAR{window}, uint(val)));
     }
     thisfunc := *(*func(HANDLE, uint, POINTER) int)(pfunc);
-    return C.int(thisfunc(HWND{window}, uint(val), POINTER(data)));
+    return C.int(thisfunc(HGENERIC{window}, uint(val), POINTER(data)));
 }
 
 //export go_int_callback_notepage
@@ -5024,13 +5190,13 @@ func go_int_callback_notepage(pfunc unsafe.Pointer, window unsafe.Pointer, val C
        return C.int(thisfunc(HNOTEBOOK{window}, HNOTEPAGE{val, HNOTEBOOK{window}}, POINTER(data)));
    case go_flags_no_data:
        thisfunc := *(*func(HANDLE, HNOTEPAGE) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, HNOTEPAGE{val, HNOTEBOOK{window}}));
+       return C.int(thisfunc(HGENERIC{window}, HNOTEPAGE{val, HNOTEBOOK{window}}));
    case (9 << 8) | go_flags_no_data: // HNOTEBOOK
        thisfunc := *(*func(HNOTEBOOK, HNOTEPAGE) int)(pfunc);
        return C.int(thisfunc(HNOTEBOOK{window}, HNOTEPAGE{val, HNOTEBOOK{window}}));
    }
    thisfunc := *(*func(HANDLE, HNOTEPAGE, POINTER) int)(pfunc);
-   return C.int(thisfunc(HWND{window}, HNOTEPAGE{val, HNOTEBOOK{window}}, POINTER(data)));
+   return C.int(thisfunc(HGENERIC{window}, HNOTEPAGE{val, HNOTEBOOK{window}}, POINTER(data)));
 }
 
 //export go_int_callback_tree
@@ -5041,13 +5207,13 @@ func go_int_callback_tree(pfunc unsafe.Pointer, window unsafe.Pointer, tree unsa
         return C.int(thisfunc(HTREE{window}, HTREEITEM{tree, HWND{window}}, POINTER(data)));
     case go_flags_no_data:
         thisfunc := *(*func(HANDLE, HTREEITEM) int)(pfunc);
-        return C.int(thisfunc(HWND{window}, HTREEITEM{tree, HWND{window}}));
+        return C.int(thisfunc(HGENERIC{window}, HTREEITEM{tree, HWND{window}}));
     case (4 << 8) | go_flags_no_data: // HTREE
         thisfunc := *(*func(HTREE, HTREEITEM) int)(pfunc);
         return C.int(thisfunc(HTREE{window}, HTREEITEM{tree, HWND{window}}));
     }
     thisfunc := *(*func(HANDLE, HTREEITEM, POINTER) int)(pfunc);
-    return C.int(thisfunc(HWND{window}, HTREEITEM{tree, HWND{window}}, POINTER(data)));
+    return C.int(thisfunc(HGENERIC{window}, HTREEITEM{tree, HWND{window}}, POINTER(data)));
 }
 
 //export go_int_callback_timer

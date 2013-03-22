@@ -57,8 +57,8 @@ func main() {
     window.ConnectDelete(func(window dw.HWND) int { return exit_handler(); });
     /* Handler for Mac application menu Quit */
     dw.DESKTOP.ConnectDelete(func(window dw.HWND) int { return exit_handler(); });
-    quitmenu := dwib.Window_get_handle(window, "quitmenu");
-    quitmenu.ConnectClicked(func(window dw.HWND) int { return exit_handler(); });
+    quitmenu := dw.HANDLE_TO_HMENUITEM(dwib.Window_get_handle(window, "quitmenu"));
+    quitmenu.ConnectClicked(func(window dw.HMENUITEM) int { return exit_handler(); });
 
     dw.Main();
 

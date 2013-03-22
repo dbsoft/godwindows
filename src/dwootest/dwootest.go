@@ -99,8 +99,8 @@ func read_file() {
 
 // Call back section
 func exit_handler() int {
-   if dw.Messagebox("dwtest", dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit?") != 0 {
-      dw.Main_quit();
+   if dw.MessageBox("dwtest", dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit?") != 0 {
+      dw.MainQuit();
    }
    return dw.TRUE;
 }
@@ -397,7 +397,7 @@ func button_callback(combobox1 dw.HLISTBOX, combobox2 dw.HLISTBOX, spinbutton dw
                   spvalue,
                   buf1, buf2,
                   y, m, d);
-    dw.Messagebox( "Values", dw.MB_OK | dw.MB_INFORMATION, message);
+    dw.MessageBox( "Values", dw.MB_OK | dw.MB_INFORMATION, message);
 }
 
 // Create the menu
@@ -414,11 +414,11 @@ func menu_add(mainwindow dw.HWND) {
 
     changeable_menu := dw.MenuNew(0);
     checkable_menuitem := changeable_menu.AppendItem("~Checkable Menu Item", dw.MENU_AUTO, 0, dw.TRUE, dw.TRUE, dw.NOMENU);
-    checkable_menuitem.ConnectClicked(func(window dw.HMENUITEM) int { dw.Messagebox("Menu Item Callback", dw.MB_OK | dw.MB_INFORMATION, "Checkable menu item selected"); return dw.FALSE });
+    checkable_menuitem.ConnectClicked(func(window dw.HMENUITEM) int { dw.MessageBox("Menu Item Callback", dw.MB_OK | dw.MB_INFORMATION, "Checkable menu item selected"); return dw.FALSE });
 
 
     noncheckable_menuitem := changeable_menu.AppendItem("~Non-checkable Menu Item", dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
-    noncheckable_menuitem.ConnectClicked(func(window dw.HMENUITEM) int { dw.Messagebox("Menu Item Callback", dw.MB_OK | dw.MB_INFORMATION, "Non-checkable menu item selected"); return dw.FALSE });
+    noncheckable_menuitem.ConnectClicked(func(window dw.HMENUITEM) int { dw.MessageBox("Menu Item Callback", dw.MB_OK | dw.MB_INFORMATION, "Non-checkable menu item selected"); return dw.FALSE });
     changeable_menu.AppendItem("~Disabled menu Item", dw.MENU_AUTO, dw.MIS_DISABLED | dw.MIS_CHECKED, dw.TRUE, dw.TRUE, dw.NOMENU);
     /* seperator */
     changeable_menu.AppendItem(dw.MENU_SEPARATOR, dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU);
@@ -450,7 +450,7 @@ func menu_add(mainwindow dw.HWND) {
                                                           env.OSName, env.BuildDate, env.BuildTime,
                                                           env.MajorVersion, env.MinorVersion, env.MajorBuild, env.MinorBuild,
                                                           env.DWMajorVersion, env.DWMinorVersion, env.DWSubVersion);
-                                dw.Messagebox("About dwindows", dw.MB_OK | dw.MB_INFORMATION, message);
+                                dw.MessageBox("About dwindows", dw.MB_OK | dw.MB_INFORMATION, message);
                                 return dw.FALSE;
                             });
 
@@ -696,7 +696,7 @@ func text_add(notebookbox2 dw.HBOX) {
         image.SetTransparentColor(dw.CLR_WHITE);
     }
 
-    dw.Messagebox("DWTest", dw.MB_OK | dw.MB_INFORMATION, fmt.Sprintf("Width: %d Height: %d\n", font_width, font_height));
+    dw.MessageBox("DWTest", dw.MB_OK | dw.MB_INFORMATION, fmt.Sprintf("Width: %d Height: %d\n", font_width, font_height));
     text1pm.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * width1, font_height * rows);
     text2pm.DrawRect(dw.DRAW_FILL | dw.DRAW_NOAA, 0, 0, font_width * cols, font_height * rows);
     textbox1.ConnectButtonPress(func(window dw.HRENDER, x int, y int, buttonmask int) int { context_menu(); return dw.TRUE; });
@@ -1026,7 +1026,7 @@ func buttons_add(notebookbox5 dw.HBOX) {
                                     iteration++;
                                     return dw.FALSE;
                                 });
-    spinbutton.ConnectValueChanged(func(hwnd dw.HSPINBUTTON, value int) int { dw.Messagebox("DWTest", dw.MB_OK, fmt.Sprintf("New value from spinbutton: %d\n", value)); return dw.FALSE; });
+    spinbutton.ConnectValueChanged(func(hwnd dw.HSPINBUTTON, value int) int { dw.MessageBox("DWTest", dw.MB_OK, fmt.Sprintf("New value from spinbutton: %d\n", value)); return dw.FALSE; });
     slider.ConnectValueChanged(func(hwnd dw.HSLIDER, value int) int { percent.SetPos(uint(value * 10)); return dw.FALSE; });
 }
 

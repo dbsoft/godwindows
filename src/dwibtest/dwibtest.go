@@ -18,9 +18,9 @@ var SRCROOT string
 
 /* Handle exiting the application */
 func exit_handler() int {
-    if dw.Messagebox(APP_NAME, dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit?") == dw.MB_RETURN_YES {
+    if dw.MessageBox(APP_NAME, dw.MB_YESNO | dw.MB_QUESTION, "Are you sure you want to exit?") == dw.MB_RETURN_YES {
         /* Exit the application cleanly */
-        dw.Main_quit();
+        dw.MainQuit();
     }
     return TRUE;
 }

@@ -826,6 +826,10 @@ func Messagebox(title string, flags int, message string) int {
     return int(C.go_messagebox(ctitle, C.int(flags), cmessage));
 }
 
+func MessageBox(title string, flags int, message string) int {
+    return Messagebox(title, flags, message);
+}
+
 func Window_new(owner HWND, title string, flags uint) HWND {
     ctitle := C.CString(title);
     defer C.free(unsafe.Pointer(ctitle));
@@ -2070,12 +2074,24 @@ func Main_iteration() {
     C.dw_main_iteration();
 }
 
+func MainIteration() {
+    Main_iteration();
+}
+
 func Main_quit() {
     C.dw_main_quit();
 }
 
+func MainQuit() {
+    Main_quit();
+}
+
 func Main_sleep(milliseconds int) {
     C.dw_main_sleep(C.int(milliseconds));
+}
+
+func MainSleep(milliseconds int) {
+    Main_sleep(milliseconds);
 }
 
 func Box_new(btype int, pad int) HBOX {

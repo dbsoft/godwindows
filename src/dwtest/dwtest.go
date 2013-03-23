@@ -1108,6 +1108,8 @@ func tree_add() {
     dw.Tree_insert(tree, "tree file 4", fileicon, t2, dw.POINTER(uintptr(6)));
     dw.Tree_item_change(tree, t1, "tree folder 1", foldericon);
     dw.Tree_item_change(tree, t2, "tree folder 2", foldericon);
+    dw.Tree_item_set_data(tree, t2, dw.POINTER(uintptr(100)));
+    fmt.Printf("t1 title \"%s\" data %d t2 data %d\n", dw.Tree_get_title(tree, t1), uintptr(dw.Tree_item_get_data(tree, t1)), uintptr(dw.Tree_item_get_data(tree, t2))); 
 }
 
 // Page 4

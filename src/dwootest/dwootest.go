@@ -822,6 +822,8 @@ func tree_add(notebookbox3 dw.HBOX) {
     tree.Insert("tree file 4", fileicon, t2, dw.POINTER(uintptr(6)));
     t1.Change("tree folder 1", foldericon);
     t2.Change("tree folder 2", foldericon);
+    t2.SetData(dw.POINTER(uintptr(100)));
+    fmt.Printf("t1 title \"%s\" data %d t2 data %d\n", t1.GetTitle(), uintptr(t1.GetData()), uintptr(t2.GetData())); 
 }
 
 // Page 4

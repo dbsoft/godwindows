@@ -779,6 +779,7 @@ func (window HCONTINS) GetType() C.uint {
    return 0;
 }
 
+// Initializes the Dynamic Windows engine.
 func Init(newthread int) int {
     if len(os.Args) > 0 {
         var argc C.int = C.int(len(os.Args));
@@ -792,10 +793,12 @@ func Init(newthread int) int {
     return int(C.go_init(C.int(newthread), 0, nil));
 }
 
+// Cleanly terminates a DW session, should be signal handler safe but does not exit.
 func Shutdown() {
     C.dw_shutdown();
 }
 
+// Returns some information about the current operating environment.
 func Environment_query(env *Env) {
     var cenv C.DWEnv;
     C.dw_environment_query(&cenv);
@@ -811,12 +814,14 @@ func Environment_query(env *Env) {
     env.DWSubVersion = cenv.DWSubVersion;
 }
 
+// Returns some information about the current operating environment.
 func EnvironmentGet() Env {
     var env Env;
     Environment_query(&env);
     return env;
 }
 
+// Displays a Message Box with given text and title.
 func Messagebox(title string, flags int, message string) int {
     ctitle := C.CString(title);
     defer C.free(unsafe.Pointer(ctitle));
@@ -826,10 +831,12 @@ func Messagebox(title string, flags int, message string) int {
     return int(C.go_messagebox(ctitle, C.int(flags), cmessage));
 }
 
+// Displays a Message Box with given text and title.
 func MessageBox(title string, flags int, message string) int {
     return Messagebox(title, flags, message);
 }
 
+// Create a new Window Frame.
 func Window_new(owner HWND, title string, flags uint) HWND {
     ctitle := C.CString(title);
     defer C.free(unsafe.Pointer(ctitle));
@@ -837,118 +844,147 @@ func Window_new(owner HWND, title string, flags uint) HWND {
     return HWND{C.go_window_new(unsafe.Pointer(owner.hwnd), ctitle, C.ulong(flags))};
 }
 
+// Create a new Window Frame.
 func WindowNew(owner HWND, title string, flags uint) HWND {
     return Window_new(owner, title, flags);
 }
 
+// Makes the window visible.
 func Window_show(handle HANDLE) int {
    return int(C.go_window_show(handle.GetHandle()));
 }
 
+// Makes the window visible.
 func (window HWND) Show() int {
     return Window_show(window);
 }
 
+// Makes the window invisible.
 func Window_hide(handle HANDLE) int {
    return int(C.go_window_hide(handle.GetHandle()));
 }
 
+// Makes the window invisible.
 func (window HWND) Hide() int {
     return Window_hide(window);
 }
 
+// Makes the window bottommost.
 func Window_lower(handle HANDLE) int {
    return int(C.go_window_lower(handle.GetHandle()));
 }
 
+// Makes the window bottommost.
 func (window HWND) Lower() int {
     return Window_lower(window);
 }
 
+// Makes the window topmost.
 func Window_raise(handle HANDLE) int {
    return int(C.go_window_raise(handle.GetHandle()));
 }
 
+// Makes the window topmost.
 func (window HWND) Raise() int {
     return Window_raise(window);
 }
 
+// Minimizes or Iconifies a top-level window.
 func Window_minimize(handle HANDLE) int {
    return int(C.go_window_minimize(handle.GetHandle()));
 }
 
+// Minimizes or Iconifies a top-level window.
 func (window HWND) Minimize() int {
     return Window_minimize(window);
 }
 
+// Sets the position of a given window.
 func Window_set_pos(handle HANDLE, x int, y int) {
     C.go_window_set_pos(handle.GetHandle(), C.long(x), C.long(y));
 }
 
+// Sets the position of a given window.
 func (window HWND) SetPos(x int, y int) {
     Window_set_pos(window, x, y);
 }
 
+// Sets the position and size of a given window.
 func Window_set_pos_size(handle HANDLE, x int, y int, width uint, height uint) {
     C.go_window_set_pos_size(handle.GetHandle(), C.long(x), C.long(y), C.ulong(width), C.ulong(height));
 }
 
+// Sets the position and size of a given window.
 func (window HWND) SetPosSize(x int, y int, width uint, height uint) {
     Window_set_pos_size(window, x, y, width, height);
 }
 
+// Sets the size of a given window.
 func Window_set_size(handle HANDLE, width uint, height uint) {
     C.go_window_set_size(handle.GetHandle(), C.ulong(width), C.ulong(height));
 }
 
+// Sets the size of a given window.
 func (window HWND) SetSize(width uint, height uint) {
     Window_set_size(window, width, height);
 }
 
+// Sets the colors used by a specified widget handle.
 func Window_set_color(handle HANDLE, fore COLOR, back COLOR) int {
    return int(C.go_window_set_color(handle.GetHandle(), C.ulong(fore), C.ulong(back)));
 }
 
+// Sets the style of a given widget.
 func Window_set_style(handle HANDLE, style uint, mask uint) {
     C.go_window_set_style(handle.GetHandle(), C.ulong(style), C.ulong(mask));
 }
 
+// Sets widget to click the default dialog item when an ENTER is pressed.
 func Window_click_default(window HANDLE, next HANDLE) {
     C.go_window_click_default(window.GetHandle(), next.GetHandle());
 }
 
+// Sets widget to click the default dialog item when an ENTER is pressed.
 func (window HWND) ClickDefault(next HANDLE) {
     Window_click_default(window, next);
 }
 
+// Sets the default focus item for a window/dialog.
 func Window_default(window HWND, defaultitem HANDLE) {
     C.go_window_default(unsafe.Pointer(window.hwnd), defaultitem.GetHandle());
 }
 
+// Sets the default focus item for a window/dialog.
 func (window HWND) Default(defaultitem HANDLE) {
     Window_default(window, defaultitem);
 }
 
+// Destroys a window and all of it's children.
 func Window_destroy(handle HANDLE) int {
     return int(C.go_window_destroy(handle.GetHandle()));
 }
 
+// Disables given widget.
 func Window_disable(handle HANDLE) {
    C.go_window_disable(handle.GetHandle());
 }
 
+// Enables given widget.
 func Window_enable(handle HANDLE) {
     C.go_window_enable(handle.GetHandle());
 }
 
-func Window_from_id(handle HANDLE, cid int) HWND {
-    return HWND{C.go_window_from_id(handle.GetHandle(), C.int(cid))};
+// Gets the child widget handle with specified ID.
+func Window_from_id(handle HANDLE, cid int) HGENERIC {
+    return HGENERIC{C.go_window_from_id(handle.GetHandle(), C.int(cid))};
 }
 
-func (window HWND) FromID(cid int) HWND {
+// Gets the child widget handle with specified ID.
+func (window HWND) FromID(cid int) HGENERIC {
     return Window_from_id(window, cid);
 }
 
+// Gets a named user data item from a widget handle.
 func Window_get_data(window HANDLE, dataname string) POINTER {
     cdataname := C.CString(dataname);
     defer C.free(unsafe.Pointer(cdataname));
@@ -956,6 +992,7 @@ func Window_get_data(window HANDLE, dataname string) POINTER {
     return POINTER(C.go_window_get_data(window.GetHandle(), cdataname));
 }
 
+// Add a named user data item to a widget handle.
 func Window_set_data(window HANDLE, dataname string, data POINTER) {
     cdataname := C.CString(dataname);
     defer C.free(unsafe.Pointer(cdataname));
@@ -963,6 +1000,7 @@ func Window_set_data(window HANDLE, dataname string, data POINTER) {
     C.go_window_set_data(window.GetHandle(), cdataname, unsafe.Pointer(data));
 }
 
+// Returns the current font for the specified widget
 func Window_get_font(handle HANDLE) string {
    cfontname := C.go_window_get_font(handle.GetHandle());
    fontname := C.GoString(cfontname);
@@ -970,6 +1008,7 @@ func Window_get_font(handle HANDLE) string {
    return fontname;
 }
 
+// Sets the font used by a specified widget handle.
 func Window_set_font(handle HANDLE, fontname string) int {
     cfontname := C.CString(fontname);
     defer C.free(unsafe.Pointer(cfontname));
@@ -977,6 +1016,7 @@ func Window_set_font(handle HANDLE, fontname string) int {
     return int(C.go_window_set_font(handle.GetHandle(), cfontname));
 }
 
+// Gets the position and size of a given window.
 func Window_get_pos_size(handle HANDLE) (int, int, uint, uint) {
     var x, y C.long;
     var width, height C.ulong;
@@ -984,16 +1024,19 @@ func Window_get_pos_size(handle HANDLE) (int, int, uint, uint) {
     return int(x), int(y), uint(width), uint(height);
 }
 
+// Gets the position and size of a given window.
 func (window HWND) GetPosSize() (int, int, uint, uint) {
     return Window_get_pos_size(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func Window_get_preferred_size(handle HANDLE) (int, int) {
     var width, height C.int;
     C.go_window_get_preferred_size(handle.GetHandle(), &width, &height);
     return int(width), int(height);
 }
 
+// Gets the text used for a given widget.
 func Window_get_text(handle HANDLE) string {
     ctext := C.go_window_get_text(handle.GetHandle());
     text := C.GoString(ctext);
@@ -1001,6 +1044,7 @@ func Window_get_text(handle HANDLE) string {
     return text;
 }
 
+// Sets the text used for a given widget.
 func Window_set_text(handle HANDLE, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -1008,6 +1052,7 @@ func Window_set_text(handle HANDLE, text string) {
     C.go_window_set_text(handle.GetHandle(), ctext);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func Window_set_tooltip(handle HANDLE, bubbletext string) {
     cbubbletext := C.CString(bubbletext);
     defer C.free(unsafe.Pointer(cbubbletext));
@@ -1015,10 +1060,12 @@ func Window_set_tooltip(handle HANDLE, bubbletext string) {
     C.go_window_set_tooltip(handle.GetHandle(), cbubbletext);
 }
 
+// Causes entire window to be invalidated and redrawn.
 func Window_redraw(handle HANDLE) {
     C.go_window_redraw(handle.GetHandle());
 }
 
+// Causes entire window to be invalidated and redrawn.
 func (window HWND) Redraw() {
     Window_redraw(window);
 }

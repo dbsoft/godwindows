@@ -3634,14 +3634,17 @@ func Flush() {
     C.dw_flush();
 }
 
+// Create a tree widget to be packed.
 func Tree_new(id uint) HTREE {
     return HTREE{C.go_tree_new(C.ulong(id))};
 }
 
+// Create a tree widget to be packed.
 func TreeNew(id uint) HTREE {
     return Tree_new(id);
 }
 
+// Inserts an item into a tree widget.
 func Tree_insert(handle HANDLE, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
@@ -3649,10 +3652,12 @@ func Tree_insert(handle HANDLE, title string, icon HICN, parent HTREEITEM, itemd
    return HTREEITEM{C.go_tree_insert(handle.GetHandle(), ctitle, unsafe.Pointer(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle};
 }
 
+// Inserts an item into a tree widget.
 func (handle HTREE) Insert(title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
     return Tree_insert(handle, title, icon, parent, itemdata);
 }
 
+// Inserts an item into a tree widget after another item.
 func Tree_insert_after(handle HANDLE, item HTREEITEM, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
@@ -3660,26 +3665,32 @@ func Tree_insert_after(handle HANDLE, item HTREEITEM, title string, icon HICN, p
    return HTREEITEM{C.go_tree_insert_after(handle.GetHandle(), item.htreeitem, ctitle, unsafe.Pointer(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle};
 }
 
+// Inserts an item into a tree widget after another item.
 func (handle HTREE) InsertAfter(item HTREEITEM, title string, icon HICN, parent HTREEITEM, itemdata POINTER) HTREEITEM {
     return Tree_insert_after(handle, item, title, icon, parent, itemdata);
 }
 
+// Removes all nodes from a tree.
 func Tree_clear(handle HANDLE) {
    C.go_tree_clear(handle.GetHandle());
 }
 
+// Removes all nodes from a tree.
 func (handle HTREE) Clear() {
     Tree_clear(handle);
 }
 
+// Removes a node from a tree.
 func Tree_item_delete(handle HANDLE, item HTREEITEM) {
    C.go_tree_item_delete(handle.GetHandle(), item.htreeitem);
 }
 
+// Removes a node from a tree.
 func (handle HTREEITEM) Delete() {
     Tree_item_delete(handle.htree, handle);
 }
 
+// Sets the text and icon of an item in a tree widget.
 func Tree_item_change(handle HANDLE, item HTREEITEM, title string, icon HICN) {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
@@ -3687,50 +3698,62 @@ func Tree_item_change(handle HANDLE, item HTREEITEM, title string, icon HICN) {
    C.go_tree_item_change(handle.GetHandle(), item.htreeitem, ctitle, unsafe.Pointer(icon));
 }
 
+// Sets the text and icon of an item in a tree widget.
 func (handle HTREEITEM) Change(title string, icon HICN) {
     Tree_item_change(handle.htree, handle, title, icon);
 }
 
+// Expands a node on a tree.
 func Tree_item_expand(handle HANDLE, item HTREEITEM) {
    C.go_tree_item_expand(handle.GetHandle(), item.htreeitem);
 }
 
+// Expands a node on a tree.
 func (handle HTREEITEM) Expand() {
     Tree_item_expand(handle.htree, handle);
 }
 
+// Collapses a node on a tree.
 func Tree_item_collapse(handle HANDLE, item HTREEITEM) {
    C.go_tree_item_collapse(handle.GetHandle(), item.htreeitem);
 }
 
+// Collapses a node on a tree.
 func (handle HTREEITEM) Collapse() {
     Tree_item_collapse(handle.htree, handle);
 }
 
+// Sets this item as the active selection.
 func Tree_item_select(handle HANDLE, item HTREEITEM) {
    C.go_tree_item_select(handle.GetHandle(), item.htreeitem);
 }
 
+// Sets this item as the active selection.
 func (handle HTREEITEM) Select() {
     Tree_item_select(handle.htree, handle);
 }
 
+// Sets the item data of a tree item.
 func Tree_item_set_data(handle HANDLE, item HTREEITEM, itemdata POINTER) {
    C.go_tree_item_set_data(handle.GetHandle(), item.htreeitem, unsafe.Pointer(itemdata));
 }
 
+// Sets the item data of a tree item.
 func (handle HTREEITEM) SetData(itemdata POINTER) {
     Tree_item_set_data(handle.htree, handle, itemdata);
 }
 
+// Gets the item data of a tree item.
 func Tree_item_get_data(handle HANDLE, item HTREEITEM) POINTER {
    return POINTER(C.go_tree_item_get_data(handle.GetHandle(), item.htreeitem));
 }
 
+// Gets the item data of a tree item.
 func (handle HTREEITEM) GetData() POINTER {
     return Tree_item_get_data(handle.htree, handle);
 }
 
+// Gets the text an item in a tree widget.
 func Tree_get_title(handle HANDLE, item HTREEITEM) string {
    ctitle := C.go_tree_get_title(handle.GetHandle(), item.htreeitem);
    title := C.GoString(ctitle);
@@ -3738,26 +3761,32 @@ func Tree_get_title(handle HANDLE, item HTREEITEM) string {
    return title;
 }
 
+// Gets the text an item in a tree widget.
 func (handle HTREEITEM) GetTitle() string {
     return Tree_get_title(handle.htree, handle);
 }
 
+// Create a new HTML widget to be packed.
 func Html_new(id uint) HHTML {
     return HHTML{C.go_html_new(C.ulong(id))};
 }
 
+// Create a new HTML widget to be packed.
 func HtmlNew(id uint) HHTML {
     return Html_new(id);
 }
 
+// Causes the embedded HTML widget to take action.
 func Html_action(handle HANDLE, action int) {
    C.go_html_action(handle.GetHandle(), C.int(action));
 }
 
+// Causes the embedded HTML widget to take action.
 func (handle HHTML) Action(action int) {
     Html_action(handle, action);
 }
 
+// Render raw HTML code in the embedded HTML widget.
 func Html_raw(handle HANDLE, code string) int {
    ccode := C.CString(code);
    defer C.free(unsafe.Pointer(ccode));
@@ -3765,10 +3794,12 @@ func Html_raw(handle HANDLE, code string) int {
    return int(C.go_html_raw(handle.GetHandle(), ccode));
 }
 
+// Render raw HTML code in the embedded HTML widget.
 func (handle HHTML) Raw(code string) {
     Html_raw(handle, code);
 }
 
+// Render file or web page in the embedded HTML widget.
 func Html_url(handle HANDLE, url string) int {
    curl := C.CString(url);
    defer C.free(unsafe.Pointer(curl));
@@ -3776,18 +3807,22 @@ func Html_url(handle HANDLE, url string) int {
    return int(C.go_html_url(handle.GetHandle(), curl));
 }
 
+// Render file or web page in the embedded HTML widget.
 func (handle HHTML) URL(url string) int {
     return Html_url(handle, url);
 }
 
+// Create a new Multiline Editbox widget to be packed.
 func Mle_new(id uint) HMLE {
     return HMLE{C.go_mle_new(C.ulong(id))};
 }
 
+// Create a new Multiline Editbox widget to be packed.
 func MLENew(id uint) HMLE {
     return Mle_new(id);
 }
 
+// Adds text to an MLE box and returns the current point.
 func Mle_import(handle HANDLE, buffer string, startpoint int) int {
    cbuffer := C.CString(buffer);
    defer C.free(unsafe.Pointer(cbuffer));
@@ -3795,10 +3830,12 @@ func Mle_import(handle HANDLE, buffer string, startpoint int) int {
    return int(C.go_mle_import(handle.GetHandle(), cbuffer, C.int(startpoint)));
 }
 
+// Adds text to an MLE box and returns the current point.
 func (handle HMLE) Import(buffer string, startpoint int) int {
     return Mle_import(handle, buffer, startpoint);
 }
 
+// Grabs text from an MLE box.
 func Mle_export(handle HANDLE, startpoint int, length int) string {
    cbuf := C.calloc(1, C.size_t(length+1));
    C.go_mle_export(handle.GetHandle(), (*C.char)(cbuf), C.int(startpoint), C.int(length));
@@ -3807,84 +3844,104 @@ func Mle_export(handle HANDLE, startpoint int, length int) string {
    return buf;
 }
 
+// Grabs text from an MLE box.
 func (handle HMLE) Export(startpoint int, length int) string {
     return Mle_export(handle, startpoint, length);
 }
 
+// Obtains information about an MLE box.
 func Mle_get_size(handle HANDLE) (int, int) {
    var bytes, lines C.ulong;
    C.go_mle_get_size(handle.GetHandle(), &bytes, &lines);
    return int(bytes), int(lines);
 }
 
+// Obtains information about an MLE box.
 func (handle HMLE) GetSize() (int, int) {
     return Mle_get_size(handle);
 }
 
+// Deletes text from an MLE box.
 func Mle_delete(handle HANDLE, startpoint int, length int) {
    C.go_mle_delete(handle.GetHandle(), C.int(startpoint), C.int(length));
 }
 
+// Deletes text from an MLE box.
 func (handle HMLE) Delete(startpoint int, length int) {
     Mle_delete(handle, startpoint, length);
 }
 
+// Clears all text from an MLE box.
 func Mle_clear(handle HANDLE) {
    C.go_mle_clear(handle.GetHandle());
 }
 
+// Clears all text from an MLE box.
 func (handle HMLE) Clear() {
     Mle_clear(handle);
 }
 
+// Stops redrawing of an MLE box.
 func Mle_freeze(handle HANDLE) {
    C.go_mle_freeze(handle.GetHandle());
 }
 
+// Stops redrawing of an MLE box.
 func (handle HMLE) Freeze() {
     Mle_freeze(handle);
 }
 
+// Resumes redrawing of an MLE box.
 func Mle_thaw(handle HANDLE) {
    C.go_mle_thaw(handle.GetHandle());
 }
 
+// Resumes redrawing of an MLE box.
 func (handle HMLE) Thaw() {
     Mle_thaw(handle);
 }
 
+// Sets the current cursor position of an MLE box.
 func Mle_set_cursor(handle HANDLE, point int) {
    C.go_mle_set_cursor(handle.GetHandle(), C.int(point));
 }
 
+// Sets the current cursor position of an MLE box.
 func (handle HMLE) SetCursor(point int) {
     Mle_set_cursor(handle, point);
 }
 
+// Sets the visible line of an MLE box.
 func Mle_set_visible(handle HANDLE, line int) {
    C.go_mle_set_visible(handle.GetHandle(), C.int(line));
 }
 
+// Sets the visible line of an MLE box.
 func (handle HMLE) SetVisible(line int) {
     Mle_set_visible(handle, line);
 }
 
+// Sets the editablity of an MLE box.
 func Mle_set_editable(handle HANDLE, state int) {
    C.go_mle_set_editable(handle.GetHandle(), C.int(state));
 }
 
+// Sets the editablity of an MLE box.
 func (handle HMLE) SetEditable(state int) {
     Mle_set_editable(handle, state);
 }
 
+// Sets the word wrap state of an MLE box.
 func Mle_set_word_wrap(handle HANDLE, state int) {
    C.go_mle_set_word_wrap(handle.GetHandle(), C.int(state));
 }
 
+// Sets the word wrap state of an MLE box.
 func (handle HMLE) SetWordWrap(state int) {
     Mle_set_word_wrap(handle, state);
 }
 
+// Finds text in an MLE box.
 func Mle_search(handle HANDLE, text string, point int, flags uint) int {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -3892,18 +3949,22 @@ func Mle_search(handle HANDLE, text string, point int, flags uint) int {
    return int(C.go_mle_search(handle.GetHandle(), ctext, C.int(point), C.ulong(flags)));
 }
 
+// Finds text in an MLE box.
 func (handle HMLE) Search(text string, point int, flags uint) int {
     return Mle_search(handle, text, point, flags);
 }
 
+// Create a container widget to be packed.
 func Container_new(id uint, multi int) HCONTAINER {
     return HCONTAINER{C.go_container_new(C.ulong(id), C.int(multi)), false};
 }
 
+// Create a container widget to be packed.
 func ContainerNew(id uint, multi int) HCONTAINER {
     return Container_new(id, multi);
 }
 
+// Sets up the container columns.
 func Container_setup(handle HANDLE, flags []uint, titles []string, separator int) int {
     count := len(flags);
     if len(titles) < count {
@@ -3924,10 +3985,12 @@ func Container_setup(handle HANDLE, flags []uint, titles []string, separator int
     return int(C.go_container_setup(handle.GetHandle(), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count), C.int(separator)));
 }
 
+// Sets up the container columns.
 func (handle HCONTAINER) Setup(flags []uint, titles []string, separator int) int {
     return Container_setup(handle, flags, titles, separator);
 }
 
+// Sets up the filesystem columns, note: filesystem always has an icon/filename field.
 func Filesystem_setup(handle HANDLE, flags []uint, titles []string) int {
     count := len(flags);
     if len(titles) < count {
@@ -3949,25 +4012,30 @@ func Filesystem_setup(handle HANDLE, flags []uint, titles []string) int {
     return int(C.go_filesystem_setup(handle.GetHandle(), (*C.ulong)(unsafe.Pointer(flagsHeader.Data)), ctitles, C.int(count)));
 }
 
+// Sets up the filesystem columns, note: filesystem always has an icon/filename field.
 func (handle *HCONTAINER) FileSystemSetup(flags []uint, titles []string) int {
     handle.filesystem = true;
     return Filesystem_setup(handle, flags, titles);
 }
 
+// Allocates memory used to populate a container.
 func Container_alloc(handle HANDLE, rowcount int) HCONTINS {
    return HCONTINS{C.go_container_alloc(handle.GetHandle(), C.int(rowcount)), rowcount, handle, false};
 }
 
+// Allocates memory used to populate a container.
 func (handle *HCONTAINER) Alloc(rowcount int) HCONTINS {
     contins := Container_alloc(handle, rowcount);
     contins.filesystem = handle.filesystem;
     return contins;
 }
 
+// Sets an item in specified row and column to the given data.
 func Container_set_item(handle HANDLE, contins HCONTINS, column int, row int, data POINTER) {
    C.go_container_set_item(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), unsafe.Pointer(data));
 }
 
+// Sets an item in specified row and column to the given data.
 func (handle HCONTINS) SetItem(column int, row int, data POINTER) {
     if handle.filesystem == true {
         Filesystem_set_item(handle.hcont, handle, column, row, data);
@@ -3975,10 +4043,12 @@ func (handle HCONTINS) SetItem(column int, row int, data POINTER) {
     Container_set_item(handle.hcont, handle, column, row, data);
 }
 
+// Sets an item in specified row and column to the given unsigned integer.
 func Container_set_item_ulong(handle HANDLE, contins HCONTINS, column int, row int, val uint) {
    C.go_container_set_item_ulong(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.ulong(val));
 }
 
+// Sets an item in specified row and column to the given unsigned integer.
 func (handle HCONTINS) SetItemULong(column int, row int, val uint) {
     if handle.filesystem == true {
         Filesystem_set_item_ulong(handle.hcont, handle, column, row, val);
@@ -3986,10 +4056,12 @@ func (handle HCONTINS) SetItemULong(column int, row int, val uint) {
     Container_set_item_ulong(handle.hcont, handle, column, row, val);
 }
 
+// Sets an item in specified row and column to the given icon.
 func Container_set_item_icon(handle HANDLE, contins HCONTINS, column int, row int, icon HICN) {
    C.go_container_set_item_icon(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), unsafe.Pointer(icon));
 }
 
+// Sets an item in specified row and column to the given icon.
 func (handle HCONTINS) SetItemIcon(column int, row int, icon HICN) {
     if handle.filesystem == true {
         Filesystem_set_item_icon(handle.hcont, handle, column, row, icon);
@@ -3997,10 +4069,12 @@ func (handle HCONTINS) SetItemIcon(column int, row int, icon HICN) {
     Container_set_item_icon(handle.hcont, handle, column, row, icon);
 }
 
+// Sets an item in specified row and column to the given time.
 func Container_set_item_time(handle HANDLE, contins HCONTINS, column int, row int, seconds int, minutes int, hours int) {
    C.go_container_set_item_time(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
 }
 
+// Sets an item in specified row and column to the given time.
 func (handle HCONTINS) SetItemTime(column int, row int, seconds int, minutes int, hours int) {
     if handle.filesystem == true {
         Filesystem_set_item_time(handle.hcont, handle, column, row, seconds, minutes, hours);
@@ -4008,10 +4082,12 @@ func (handle HCONTINS) SetItemTime(column int, row int, seconds int, minutes int
     Container_set_item_time(handle.hcont, handle, column, row, seconds, minutes, hours);
 }
 
+// Sets an item in specified row and column to the given date.
 func Container_set_item_date(handle HANDLE, contins HCONTINS, column int, row int, day int, month int, year int) {
    C.go_container_set_item_date(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
 }
 
+// Sets an item in specified row and column to the given date.
 func (handle HCONTINS) SetItemDate(column int, row int, day int, month int, year int) {
     if handle.filesystem == true {
         Filesystem_set_item_date(handle.hcont, handle, column, row, day, month, year);
@@ -4019,10 +4095,12 @@ func (handle HCONTINS) SetItemDate(column int, row int, day int, month int, year
     Container_set_item_date(handle.hcont, handle, column, row, day, month, year);
 }
 
+// Changes an existing item in specified row and column to the given data.
 func Container_change_item(handle HANDLE, column int, row int, data POINTER) {
    C.go_container_change_item(handle.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(data));
 }
 
+// Changes an existing item in specified row and column to the given data.
 func (handle HCONTAINER) ChangeItem(column int, row int, data POINTER) {
     if handle.filesystem == true {
         Filesystem_change_item(handle, column, row, data);
@@ -4030,10 +4108,12 @@ func (handle HCONTAINER) ChangeItem(column int, row int, data POINTER) {
     Container_change_item(handle, column, row, data);
 }
 
+// Changes an existing item in specified row and column to the given unsigned integer.
 func Container_change_item_ulong(handle HANDLE, column int, row int, val uint) {
    C.go_container_change_item_ulong(handle.GetHandle(), C.int(column), C.int(row), C.ulong(val));
 }
 
+// Changes an existing item in specified row and column to the given unsigned integer.
 func (handle HCONTAINER) ChangeItemULong(column int, row int, val uint) {
     if handle.filesystem == true {
         Filesystem_change_item_ulong(handle, column, row, val);
@@ -4041,10 +4121,12 @@ func (handle HCONTAINER) ChangeItemULong(column int, row int, val uint) {
     Container_change_item_ulong(handle, column, row, val);
 }
 
+// Changes an existing item in specified row and column to the given icon.
 func Container_change_item_icon(handle HANDLE, column int, row int, icon HICN) {
    C.go_container_change_item_icon(handle.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(icon));
 }
 
+// Changes an existing item in specified row and column to the given icon.
 func (handle HCONTAINER) ChangeItemIcon(column int, row int, icon HICN) {
     if handle.filesystem == true {
         Filesystem_change_item_icon(handle, column, row, icon);
@@ -4052,10 +4134,12 @@ func (handle HCONTAINER) ChangeItemIcon(column int, row int, icon HICN) {
     Container_change_item_icon(handle, column, row, icon);
 }
 
+// Changes an existing item in specified row and column to the given time.
 func Container_change_item_time(handle HANDLE, column int, row int, seconds int, minutes int, hours int) {
    C.go_container_change_item_time(handle.GetHandle(), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
 }
 
+// Changes an existing item in specified row and column to the given time.
 func (handle HCONTAINER) ChangeItemTime(column int, row int, seconds int, minutes int, hours int) {
     if handle.filesystem == true {
         Filesystem_change_item_time(handle, column, row, seconds, minutes, hours);
@@ -4063,10 +4147,12 @@ func (handle HCONTAINER) ChangeItemTime(column int, row int, seconds int, minute
     Container_change_item_time(handle, column, row, seconds, minutes, hours);
 }
 
+// Changes an existing item in specified row and column to the given date.
 func Container_change_item_date(handle HANDLE, column int, row int, day int, month int, year int) {
    C.go_container_change_item_date(handle.GetHandle(), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
 }
 
+// Changes an existing item in specified row and column to the given date.
 func (handle HCONTAINER) ChangeItemDate(column int, row int, day int, month int, year int) {
     if handle.filesystem == true {
         Filesystem_change_item_date(handle, column, row, day, month, year);
@@ -4074,75 +4160,92 @@ func (handle HCONTAINER) ChangeItemDate(column int, row int, day int, month int,
     Container_change_item_date(handle, column, row, day, month, year);
 }
 
+// Sets the width of a column in the container.
 func Container_set_column_width(handle HANDLE, column int, width int) {
    C.go_container_set_column_width(handle.GetHandle(), C.int(column), C.int(width));
 }
 
+// Sets the width of a column in the container.
 func (handle HCONTAINER) SetColumnWidth(column int, width int) {
     Container_set_column_width(handle, column, width);
 }
 
+// Sets the title of a row in the container.
 func Container_set_row_title(contins HCONTINS, row int, title string) {
    ctitle := C.CString(title);
    C.dw_container_set_row_title(contins.ptr, C.int(row), ctitle);
    /* TODO: Probably need to have a way to free this or leak */
 }
 
+// Sets the title of a row in the container.
 func (handle HCONTINS) SetRowTitle(row int, title string) {
     Container_set_row_title(handle, row, title);
 }
 
+// Sets the pointer of a row in the container.
 func Container_set_row_data(contins HCONTINS, row int, data POINTER) {
    C.dw_container_set_row_title(contins.ptr, C.int(row), (*C.char)(data));
 }
 
+// Sets the pointer of a row in the container.
 func (handle HCONTINS) SetRowData(row int, data POINTER) {
     Container_set_row_data(handle, row, data);
 }
 
+// Sets the title of a row in the container.
 func Container_change_row_title(handle HANDLE, row int, title string) {
    ctitle := C.CString(title);
    C.go_container_change_row_title(handle.GetHandle(), C.int(row), ctitle);
 }
 
+// Sets the title of a row in the container.
 func (handle HCONTAINER) ChangeRowTitle(row int, title string) {
     Container_change_row_title(handle, row, title);
 }
 
+// Sets the pointer of a row in the container.
 func Container_change_row_data(handle HANDLE, row int, data unsafe.Pointer) {
    C.go_container_change_row_data(handle.GetHandle(), C.int(row), data);
 }
 
+// Sets the pointer of a row in the container.
 func (handle HCONTAINER) ChangeRowData(row int, data POINTER) {
     Container_change_row_data(handle, row, unsafe.Pointer(data));
 }
 
+// Inserts allocated rows into the container widget.
 func Container_insert(handle HANDLE, contins HCONTINS, rowcount int) {
    C.go_container_insert(handle.GetHandle(), contins.ptr, C.int(rowcount));
    contins.ptr = nil;
    contins.rowcount = 0;
 }
 
+// Inserts allocated rows into the container widget.
 func (handle HCONTINS) Insert() {
     Container_insert(handle.hcont, handle, handle.rowcount);
 }
 
+// Removes all rows from a container.
 func Container_clear(handle HANDLE, redraw int) {
    C.go_container_clear(handle.GetHandle(), C.int(redraw));
 }
 
+// Removes all rows from a container.
 func (handle HCONTAINER) Clear(redraw int) {
     Container_clear(handle, redraw);
 }
 
+// Removes the first x rows from a container.
 func Container_delete(handle HANDLE, rowcount int) {
    C.go_container_delete(handle.GetHandle(), C.int(rowcount));
 }
 
+// Removes the first x rows from a container.
 func (handle HCONTAINER) Delete(rowcount int) {
     Container_delete(handle, rowcount);
 }
 
+// Starts a new query of a container.
 func Container_query_start(handle HANDLE, flags uint) string {
    cresult := C.go_container_query_start(handle.GetHandle(), C.ulong(flags));
    result := C.GoString(cresult);
@@ -4150,10 +4253,12 @@ func Container_query_start(handle HANDLE, flags uint) string {
    return result;
 }
 
+// Starts a new query of a container.
 func (handle HCONTAINER) QueryStart(flags uint) string {
     return Container_query_start(handle, flags);
 }
 
+// Continues an existing query of a container.
 func Container_query_next(handle HANDLE, flags uint) string {
    cresult := C.go_container_query_next(handle.GetHandle(), C.ulong(flags));
    result := C.GoString(cresult);
@@ -4161,18 +4266,22 @@ func Container_query_next(handle HANDLE, flags uint) string {
    return result;
 }
 
+// Continues an existing query of a container.
 func (handle HCONTAINER) QueryNext(flags uint) string {
     return Container_query_next(handle, flags);
 }
 
+// Scrolls container up or down.
 func Container_scroll(handle HANDLE, direction int, rows int) {
    C.go_container_scroll(handle.GetHandle(), C.int(direction), C.long(rows));
 }
 
+// Scrolls container up or down.
 func (handle HCONTAINER) Scroll(direction int, rows int) {
     Container_scroll(handle, direction, rows);
 }
 
+// Cursors the item with the title speficied, and scrolls to that item.
 func Container_cursor(handle HANDLE, text string) {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -4180,10 +4289,12 @@ func Container_cursor(handle HANDLE, text string) {
    C.go_container_cursor(handle.GetHandle(), ctext);
 }
 
+// Cursors the item with the title speficied, and scrolls to that item.
 func (handle HCONTAINER) Cursor(text string) {
     Container_cursor(handle, text);
 }
 
+// Deletes the item with the title specified. 
 func Container_delete_row(handle HANDLE, text string) {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -4191,30 +4302,37 @@ func Container_delete_row(handle HANDLE, text string) {
    C.go_container_delete_row(handle.GetHandle(), ctext);
 }
 
+// Deletes the item with the title specified. 
 func (handle HCONTAINER) DeleteRow(text string) {
     Container_delete_row(handle, text);
 }
 
+// Optimizes the column widths so that all data is visible.
 func Container_optimize(handle HANDLE) {
    C.go_container_optimize(handle.GetHandle());
 }
 
+// Optimizes the column widths so that all data is visible.
 func (handle HCONTAINER) Optimize() {
     Container_optimize(handle);
 }
 
+// Sets the alternating row colors for container widget handle.
 func Container_set_stripe(handle HANDLE, oddcolor COLOR, evencolor COLOR) {
    C.go_container_set_stripe(handle.GetHandle(), C.ulong(oddcolor), C.ulong(evencolor));
 }
 
+// Sets the alternating row colors for container widget handle.
 func (handle HCONTAINER) SetStripe(oddcolor COLOR, evencolor COLOR) {
     Container_set_stripe(handle, oddcolor, evencolor);
 }
 
+// Gets column type for a container column.
 func Container_get_column_type(handle HANDLE, column int) uint {
    return uint(C.go_container_get_column_type(handle.GetHandle(), C.int(column)));
 }
 
+// Gets column type for a container column.
 func (handle HCONTAINER) GetColumnType(column int) uint {
     if handle.filesystem == true {
         return Filesystem_get_column_type(handle, column);
@@ -4222,10 +4340,12 @@ func (handle HCONTAINER) GetColumnType(column int) uint {
     return Container_get_column_type(handle, column);
 }
 
+// Gets column type for a filesystem container column.
 func Filesystem_get_column_type(handle HANDLE, column int) uint {
    return uint(C.go_filesystem_get_column_type(handle.GetHandle(), C.int(column)));
 }
 
+// Configures the main filesystem column title for localization.
 func Filesystem_set_column_title(handle HANDLE, title string) {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
@@ -4233,30 +4353,37 @@ func Filesystem_set_column_title(handle HANDLE, title string) {
    C.go_filesystem_set_column_title(handle.GetHandle(), ctitle);
 }
 
+// Configures the main filesystem column title for localization.
 func (handle HCONTAINER) SetColumnTitle(title string) {
     Filesystem_set_column_title(handle, title);
 }
 
+// Sets an item in specified row and column to the given data.
 func Filesystem_set_item(handle HANDLE, contins HCONTINS, column int, row int, data POINTER) {
    C.go_filesystem_set_item(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), unsafe.Pointer(data));
 }
 
+// Sets an item in specified row and column to the given unsigned integer.
 func Filesystem_set_item_ulong(handle HANDLE, contins HCONTINS, column int, row int, val uint) {
    C.go_filesystem_set_item_ulong(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.ulong(val));
 }
 
+// Sets an item in specified row and column to the given icon.
 func Filesystem_set_item_icon(handle HANDLE, contins HCONTINS, column int, row int, icon HICN) {
    C.go_filesystem_set_item_icon(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), unsafe.Pointer(icon));
 }
 
+// Sets an item in specified row and column to the given time.
 func Filesystem_set_item_time(handle HANDLE, contins HCONTINS, column int, row int, seconds int, minutes int, hours int) {
    C.go_filesystem_set_item_time(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
 }
 
+// Sets an item in specified row and column to the given date.
 func Filesystem_set_item_date(handle HANDLE, contins HCONTINS, column int, row int, day int, month int, year int) {
    C.go_filesystem_set_item_date(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
 }
 
+// Sets the filename and icon of the row in a filesystem style container.
 func Filesystem_set_file(handle HANDLE, contins HCONTINS, row int, filename string, icon HICN) {
    cfilename := C.CString(filename);
    defer C.free(unsafe.Pointer(cfilename));
@@ -4264,32 +4391,39 @@ func Filesystem_set_file(handle HANDLE, contins HCONTINS, row int, filename stri
    C.go_filesystem_set_file(handle.GetHandle(), contins.ptr, C.int(row), cfilename, unsafe.Pointer(icon));
 }
 
+// Sets the filename and icon of the row in a filesystem style container.
 func (handle HCONTINS) SetFile(row int, filename string, icon HICN) {
     if handle.filesystem == true {
         Filesystem_set_file(handle.hcont, handle, row, filename, icon);
     }
 }
 
+// Changes an existing item in specified row and column to the given data.
 func Filesystem_change_item(handle HANDLE, column int, row int, data POINTER) {
    C.go_filesystem_change_item(handle.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(data));
 }
 
+// Changes an existing item in specified row and column to the given unsigned integer.
 func Filesystem_change_item_ulong(handle HANDLE, column int, row int, val uint) {
    C.go_filesystem_change_item_ulong(handle.GetHandle(), C.int(column), C.int(row), C.ulong(val));
 }
 
+// Changes an existing item in specified row and column to the given icon.
 func Filesystem_change_item_icon(handle HANDLE, column int, row int, icon HICN) {
    C.go_filesystem_change_item_icon(handle.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(icon));
 }
 
+// Changes an existing item in specified row and column to the given time.
 func Filesystem_change_item_time(handle HANDLE, column int, row int, seconds int, minutes int, hours int) {
    C.go_filesystem_change_item_time(handle.GetHandle(), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours));
 }
 
+// Changes an existing item in specified row and column to the given date.
 func Filesystem_change_item_date(handle HANDLE, column int, row int, day int, month int, year int) {
    C.go_filesystem_change_item_date(handle.GetHandle(), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year));
 }
 
+// Changes the filename and icon of the row in a filesystem style container.
 func Filesystem_change_file(handle HANDLE, row int, filename string, icon HICN) {
    cfilename := C.CString(filename);
    defer C.free(unsafe.Pointer(cfilename));
@@ -4297,28 +4431,34 @@ func Filesystem_change_file(handle HANDLE, row int, filename string, icon HICN) 
    C.go_filesystem_change_file(handle.GetHandle(), C.int(row), cfilename, unsafe.Pointer(icon));
 }
 
+// Changes the filename and icon of the row in a filesystem style container.
 func (handle HCONTAINER) ChangeFile(row int, filename string, icon HICN) {
     if handle.filesystem == true {
         Filesystem_change_file(handle, row, filename, icon);
     }
 }
 
+// Create a new calendar widget to be packed.
 func Calendar_new(id uint) HCALENDAR {
     return HCALENDAR{C.go_calendar_new(C.ulong(id))};
 }
 
+// Create a new calendar widget to be packed.
 func CalendarNew(id uint) HCALENDAR {
     return Calendar_new(id);
 }
 
+// Sets the current date of a calendar.
 func Calendar_set_date(handle HANDLE, year uint, month uint, day uint) {
    C.go_calendar_set_date(handle.GetHandle(), C.uint(year), C.uint(month), C.uint(day));
 }
 
+// Sets the current date of a calendar.
 func (handle HCALENDAR) SetDate(year uint, month uint, day uint) {
     Calendar_set_date(handle, year, month, day);
 }
 
+// Gets the year, month and day set in the calendar widget.
 func Calendar_get_date(handle HANDLE) (uint, uint, uint) {
    var year, month, day C.uint;
    
@@ -4326,18 +4466,22 @@ func Calendar_get_date(handle HANDLE) (uint, uint, uint) {
    return uint(year), uint(month), uint(day);
 }
 
+// Gets the year, month and day set in the calendar widget.
 func (handle HCALENDAR) GetDate() (uint, uint, uint) {
     return Calendar_get_date(handle);
 }
 
+// Create a bitmap widget to be packed.
 func Bitmap_new(id uint) HBITMAP {
     return HBITMAP{C.go_bitmap_new(C.ulong(id))};
 }
 
+// Create a bitmap widget to be packed.
 func BitmapNew(id uint) HBITMAP {
     return Bitmap_new(id);
 }
 
+// Create a new bitmap button widget to be packed.
 func Bitmapbutton_new(text string, id uint) HBUTTON {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -4345,10 +4489,12 @@ func Bitmapbutton_new(text string, id uint) HBUTTON {
    return HBUTTON{C.go_bitmapbutton_new(ctext, C.ulong(id))};
 }
 
+// Create a new bitmap button widget to be packed.
 func BitmapButtonNew(text string, id uint) HBUTTON {
     return Bitmapbutton_new(text, id);
 }
 
+// Create a new bitmap button widget to be packed from a file.
 func Bitmapbutton_new_from_file(text string, id uint, filename string) HBUTTON {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -4358,38 +4504,47 @@ func Bitmapbutton_new_from_file(text string, id uint, filename string) HBUTTON {
    return HBUTTON{C.go_bitmapbutton_new_from_file(ctext, C.ulong(id), cfilename)};
 }
 
+// Create a new bitmap button widget to be packed from a file.
 func BitmapButtonNewFromFile(text string, id uint, filename string) HBUTTON {
     return Bitmapbutton_new_from_file(text, id, filename);
 }
 
+// Creates a splitbar widget with given widgets on either side.
 func Splitbar_new(btype int, topleft HWND, bottomright HWND, id uint) HSPLITBAR {
     return HSPLITBAR{C.go_splitbar_new(C.int(btype), unsafe.Pointer(topleft.hwnd), unsafe.Pointer(bottomright.hwnd), C.ulong(id))};
 }
 
+// Creates a splitbar widget with given widgets on either side.
 func SplitbarNew(btype int, topleft HWND, bottomright HWND, id uint) HSPLITBAR {
     return Splitbar_new(btype, topleft, bottomright, id);
 }
 
+// Sets the position of a splitbar (pecentage).
 func Splitbar_set(handle HANDLE, position float32) {
    C.go_splitbar_set(handle.GetHandle(), C.float(position));
 }
 
+// Sets the position of a splitbar (pecentage).
 func (handle HSPLITBAR) Set(position float32) {
     Splitbar_set(handle, position);
 }
 
+// Gets the position of a splitbar (pecentage).
 func Splitbar_get(handle HANDLE) float32 {
     return float32(C.go_splitbar_get(handle.GetHandle()));
 }
 
+// Gets the position of a splitbar (pecentage).
 func (handle HSPLITBAR) Get() float32 {
     return Splitbar_get(handle);
 }
 
+// Creates a new print object.
 func PrintNew(jobname string) HPRINT {
    return HPRINT{nil, jobname};
 }
 
+// Creates a new print object.
 func Print_new(jobname string, flags uint, pages uint, drawfunc SIGNAL_FUNC, drawdata POINTER) HPRINT {
    backs = append(backs, unsafe.Pointer(drawfunc));
    cjobname := C.CString(jobname);
@@ -4398,6 +4553,8 @@ func Print_new(jobname string, flags uint, pages uint, drawfunc SIGNAL_FUNC, dra
    return HPRINT{C.go_print_new(cjobname, C.ulong(flags), C.uint(pages), unsafe.Pointer(drawfunc), unsafe.Pointer(drawdata), 0), jobname};
 }
 
+
+// Runs the print job, causing the draw page callbacks to fire.
 func Print_run(print HPRINT, flags uint) int {
    if print.hprint != nil {
       return int(C.go_print_run(unsafe.Pointer(print.hprint), C.ulong(flags)));
@@ -4405,6 +4562,7 @@ func Print_run(print HPRINT, flags uint) int {
    return C.DW_ERROR_UNKNOWN;
 }
 
+// Cancels the print job, typically called from a draw page callback.
 func Print_cancel(print HPRINT) {
    if print.hprint != nil {
       C.go_print_cancel(unsafe.Pointer(print.hprint));

@@ -4562,11 +4562,21 @@ func Print_run(print HPRINT, flags uint) int {
    return C.DW_ERROR_UNKNOWN;
 }
 
+// Runs the print job, causing the draw page callbacks to fire.
+func (print HPRINT) Run(flags uint) {
+   Print_run(print, flags);
+}
+
 // Cancels the print job, typically called from a draw page callback.
 func Print_cancel(print HPRINT) {
    if print.hprint != nil {
       C.go_print_cancel(unsafe.Pointer(print.hprint));
    }
+}
+
+// Cancels the print job, typically called from a draw page callback.
+func (print HPRINT) Cancel() {
+   Print_cancel(print);
 }
 
 func init() {
@@ -4575,6 +4585,7 @@ func init() {
 
 var go_flags_no_data C.uint = 1;
 
+// Connect a function or closure to a window close (delete) event.
 func (window HWND) ConnectDelete(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_DELETE);
    defer C.free(unsafe.Pointer(csigname));
@@ -4583,6 +4594,7 @@ func (window HWND) ConnectDelete(sigfunc func(window HWND) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a widget clicked event.
 func (window HBUTTON) ConnectClicked(sigfunc func(window HBUTTON) int) {
    csigname := C.CString(C.DW_SIGNAL_CLICKED);
    defer C.free(unsafe.Pointer(csigname));
@@ -4591,6 +4603,7 @@ func (window HBUTTON) ConnectClicked(sigfunc func(window HBUTTON) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a focus clicked event.
 func (window HWND) ConnectSetFocus(sigfunc func(window HWND) int) {
    csigname := C.CString(C.DW_SIGNAL_SET_FOCUS);
    defer C.free(unsafe.Pointer(csigname));
@@ -4599,6 +4612,7 @@ func (window HWND) ConnectSetFocus(sigfunc func(window HWND) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a key press event.
 func (window HWND) ConnectKeyPress(sigfunc func(window HWND, ch uint8, vk int, state int, utf8 string) int) {
    csigname := C.CString(C.DW_SIGNAL_KEY_PRESS);
    defer C.free(unsafe.Pointer(csigname));
@@ -4607,6 +4621,7 @@ func (window HWND) ConnectKeyPress(sigfunc func(window HWND, ch uint8, vk int, s
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a key press event.
 func (window HRENDER) ConnectKeyPress(sigfunc func(window HRENDER, ch uint8, vk int, state int, utf8 string) int) {
    csigname := C.CString(C.DW_SIGNAL_KEY_PRESS);
    defer C.free(unsafe.Pointer(csigname));
@@ -4615,6 +4630,7 @@ func (window HRENDER) ConnectKeyPress(sigfunc func(window HRENDER, ch uint8, vk 
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a mouse motion event.
 func (window HRENDER) ConnectMotion(sigfunc func(window HRENDER, x int, y int, mask int) int) {
    csigname := C.CString(C.DW_SIGNAL_MOTION_NOTIFY);
    defer C.free(unsafe.Pointer(csigname));
@@ -4623,6 +4639,7 @@ func (window HRENDER) ConnectMotion(sigfunc func(window HRENDER, x int, y int, m
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a mouse button press event.
 func (window HRENDER) ConnectButtonPress(sigfunc func(window HRENDER, x int, y int, mask int) int) {
    csigname := C.CString(C.DW_SIGNAL_BUTTON_PRESS);
    defer C.free(unsafe.Pointer(csigname));
@@ -4631,6 +4648,7 @@ func (window HRENDER) ConnectButtonPress(sigfunc func(window HRENDER, x int, y i
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a mouse button release event.
 func (window HRENDER) ConnectButtonRelease(sigfunc func(window HRENDER, x int, y int, mask int) int) {
    csigname := C.CString(C.DW_SIGNAL_BUTTON_RELEASE);
    defer C.free(unsafe.Pointer(csigname));
@@ -4639,6 +4657,7 @@ func (window HRENDER) ConnectButtonRelease(sigfunc func(window HRENDER, x int, y
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a render expose event.
 func (window HRENDER) ConnectExpose(sigfunc func(window HRENDER, x int, y int, width int, height int) int) {
    csigname := C.CString(C.DW_SIGNAL_EXPOSE);
    defer C.free(unsafe.Pointer(csigname));
@@ -4647,6 +4666,7 @@ func (window HRENDER) ConnectExpose(sigfunc func(window HRENDER, x int, y int, w
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a configure (size change) event.
 func (window HRENDER) ConnectConfigure(sigfunc func(window HRENDER, width int, height int) int) {
    csigname := C.CString(C.DW_SIGNAL_CONFIGURE);
    defer C.free(unsafe.Pointer(csigname));
@@ -4655,6 +4675,7 @@ func (window HRENDER) ConnectConfigure(sigfunc func(window HRENDER, width int, h
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a tree ENTER/RETURN press event.
 func (window HTREE) ConnectItemEnter(sigfunc func(window HTREE, str string) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
    defer C.free(unsafe.Pointer(csigname));
@@ -4663,6 +4684,7 @@ func (window HTREE) ConnectItemEnter(sigfunc func(window HTREE, str string) int)
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a container ENTER/RETURN press event.
 func (window HCONTAINER) ConnectItemEnter(sigfunc func(window HCONTAINER, str string) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
    defer C.free(unsafe.Pointer(csigname));
@@ -4671,6 +4693,7 @@ func (window HCONTAINER) ConnectItemEnter(sigfunc func(window HCONTAINER, str st
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a tree context event.
 func (window HTREE) ConnectItemContext(sigfunc func(window HTREE, text string, x int, y int, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_CONTEXT);
    defer C.free(unsafe.Pointer(csigname));
@@ -4679,6 +4702,7 @@ func (window HTREE) ConnectItemContext(sigfunc func(window HTREE, text string, x
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a container context event.
 func (window HCONTAINER) ConnectItemContext(sigfunc func(window HCONTAINER, text string, x int, y int, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_CONTEXT);
    defer C.free(unsafe.Pointer(csigname));
@@ -4687,6 +4711,7 @@ func (window HCONTAINER) ConnectItemContext(sigfunc func(window HCONTAINER, text
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a tree select event.
 func (window HTREE) ConnectItemSelect(sigfunc func(window HTREE, item HTREEITEM, text string, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT);
    defer C.free(unsafe.Pointer(csigname));
@@ -4695,6 +4720,7 @@ func (window HTREE) ConnectItemSelect(sigfunc func(window HTREE, item HTREEITEM,
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a container select event.
 func (window HCONTAINER) ConnectItemSelect(sigfunc func(window HCONTAINER, item HTREEITEM, text string, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT);
    defer C.free(unsafe.Pointer(csigname));
@@ -4703,6 +4729,7 @@ func (window HCONTAINER) ConnectItemSelect(sigfunc func(window HCONTAINER, item 
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a listbox select event.
 func (window HLISTBOX) ConnectListSelect(sigfunc func(window HLISTBOX, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_LIST_SELECT);
    defer C.free(unsafe.Pointer(csigname));
@@ -4711,6 +4738,7 @@ func (window HLISTBOX) ConnectListSelect(sigfunc func(window HLISTBOX, index int
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a value changed event.
 func (window HSCROLLBAR) ConnectValueChanged(sigfunc func(window HSCROLLBAR, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED);
    defer C.free(unsafe.Pointer(csigname));
@@ -4719,6 +4747,7 @@ func (window HSCROLLBAR) ConnectValueChanged(sigfunc func(window HSCROLLBAR, ind
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a value changed event.
 func (window HSLIDER) ConnectValueChanged(sigfunc func(window HSLIDER, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED);
    defer C.free(unsafe.Pointer(csigname));
@@ -4727,6 +4756,7 @@ func (window HSLIDER) ConnectValueChanged(sigfunc func(window HSLIDER, index int
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a value changed event.
 func (window HSPINBUTTON) ConnectValueChanged(sigfunc func(window HSPINBUTTON, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED);
    defer C.free(unsafe.Pointer(csigname));
@@ -4735,6 +4765,7 @@ func (window HSPINBUTTON) ConnectValueChanged(sigfunc func(window HSPINBUTTON, i
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a column title click event.
 func (window HCONTAINER) ConnectColumnClick(sigfunc func(window HCONTAINER, index int) int) {
    csigname := C.CString(C.DW_SIGNAL_COLUMN_CLICK);
    defer C.free(unsafe.Pointer(csigname));
@@ -4743,6 +4774,7 @@ func (window HCONTAINER) ConnectColumnClick(sigfunc func(window HCONTAINER, inde
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a notebook switch page event.
 func (window HNOTEBOOK) ConnectSwitchPage(sigfunc func(window HNOTEBOOK, pageid HNOTEPAGE) int) {
    csigname := C.CString(C.DW_SIGNAL_SWITCH_PAGE);
    defer C.free(unsafe.Pointer(csigname));
@@ -4751,6 +4783,7 @@ func (window HNOTEBOOK) ConnectSwitchPage(sigfunc func(window HNOTEBOOK, pageid 
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a tree item (node) expand event.
 func (window HTREE) ConnectTreeExpand(sigfunc func(window HTREE, item HTREEITEM) int) {
    csigname := C.CString(C.DW_SIGNAL_TREE_EXPAND);
    defer C.free(unsafe.Pointer(csigname));
@@ -4759,6 +4792,7 @@ func (window HTREE) ConnectTreeExpand(sigfunc func(window HTREE, item HTREEITEM)
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a menu item clicked event.
 func (window HMENUITEM) ConnectClicked(sigfunc func(window HMENUITEM) int) {
    csigname := C.CString(C.DW_SIGNAL_CLICKED);
    defer C.free(unsafe.Pointer(csigname));
@@ -4767,6 +4801,7 @@ func (window HMENUITEM) ConnectClicked(sigfunc func(window HMENUITEM) int) {
    C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(&sigfunc), nil, (window.GetType() << 8) | go_flags_no_data);
 }
 
+// Connect a function or closure to a timer event.
 func (id *HTIMER) Connect(sigfunc func() int, interval int) {
    if id.tid == 0 {
       backs = append(backs, unsafe.Pointer(&sigfunc));
@@ -4774,12 +4809,14 @@ func (id *HTIMER) Connect(sigfunc func() int, interval int) {
    }
 }
 
+// Disconnect an active timer event.
 func (id HTIMER) Disconnect() {
    if id.tid > 0 {
       C.dw_timer_disconnect(C.int(id.tid));
    }
 }
 
+// Connect a function or closure to a print object draw page event.
 func (print HPRINT) Connect(drawfunc func(HPRINT, HPIXMAP, int) int, flags uint, pages int) {
    if print.hprint == nil {
       backs = append(backs, unsafe.Pointer(&drawfunc));
@@ -4788,14 +4825,6 @@ func (print HPRINT) Connect(drawfunc func(HPRINT, HPIXMAP, int) int, flags uint,
 
       print.hprint = C.go_print_new(cjobname, C.ulong(flags), C.uint(pages), unsafe.Pointer(&drawfunc), nil, go_flags_no_data);
    }
-}
-
-func (print HPRINT) Run(flags uint) {
-   Print_run(print, flags);
-}
-
-func (print HPRINT) Cancel() {
-   Print_cancel(print);
 }
 
 //export go_callback_remove

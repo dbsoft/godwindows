@@ -405,10 +405,12 @@ var VK_RCONTROL = int(C.VK_RCONTROL)
 // Cache the function pointers so they don't get garbage collected
 var backs []unsafe.Pointer;
 
+// Convert a resource ID into a pointer
 func RESOURCE(id uintptr) unsafe.Pointer {
     return unsafe.Pointer(id);
 }
 
+// Convert component colors into a COLOR type
 func RGB(red uint8, green uint8, blue uint8) COLOR {
     lred := C.ulong(red);
     lgreen := C.ulong(green);
@@ -416,18 +418,22 @@ func RGB(red uint8, green uint8, blue uint8) COLOR {
     return COLOR((0xF0000000 | (lred) | (lgreen << 8) | (lblue << 16)));
 }
 
+// Convert a POINTER to a HANDLE (use with care)
 func POINTER_TO_HANDLE(ptr POINTER) HANDLE {
     return HANDLE(HGENERIC{unsafe.Pointer(ptr)});
 }
 
+// Convert a HANDLE to a UINTPTR, mostly used for display purposes
 func HANDLE_TO_UINTPTR(handle HANDLE) uintptr {
     return uintptr(handle.GetHandle());
 }
 
+// Convert a HANDLE to a POINTER (use with care)
 func HANDLE_TO_POINTER(handle HANDLE) POINTER {
     return POINTER(handle.GetHandle());
 }
 
+// Convert a HNOTEPAGE to a UINT, mostly used for display purposes
 func HNOTEPAGE_TO_UINT(handle HNOTEPAGE) uint {
     return uint(handle.pageid);
 }
@@ -436,6 +442,8 @@ func HNOTEPAGE_TO_UINT(handle HNOTEPAGE) uint {
  * These will only work if the hanldle was of the 
  * correct type, or were HGENERIC. Use with care.
  */
+
+// Convert HANDLE to HWND (use with care)
 func HANDLE_TO_HWND(handle HANDLE) HWND {
     if(handle.GetType() == 1 || handle.GetType() == 0) {
         return HWND{handle.GetHandle()};
@@ -443,6 +451,7 @@ func HANDLE_TO_HWND(handle HANDLE) HWND {
     return HWND{nil};
 }
 
+// Convert HANDLE to HENTRYFIELD (use with care)
 func HANDLE_TO_HENTRYFIELD(handle HANDLE) HENTRYFIELD {
     if(handle.GetType() == 2 || handle.GetType() == 0) {
         return HENTRYFIELD{handle.GetHandle()};
@@ -450,6 +459,7 @@ func HANDLE_TO_HENTRYFIELD(handle HANDLE) HENTRYFIELD {
     return HENTRYFIELD{nil};
 }
 
+// Convert HANDLE to HTEXT (use with care)
 func HANDLE_TO_HTEXT(handle HANDLE) HTEXT {
     if(handle.GetType() == 3 || handle.GetType() == 0) {
         return HTEXT{handle.GetHandle()};
@@ -457,6 +467,7 @@ func HANDLE_TO_HTEXT(handle HANDLE) HTEXT {
     return HTEXT{nil};
 }
 
+// Convert HANDLE to HTREE (use with care)
 func HANDLE_TO_HTREE(handle HANDLE) HTREE {
     if(handle.GetType() == 4 || handle.GetType() == 0) {
         return HTREE{handle.GetHandle()};
@@ -464,6 +475,7 @@ func HANDLE_TO_HTREE(handle HANDLE) HTREE {
     return HTREE{nil};
 }
 
+// Convert HANDLE to HCONTAINER (use with care)
 func HANDLE_TO_HCONTAINER(handle HANDLE) HCONTAINER {
     if(handle.GetType() == 5 || handle.GetType() == 0) {
         filesystem := false;
@@ -475,6 +487,7 @@ func HANDLE_TO_HCONTAINER(handle HANDLE) HCONTAINER {
     return HCONTAINER{nil, false};
 }
 
+// Convert HANDLE to HMLE (use with care)
 func HANDLE_TO_HMLE(handle HANDLE) HMLE {
     if(handle.GetType() == 6 || handle.GetType() == 0) {
         return HMLE{handle.GetHandle()};
@@ -482,6 +495,7 @@ func HANDLE_TO_HMLE(handle HANDLE) HMLE {
     return HMLE{nil};
 }
 
+// Convert HANDLE to HBUTTON (use with care)
 func HANDLE_TO_HBUTTON(handle HANDLE) HBUTTON {
     if(handle.GetType() == 7 || handle.GetType() == 0) {
         return HBUTTON{handle.GetHandle()};
@@ -489,6 +503,7 @@ func HANDLE_TO_HBUTTON(handle HANDLE) HBUTTON {
     return HBUTTON{nil};
 }
 
+// Convert HANDLE to HSPINBUTTON (use with care)
 func HANDLE_TO_HSPINBUTTON(handle HANDLE) HSPINBUTTON {
     if(handle.GetType() == 8 || handle.GetType() == 0) {
         return HSPINBUTTON{handle.GetHandle()};
@@ -496,6 +511,7 @@ func HANDLE_TO_HSPINBUTTON(handle HANDLE) HSPINBUTTON {
     return HSPINBUTTON{nil};
 }
 
+// Convert HANDLE to HNOTEBOOK (use with care)
 func HANDLE_TO_HNOTEBOOK(handle HANDLE) HNOTEBOOK {
     if(handle.GetType() == 9 || handle.GetType() == 0) {
         return HNOTEBOOK{handle.GetHandle()};
@@ -503,6 +519,7 @@ func HANDLE_TO_HNOTEBOOK(handle HANDLE) HNOTEBOOK {
     return HNOTEBOOK{nil};
 }
 
+// Convert HANDLE to HBOX (use with care)
 func HANDLE_TO_HBOX(handle HANDLE) HBOX {
     if(handle.GetType() == 10 || handle.GetType() == 0) {
         return HBOX{handle.GetHandle()};
@@ -510,6 +527,7 @@ func HANDLE_TO_HBOX(handle HANDLE) HBOX {
     return HBOX{nil};
 }
 
+// Convert HANDLE to HSCROLLBOX (use with care)
 func HANDLE_TO_HSCROLLBOX(handle HANDLE) HSCROLLBOX {
     if(handle.GetType() == 11 || handle.GetType() == 0) {
         return HSCROLLBOX{handle.GetHandle()};
@@ -517,6 +535,7 @@ func HANDLE_TO_HSCROLLBOX(handle HANDLE) HSCROLLBOX {
     return HSCROLLBOX{nil};
 }
 
+// Convert HANDLE to HMENUITEM (use with care)
 func HANDLE_TO_HMENUITEM(handle HANDLE) HMENUITEM {
     if(handle.GetType() == 12 || handle.GetType() == 0) {
         return HMENUITEM{handle.GetHandle()};
@@ -524,6 +543,7 @@ func HANDLE_TO_HMENUITEM(handle HANDLE) HMENUITEM {
     return HMENUITEM{nil};
 }
 
+// Convert HANDLE to HLISTBOX (use with care)
 func HANDLE_TO_HLISTBOX(handle HANDLE) HLISTBOX {
     if(handle.GetType() == 13 || handle.GetType() == 0) {
         return HLISTBOX{handle.GetHandle()};
@@ -531,6 +551,7 @@ func HANDLE_TO_HLISTBOX(handle HANDLE) HLISTBOX {
     return HLISTBOX{nil};
 }
 
+// Convert HANDLE to HPERCENT (use with care)
 func HANDLE_TO_HPERCENT(handle HANDLE) HPERCENT {
     if(handle.GetType() == 14 || handle.GetType() == 0) {
         return HPERCENT{handle.GetHandle()};
@@ -538,6 +559,7 @@ func HANDLE_TO_HPERCENT(handle HANDLE) HPERCENT {
     return HPERCENT{nil};
 }
 
+// Convert HANDLE to HSLIDER (use with care)
 func HANDLE_TO_HSLIDER(handle HANDLE) HSLIDER {
     if(handle.GetType() == 15 || handle.GetType() == 0) {
         return HSLIDER{handle.GetHandle()};
@@ -545,6 +567,7 @@ func HANDLE_TO_HSLIDER(handle HANDLE) HSLIDER {
     return HSLIDER{nil};
 }
 
+// Convert HANDLE to HSCROLLBAR (use with care)
 func HANDLE_TO_HSCROLLBAR(handle HANDLE) HSCROLLBAR {
     if(handle.GetType() == 16 || handle.GetType() == 0) {
         return HSCROLLBAR{handle.GetHandle()};
@@ -552,6 +575,7 @@ func HANDLE_TO_HSCROLLBAR(handle HANDLE) HSCROLLBAR {
     return HSCROLLBAR{nil};
 }
 
+// Convert HANDLE to HRENDER (use with care)
 func HANDLE_TO_HRENDER(handle HANDLE) HRENDER {
     if(handle.GetType() == 17 || handle.GetType() == 0) {
         return HRENDER{handle.GetHandle()};
@@ -559,6 +583,7 @@ func HANDLE_TO_HRENDER(handle HANDLE) HRENDER {
     return HRENDER{nil};
 }
 
+// Convert HANDLE to HHTML (use with care)
 func HANDLE_TO_HHTML(handle HANDLE) HHTML {
     if(handle.GetType() == 18 || handle.GetType() == 0) {
         return HHTML{handle.GetHandle()};
@@ -566,6 +591,7 @@ func HANDLE_TO_HHTML(handle HANDLE) HHTML {
     return HHTML{nil};
 }
 
+// Convert HANDLE to HCALENDAR (use with care)
 func HANDLE_TO_HCALENDAR(handle HANDLE) HCALENDAR {
     if(handle.GetType() == 19 || handle.GetType() == 0) {
         return HCALENDAR{handle.GetHandle()};
@@ -573,6 +599,7 @@ func HANDLE_TO_HCALENDAR(handle HANDLE) HCALENDAR {
     return HCALENDAR{nil};
 }
 
+// Convert HANDLE to HBITMAP (use with care)
 func HANDLE_TO_HBITMAP(handle HANDLE) HBITMAP {
     if(handle.GetType() == 20 || handle.GetType() == 0) {
         return HBITMAP{handle.GetHandle()};
@@ -580,6 +607,7 @@ func HANDLE_TO_HBITMAP(handle HANDLE) HBITMAP {
     return HBITMAP{nil};
 }
 
+// Convert HANDLE to HSPLITBAR (use with care)
 func HANDLE_TO_HSPLITBAR(handle HANDLE) HSPLITBAR {
     if(handle.GetType() == 21 || handle.GetType() == 0) {
         return HSPLITBAR{handle.GetHandle()};

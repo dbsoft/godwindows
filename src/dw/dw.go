@@ -1070,22 +1070,27 @@ func (window HWND) Redraw() {
     Window_redraw(window);
 }
 
+// Captures the mouse input to this window even if it is outside the bounds.
 func Window_capture(handle HANDLE) {
     C.go_window_capture(handle.GetHandle());
 }
 
+// Captures the mouse input to this window even if it is outside the bounds.
 func (window HWND) Capture() {
     Window_capture(window);
 }
 
+// Releases previous mouse capture.
 func Window_release() {
     C.dw_window_release();
 }
 
+// Releases previous mouse capture.
 func (window HWND) Release() {
     Window_release();
 }
 
+// Sets the bitmap used for a given widget.
 func Window_set_bitmap(window HANDLE, id uint, filename string) {
     cfilename := C.CString(filename);
     defer C.free(unsafe.Pointer(cfilename));
@@ -1093,42 +1098,57 @@ func Window_set_bitmap(window HANDLE, id uint, filename string) {
     C.go_window_set_bitmap(window.GetHandle(), C.ulong(id), cfilename);
 }
 
+// Sets the bitmap used for a given widget.
 func (window HBUTTON) SetBitmap(id uint, filename string) {
     Window_set_bitmap(window, id, filename);
 }
 
+// Sets the bitmap used for a given widget.
 func (window HBITMAP) SetBitmap(id uint, filename string) {
     Window_set_bitmap(window, id, filename);
 }
 
+// Sets the border size of a specified window handle.
+// This function may only work on OS/2.
 func Window_set_border(handle HANDLE, border int) {
     C.go_window_set_border(handle.GetHandle(), C.int(border));
 }
 
+// Sets the border size of a specified window handle.
+// This function may only work on OS/2.
 func (window HWND) SetBorder(border int) {
     Window_set_border(window, border);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func Window_set_focus(handle HANDLE) {
     C.go_window_set_focus(handle.GetHandle());
 }
 
+// Sets the gravity of a given window. 
+// Gravity controls which corner of the screen and window the position is relative to.
 func Window_set_gravity(handle HANDLE, horz int, vert int) {
     C.go_window_set_gravity(handle.GetHandle(), C.int(horz), C.int(vert));
 }
 
+// Sets the gravity of a given window. 
+// Gravity controls which corner of the screen and window the position is relative to.
 func (window HWND) SetGravity(horz int, vert int) {
     Window_set_gravity(window, horz, vert);
 }
 
+// Sets the icon used for a given window.
 func Window_set_icon(handle HANDLE, icon HICN) {
     C.go_window_set_icon(handle.GetHandle(), unsafe.Pointer(icon));
 }
 
+// Sets the icon used for a given window.
 func (window HWND) SetIcon(icon HICN) {
     Window_set_icon(window, icon);
 }
 
+// Changes the appearance of the mouse pointer.
 func Window_set_pointer(handle HANDLE, cursortype int) {
     C.go_window_set_pointer(handle.GetHandle(), C.int(cursortype));
 }
@@ -1136,978 +1156,1240 @@ func Window_set_pointer(handle HANDLE, cursortype int) {
 /* Start Generic Section ---
  * These need to be implemented by basically every class/type 
  */
+
+
+// Destroys a window and all of it's children.
 func (window HWND) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HWND) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HWND) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HWND) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HWND) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HWND) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HWND) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HWND) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HWND) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HWND) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HWND) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HWND) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HWND) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HWND) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Destroys a widget and all of it's children.
 func (window HENTRYFIELD) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HENTRYFIELD) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HENTRYFIELD) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HENTRYFIELD) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HENTRYFIELD) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HENTRYFIELD) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HENTRYFIELD) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HENTRYFIELD) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HENTRYFIELD) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HENTRYFIELD) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HENTRYFIELD) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HENTRYFIELD) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HENTRYFIELD) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HENTRYFIELD) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HENTRYFIELD) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HTEXT) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HTEXT) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HTEXT) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HTEXT) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HTEXT) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HTEXT) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HTEXT) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HTEXT) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HTEXT) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HTEXT) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HTEXT) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HTEXT) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HTEXT) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HTEXT) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HTREE) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HTREE) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HTREE) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HTREE) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HTREE) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HTREE) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HTREE) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HTREE) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HTREE) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HTREE) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HTREE) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HTREE) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HTREE) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HTREE) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HTREE) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HCONTAINER) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HCONTAINER) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HCONTAINER) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HCONTAINER) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HCONTAINER) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HCONTAINER) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HCONTAINER) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HCONTAINER) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HCONTAINER) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HCONTAINER) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HCONTAINER) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HCONTAINER) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HCONTAINER) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HCONTAINER) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HCONTAINER) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HMLE) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HMLE) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HMLE) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HMLE) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HMLE) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HMLE) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HMLE) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HMLE) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HMLE) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HMLE) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HMLE) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HMLE) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HMLE) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HMLE) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HMLE) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HBUTTON) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HBUTTON) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HBUTTON) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HBUTTON) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HBUTTON) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HBUTTON) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HBUTTON) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HBUTTON) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HBUTTON) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HBUTTON) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HBUTTON) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HBUTTON) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HBUTTON) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HBUTTON) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HBUTTON) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HSPINBUTTON) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HSPINBUTTON) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HSPINBUTTON) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HSPINBUTTON) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HSPINBUTTON) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HSPINBUTTON) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HSPINBUTTON) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HSPINBUTTON) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HSPINBUTTON) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HSPINBUTTON) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HSPINBUTTON) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HSPINBUTTON) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HSPINBUTTON) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HSPINBUTTON) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HSPINBUTTON) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HNOTEBOOK) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HNOTEBOOK) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HNOTEBOOK) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HNOTEBOOK) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HNOTEBOOK) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HNOTEBOOK) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HNOTEBOOK) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HNOTEBOOK) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HNOTEBOOK) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HNOTEBOOK) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HNOTEBOOK) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HNOTEBOOK) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HNOTEBOOK) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HNOTEBOOK) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HNOTEBOOK) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HLISTBOX) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HLISTBOX) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HLISTBOX) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HLISTBOX) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HLISTBOX) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HLISTBOX) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HLISTBOX) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HLISTBOX) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HLISTBOX) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HLISTBOX) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HLISTBOX) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HLISTBOX) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HLISTBOX) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HPERCENT) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HPERCENT) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HPERCENT) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HPERCENT) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HPERCENT) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HPERCENT) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HPERCENT) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HPERCENT) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HPERCENT) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HPERCENT) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HPERCENT) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HPERCENT) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HPERCENT) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HPERCENT) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HPERCENT) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HSLIDER) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HSLIDER) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HSLIDER) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HSLIDER) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HSLIDER) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HSLIDER) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HSLIDER) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HSLIDER) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HSLIDER) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HSLIDER) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HSLIDER) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HSLIDER) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HSLIDER) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HSLIDER) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HSLIDER) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HSCROLLBAR) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HSCROLLBAR) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HSCROLLBAR) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HSCROLLBAR) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HSCROLLBAR) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HSCROLLBAR) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Gets the text used for a given widget.
 func (window HSCROLLBAR) GetText() string {
     return Window_get_text(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HSCROLLBAR) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HSCROLLBAR) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HSCROLLBAR) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget.
 func (window HSCROLLBAR) SetText(text string) {
     Window_set_text(window, text);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HSCROLLBAR) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HSCROLLBAR) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HSCROLLBAR) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HSCROLLBAR) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HCALENDAR) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HCALENDAR) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HCALENDAR) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HCALENDAR) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HCALENDAR) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HCALENDAR) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HCALENDAR) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HCALENDAR) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HCALENDAR) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HCALENDAR) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HCALENDAR) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HCALENDAR) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HCALENDAR) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HBITMAP) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HBITMAP) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HBITMAP) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HBITMAP) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HBITMAP) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HBITMAP) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HBITMAP) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HBITMAP) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HBITMAP) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Sets the text used for a given widget's floating bubble help.
 func (window HBITMAP) SetTooltip(bubbletext string) {
     Window_set_tooltip(window, bubbletext);
 }
 
+// Changes the appearance of the mouse pointer.
 func (window HBITMAP) SetPointer(cursortype int) {
     Window_set_pointer(window, cursortype);
 }
 
+// Sets the style of a given widget.
 func (window HBITMAP) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HBITMAP) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HHTML) Destroy() int {
     return Window_destroy(window);
 }
 
+// Disables given widget.
 func (window HHTML) Disable() {
     Window_disable(window);
 }
 
+// Enables given widget.
 func (window HHTML) Enable() {
     Window_enable(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HHTML) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HHTML) GetFont() string {
     return Window_get_font(window);
 }
 
+// Gets the size the system thinks the widget should be.
 func (window HHTML) GetPreferredSize() (int, int) {
     return Window_get_preferred_size(window);
 }
 
+// Sets the current focus widget for a window/dialog.
+// This is for use after showing the window/dialog.
 func (window HHTML) SetFocus() {
     Window_set_focus(window);
 }
 
+// Sets the style of a given widget.
 func (window HHTML) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
 
+// Remove widget from the box it is packed into.
 func (window HHTML) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HSPLITBAR) Destroy() int {
     return Window_destroy(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HSPLITBAR) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Remove widget from the box it is packed into.
 func (window HSPLITBAR) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HBOX) Destroy() int {
     return Window_destroy(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HBOX) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Sets the colors used by a specified widget handle.
 func (window HBOX) SetColor(fore COLOR, back COLOR) int {
     return Window_set_color(window, fore, back);
 }
 
+// Remove widget from the box it is packed into.
 func (window HBOX) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HSCROLLBOX) Destroy() int {
     return Window_destroy(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HSCROLLBOX) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Remove widget from the box it is packed into.
 func (window HSCROLLBOX) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HRENDER) Destroy() int {
     return Window_destroy(window);
 }
 
+// Gets a named user data item from a widget handle.
 func (window HRENDER) GetData(dataname string) POINTER {
     return Window_get_data(window, dataname);
 }
 
+// Returns the current font for the specified widget
 func (window HRENDER) GetFont() string {
     return Window_get_font(window);
 }
 
+// Get the width and height of a text string.
 func (window HRENDER) GetTextExtents(text string) (int, int) {
     return Font_text_extents_get(window, NOHPIXMAP, text);
 }
 
+// Sets the font used by a specified widget handle.
 func (window HRENDER) SetFont(fontname string) int {
     return Window_set_font(window, fontname);
 }
 
+// Remove widget from the box it is packed into.
 func (window HRENDER) Unpack() int {
     return Box_unpack(window);
 }
 
+// Destroys a widget and all of it's children.
 func (window HMENUITEM) Destroy() int {
     return Window_destroy(window);
 }
 
+// Sets the style of a given widget.
 func (window HMENUITEM) SetStyle(style uint, mask uint) {
     Window_set_style(window, style, mask);
 }
@@ -2197,6 +2479,7 @@ func (window HSCROLLBOX) PackStart(item HANDLE, width int, height int, hsize int
     Box_pack_start(window, item, width, height, hsize, vsize, pad);
 }
 
+// Remove widget from the box it is packed into.
 func Box_unpack(handle HANDLE) int {
    return int(C.go_box_unpack(handle.GetHandle()));
 }
@@ -2891,6 +3174,7 @@ func FontSetFefault(fontname string) {
     Font_set_default(fontname);
 }
 
+// Get the width and height of a text string.
 func Font_text_extents_get(handle HANDLE, pixmap HPIXMAP, text string) (int, int) {
    var width, height C.int;
    
@@ -2901,6 +3185,7 @@ func Font_text_extents_get(handle HANDLE, pixmap HPIXMAP, text string) (int, int
    return int(width), int(height);
 }
 
+// Get the width and height of a text string.
 func (pixmap HPIXMAP) GetTextExtents(text string) (int, int) {
     return Font_text_extents_get(NOHWND, pixmap, text);
 }

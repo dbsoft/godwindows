@@ -2395,86 +2395,107 @@ func (window HMENUITEM) SetStyle(style uint, mask uint) {
 }
 /* End Generic Section */
 
+// Runs a message loop for Dynamic Windows.
 func Main() {
     C.dw_main();
 }
 
+// Processes a single message iteration and returns.
 func Main_iteration() {
     C.dw_main_iteration();
 }
 
+// Processes a single message iteration and returns.
 func MainIteration() {
     Main_iteration();
 }
 
+// Causes running dw.Main() to return.
 func Main_quit() {
     C.dw_main_quit();
 }
 
+// Causes running dw.Main() to return.
 func MainQuit() {
     Main_quit();
 }
 
+// Runs a message loop for Dynamic Windows, for a period of milliseconds.
 func Main_sleep(milliseconds int) {
     C.dw_main_sleep(C.int(milliseconds));
 }
 
+// Runs a message loop for Dynamic Windows, for a period of milliseconds.
 func MainSleep(milliseconds int) {
     Main_sleep(milliseconds);
 }
 
+// Create a new Box to be packed.
 func Box_new(btype int, pad int) HBOX {
     return HBOX{C.go_box_new(C.int(btype), C.int(pad))};
 }
 
+// Create a new Box to be packed.
 func BoxNew(btype int, pad int) HBOX {
     return Box_new(btype, pad);
 }
 
+// Pack widgets into a box at an arbitrary location.
 func Box_pack_at_index(box HANDLE, item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
     C.go_box_pack_at_index(box.GetHandle(), item.GetHandle(), C.int(index), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
 
+// Pack widgets into a box at an arbitrary location.
 func (window HWND) PackAtIndex(item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_at_index(window, item, index, width, height, hsize, vsize, pad);
 }
 
+// Pack widgets into a box at an arbitrary location.
 func (window HBOX) PackAtIndex(item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_at_index(window, item, index, width, height, hsize, vsize, pad);
 }
 
+// Pack widgets into a box at an arbitrary location.
 func (window HSCROLLBOX) PackAtIndex(item HANDLE, index int, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_at_index(window, item, index, width, height, hsize, vsize, pad);
 }
 
+// Pack widgets into a box from the end (or bottom).
 func Box_pack_end(box HANDLE, item HANDLE, width int, height int, hsize int, vsize int, pad int) {
    C.go_box_pack_end(box.GetHandle(), item.GetHandle(), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
 
+// Pack widgets into a box from the end (or bottom).
 func (window HWND) PackEnd(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_end(window, item, width, height, hsize, vsize, pad);
 }
 
+// Pack widgets into a box from the end (or bottom).
 func (window HBOX) PackEnd(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_end(window, item, width, height, hsize, vsize, pad);
 }
 
+// Pack widgets into a box from the end (or bottom).
 func (window HSCROLLBOX) PackEnd(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_end(window, item, width, height, hsize, vsize, pad);
 }
 
+// Pack widgets into a box from the start (or top).
 func Box_pack_start(box HANDLE, item HANDLE, width int, height int, hsize int, vsize int, pad int) {
    C.go_box_pack_start(box.GetHandle(), item.GetHandle(), C.int(width), C.int(height), C.int(hsize), C.int(vsize), C.int(pad));
 }
 
+// Pack widgets into a box from the start (or top).
 func (window HWND) PackStart(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_start(window, item, width, height, hsize, vsize, pad);
 }
 
+// Pack widgets into a box from the start (or top).
 func (window HBOX) PackStart(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_start(window, item, width, height, hsize, vsize, pad);
 }
 
+// Pack widgets into a box from the start (or top).
 func (window HSCROLLBOX) PackStart(item HANDLE, width int, height int, hsize int, vsize int, pad int) {
     Box_pack_start(window, item, width, height, hsize, vsize, pad);
 }
@@ -2484,22 +2505,27 @@ func Box_unpack(handle HANDLE) int {
    return int(C.go_box_unpack(handle.GetHandle()));
 }
 
+// Remove widgets from a box at an arbitrary location.
 func Box_unpack_at_index(handle HANDLE, index int) HANDLE {
     return HANDLE(HWND{C.go_box_unpack_at_index(handle.GetHandle(), C.int(index))});
 }
 
+// Remove widgets from a box at an arbitrary location.
 func (window HWND) UnpackAtIndex(index int) HANDLE {
     return Box_unpack_at_index(window, index);
 }
 
+// Remove widgets from a box at an arbitrary location.
 func (window HBOX) UnpackAtIndex(index int) HANDLE {
     return Box_unpack_at_index(window, index);
 }
 
+// Remove widgets from a box at an arbitrary location.
 func (window HSCROLLBOX) UnpackAtIndex(index int) HANDLE {
     return Box_unpack_at_index(window, index);
 }
 
+// Create a new static text widget to be packed.
 func Text_new(text string, id uint) HTEXT {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -2507,10 +2533,12 @@ func Text_new(text string, id uint) HTEXT {
    return HTEXT{C.go_text_new(ctext, C.ulong(id))};
 }
 
+// Create a new static text widget to be packed.
 func TextNew(text string, id uint) HTEXT {
     return Text_new(text, id);
 }
 
+// Create a new status text widget to be packed.
 func Status_text_new(text string, id uint) HTEXT {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -2518,10 +2546,12 @@ func Status_text_new(text string, id uint) HTEXT {
    return HTEXT{C.go_status_text_new(ctext, C.ulong(id))};
 }
 
+// Create a new status text widget to be packed.
 func StatusTextNew(text string, id uint) HTEXT {
     return Status_text_new(text, id);
 }
 
+// Create a new entryfield widget to be packed.
 func Entryfield_new(text string, id uint) HENTRYFIELD {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -2529,10 +2559,12 @@ func Entryfield_new(text string, id uint) HENTRYFIELD {
    return HENTRYFIELD{C.go_entryfield_new(ctext, C.ulong(id))};
 }
 
+// Create a new entryfield widget to be packed.
 func EntryfieldNew(text string, id uint) HENTRYFIELD {
    return Entryfield_new(text, id);
 }
 
+// Create a new entryfield password widget to be packed.
 func Entryfield_password_new(text string, id uint) HENTRYFIELD {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -2540,18 +2572,22 @@ func Entryfield_password_new(text string, id uint) HENTRYFIELD {
    return HENTRYFIELD{C.go_entryfield_password_new(ctext, C.ulong(id))};
 }
 
+// Create a new entryfield password widget to be packed.
 func EntryfieldPasswordNew(text string, id uint) HENTRYFIELD {
    return Entryfield_password_new(text, id);
 }
 
+// Sets the entryfield character limit.
 func Entryfield_set_limit(handle HANDLE, limit int) {
    C.go_entryfield_set_limit(handle.GetHandle(), C.int(limit));
 }
 
+// Sets the entryfield character limit.
 func (handle HENTRYFIELD) SetLimit(limit int) {
    Entryfield_set_limit(handle, limit);
 }
 
+// Create a new button widget to be packed.
 func Button_new(text string, id uint) HBUTTON {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -2559,10 +2595,12 @@ func Button_new(text string, id uint) HBUTTON {
    return HBUTTON{C.go_button_new(ctext, C.ulong(id))};
 }
 
+// Create a new button widget to be packed.
 func ButtonNew(text string, id uint) HBUTTON {
     return Button_new(text, id);
 }
 
+// Gets the contents of the default clipboard as text.
 func Clipboard_get_text() string {
    ctext := C.dw_clipboard_get_text();
    text := C.GoString(ctext);
@@ -2570,10 +2608,12 @@ func Clipboard_get_text() string {
    return text;
 }
 
+// Gets the contents of the default clipboard as text.
 func ClipboardGetText() string {
     return Clipboard_get_text();
 }
 
+// Sets the contents of the default clipboard to the supplied text.
 func Clipboard_set_text(text string) {
    ctext := C.CString(text);
    defer C.free(unsafe.Pointer(ctext));
@@ -2581,10 +2621,12 @@ func Clipboard_set_text(text string) {
    C.dw_clipboard_set_text(ctext, C.int(C.strlen(ctext)));
 }
 
+// Sets the contents of the default clipboard to the supplied text.
 func ClipboardSetText(text string) {
     Clipboard_set_text(text);
 }
 
+// Opens a file dialog and queries user selection.
 func File_browse(title string, defpath string, ext string, flags int) string {
    ctitle := C.CString(title);
    defer C.free(unsafe.Pointer(ctitle));
@@ -2598,33 +2640,40 @@ func File_browse(title string, defpath string, ext string, flags int) string {
    return C.GoString(result);
 }
 
+// Opens a file dialog and queries user selection.
 func FileBrowse(title string, defpath string, ext string, flags int) string {
     return File_browse(title, defpath, ext, flags);
 }
 
+// Allows the user to choose a color using the system's color chooser dialog.
 func Color_choose(value COLOR) COLOR {
    return COLOR(C.dw_color_choose(C.ulong(value)));
 }
 
+// Allows the user to choose a color using the system's color chooser dialog.
 func ColorChoose(value COLOR) COLOR {
     return Color_choose(value);
 }
 
+// Add a callback to a timer event.
 func Timer_connect(interval int, sigfunc SIGNAL_FUNC, data POINTER) HTIMER {
    backs = append(backs, unsafe.Pointer(sigfunc));
    return HTIMER{C.go_timer_connect(C.int(interval), unsafe.Pointer(sigfunc), unsafe.Pointer(data), 0)};
 }
 
+// Create a new timer.
 func TimerNew() HTIMER {
     return HTIMER{0};
 }
 
+//Removes timer callback.
 func Timer_disconnect(id HTIMER) {
    if id.tid > 0 {
       C.dw_timer_disconnect(C.int(id.tid));
    }
 }
 
+// Add a callback to a widget event.
 func Signal_connect(window HANDLE, signame string, sigfunc SIGNAL_FUNC, data POINTER) {
    csigname := C.CString(signame);
    defer C.free(unsafe.Pointer(csigname));
@@ -2633,26 +2682,32 @@ func Signal_connect(window HANDLE, signame string, sigfunc SIGNAL_FUNC, data POI
    C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(sigfunc), unsafe.Pointer(data), window.GetType() << 8);
 }
 
+// Emits a beep.
 func Beep(freq int, dur int) {
     C.dw_beep(C.int(freq), C.int(dur));
 }
 
+// Create a menu object to be popped up.
 func Menu_new(id uint) HMENUI {
     return HMENUI{C.go_menu_new(C.ulong(id))};
 }
 
+// Create a menu object to be popped up.
 func MenuNew(id uint) HMENUI {
     return Menu_new(id);
 }
 
+// Create a menubar on a window.
 func Menubar_new(location HWND) HMENUI {
     return HMENUI{C.go_menubar_new(unsafe.Pointer(location.hwnd))};
 }
 
+// Create a menubar on a window.
 func (window HWND) MenubarNew() HMENUI {
     return Menubar_new(window);
 }
 
+// Adds a menuitem or submenu to an existing menu.
 func Menu_append_item(menu HMENUI, title string, id uint, flags uint, end int, check int, submenu HMENUI) HMENUITEM {
     ctitle := C.CString(title);
     defer C.free(unsafe.Pointer(ctitle));
@@ -2660,86 +2715,107 @@ func Menu_append_item(menu HMENUI, title string, id uint, flags uint, end int, c
     return HMENUITEM{C.go_menu_append_item(menu.hmenui, ctitle, C.ulong(id), C.ulong(flags), C.int(end), C.int(check), submenu.hmenui)};
 }
 
+// Adds a menuitem or submenu to an existing menu.
 func (menui HMENUI) AppendItem(title string, id uint, flags uint, end int, check int, submenu HMENUI) HMENUITEM {
     return Menu_append_item(menui, title, id, flags, end, check, submenu);
 }
 
+// Deletes the menu item specified.
 func Menu_delete_item(menu HMENUI, id uint) {
     C.go_menu_delete_item(menu.hmenui, C.ulong(id));
 }
 
+// Deletes the menu item specified.
 func (menui HMENUI) DeleteItem(id uint) {
     Menu_delete_item(menui, id);
 }
 
+// Destroys a menu created with dw.Menubar_new or dw.Menu_new.
 func Menu_destroy(menu HMENUI) {
     C.go_menu_destroy(menu.hmenui);
 }
 
+// Destroys a menu created with dw.MenubarNew or dw.MenuNew.
 func (menui HMENUI) Destroy() {
     Menu_destroy(menui);
 }
 
+// Sets the state of a menu item.
 func Menu_item_set_state(menu HMENUI, id uint, flags uint) {
     C.go_menu_item_set_state(menu.hmenui, C.ulong(id), C.ulong(flags));
 }
 
+// Sets the state of a menu item.
 func (menui HMENUI) SetState(id uint, flags uint) {
     Menu_item_set_state(menui, id, flags);
 }
 
+// Pops up a context menu at given x and y coordinates.
 func Menu_popup(menu HMENUI, parent HANDLE, x int, y int) {
     C.go_menu_popup(menu.hmenui, parent.GetHandle(), C.int(x), C.int(y));
 }
 
+// Pops up a context menu at given x and y coordinates.
 func (menui HMENUI) Popup(parent HANDLE, x int, y int) {
     Menu_popup(menui, parent, x, y);
 }
 
+// Create a notebook widget to be packed.
 func Notebook_new(id uint, top int) HNOTEBOOK {
     return HNOTEBOOK{C.go_notebook_new(C.ulong(id), C.int(top))};
 }
 
+// Create a notebook widget to be packed.
 func NotebookNew(id uint, top int) HNOTEBOOK {
     return Notebook_new(id, top);
 }
 
+// Packs the specified box into the notebook page.
 func Notebook_pack(handle HANDLE, pageid HNOTEPAGE, page HANDLE) {
     C.go_notebook_pack(handle.GetHandle(), pageid.pageid, page.GetHandle());
 }
 
+// Packs the specified box into the notebook page.
 func (handle HNOTEPAGE) Pack(page HANDLE) {
     Notebook_pack(handle.hnotebook, handle, page);
 }
 
+// The contents of the notebook page will be destroyed as well.
 func Notebook_page_destroy(handle HANDLE, pageid HNOTEPAGE) {
     C.go_notebook_page_destroy(handle.GetHandle(), pageid.pageid);
 }
 
+// The contents of the notebook page will be destroyed as well.
 func (handle HNOTEPAGE) Destroy() {
     Notebook_page_destroy(handle.hnotebook, handle);
 }
 
+// Get the currently visible page.
 func Notebook_page_get(handle HANDLE) HNOTEPAGE {
     return HNOTEPAGE{C.go_notebook_page_get(handle.GetHandle()), handle};
 }
 
+// Get the currently visible page.
 func (handle HNOTEBOOK) PageGet() HNOTEPAGE {
     return Notebook_page_get(handle);
 }
 
+// Adds a new page to specified notebook.
 func Notebook_page_new(handle HANDLE, flags uint, front int) HNOTEPAGE {
     return HNOTEPAGE{C.go_notebook_page_new(handle.GetHandle(), C.ulong(flags), C.int(front)), handle};
 }
 
+// Adds a new page to specified notebook.
 func (handle HNOTEBOOK) PageNew(flags uint, front int) HNOTEPAGE {
     return Notebook_page_new(handle, flags, front);
 }
 
+// Sets the currently visible page.
 func Notebook_page_set(handle HANDLE, pageid HNOTEPAGE) {
     C.go_notebook_page_set(handle.GetHandle(), pageid.pageid);
 }
 
+// Sets the text on the specified notebook tab.
 func Notebook_page_set_text(handle HANDLE, pageid HNOTEPAGE, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -2747,10 +2823,12 @@ func Notebook_page_set_text(handle HANDLE, pageid HNOTEPAGE, text string) {
     C.go_notebook_page_set_text(handle.GetHandle(), pageid.pageid, ctext);
 }
 
+// Sets the text on the specified notebook tab.
 func (handle HNOTEPAGE) SetText(text string) {
     Notebook_page_set_text(handle.hnotebook, handle, text);
 }
 
+// Obtains an icon from a file.
 func Icon_load_from_file(filename string) HICN {
     cfilename := C.CString(filename);
     defer C.free(unsafe.Pointer(cfilename));
@@ -2758,26 +2836,32 @@ func Icon_load_from_file(filename string) HICN {
     return HICN(C.go_icon_load_from_file(cfilename));
 }
 
+// Obtains an icon from a file.
 func IconLoadFromFile(filename string) HICN {
     return Icon_load_from_file(filename);
 }
 
+// Obtains an icon from a module (or header in GTK).
 func Icon_load(id uint) HICN {
     return HICN(C.go_icon_load(0, C.ulong(id)));
 }
 
+// Obtains an icon from a module (or header in GTK).
 func IconLoad(id uint) HICN {
     return Icon_load(id);
 }
 
+// Deletes an icon from the taskbar.
 func Taskbar_delete(handle HANDLE, icon HICN) {
     C.go_taskbar_delete(handle.GetHandle(), unsafe.Pointer(icon));
 }
 
+// Deletes an icon from the taskbar.
 func TaskbarDelete(handle HANDLE, icon HICN) {
     Taskbar_delete(handle, icon);
 }
 
+// Inserts an icon into the taskbar.
 func Taskbar_insert(handle HANDLE, icon HICN, bubbletext string) {
     cbubbletext := C.CString(bubbletext);
     defer C.free(unsafe.Pointer(cbubbletext));
@@ -2785,10 +2869,12 @@ func Taskbar_insert(handle HANDLE, icon HICN, bubbletext string) {
     C.go_taskbar_insert(handle.GetHandle(), unsafe.Pointer(icon), cbubbletext);
 }
 
+// Inserts an icon into the taskbar.
 func TaskbarInsert(handle HANDLE, icon HICN, bubbletext string) {
     Taskbar_insert(handle, icon, bubbletext);
 }
 
+// Create a new Combobox widget to be packed.
 func Combobox_new(text string, id uint) HLISTBOX {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -2796,18 +2882,22 @@ func Combobox_new(text string, id uint) HLISTBOX {
     return HLISTBOX{C.go_combobox_new(ctext, C.ulong(id))};
 }
 
+// Create a new Combobox widget to be packed.
 func ComboboxNew(text string, id uint) HLISTBOX {
     return Combobox_new(text, id);
 }
 
+// Create a new listbox widget to be packed.
 func Listbox_new(id uint, multi int) HLISTBOX {
     return HLISTBOX{C.go_listbox_new(C.ulong(id), C.int(multi))};
 }
 
+// Create a new listbox widget to be packed.
 func ListboxNew(id uint, multi int) HLISTBOX {
     return Listbox_new(id, multi);
 }
 
+// Appends the specified text to the listbox's (or combobox) entry list.
 func Listbox_append(handle HANDLE, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -2815,10 +2905,12 @@ func Listbox_append(handle HANDLE, text string) {
     C.go_listbox_append(handle.GetHandle(), ctext);
 }
 
+// Appends the specified text to the listbox's (or combobox) entry list.
 func (handle HLISTBOX) Append(text string) {
     Listbox_append(handle, text);
 }
 
+// Appends the specified text items to the listbox's (or combobox) entry list.
 func Listbox_list_append(handle HANDLE, text []string) {
    count := len(text);
    ctext := C.go_string_array_make(C.int(count))
@@ -2831,6 +2923,7 @@ func Listbox_list_append(handle HANDLE, text []string) {
    C.go_listbox_list_append(handle.GetHandle(), ctext, C.int(count));
 }
 
+// Appends the specified text items to the listbox's (or combobox) entry list.
 func (handle HLISTBOX) AppendList(text []string) {
     Listbox_list_append(handle, text);
 }
@@ -2842,50 +2935,62 @@ func Listbox_insert(handle HANDLE, text string, pos int) {
     C.go_listbox_insert(handle.GetHandle(), ctext, C.int(pos));
 }
 
+// Inserts the specified text into the listbox's (or combobox) entry list.
 func (handle HLISTBOX) Insert(text string, pos int) {
     Listbox_insert(handle, text, pos);
 }
 
+// Clears the listbox's (or combobox) list of all entries.
 func Listbox_clear(handle HANDLE) {
     C.go_listbox_clear(handle.GetHandle());
 }
 
+// Clears the listbox's (or combobox) list of all entries.
 func (handle HLISTBOX) Clear() {
     Listbox_clear(handle);
 }
 
+// Returns the listbox's item count.
 func Listbox_count(handle HANDLE) int {
     return int(C.go_listbox_count(handle.GetHandle()));
 }
 
+// Returns the listbox's item count.
 func (handle HLISTBOX) Count() int {
     return Listbox_count(handle);
 }
 
+// Sets the topmost item in the viewport.
 func Listbox_set_top(handle HANDLE, top int) {
     C.go_listbox_set_top(handle.GetHandle(), C.int(top));
 }
 
+// Sets the topmost item in the viewport.
 func (handle HLISTBOX) SetTop(top int) {
     Listbox_set_top(handle, top);
 }
 
+// Sets the selection state of a given index.
 func Listbox_select(handle HANDLE, index int, state int) {
     C.go_listbox_select(handle.GetHandle(), C.int(index), C.int(state));
 }
 
+// Sets the selection state of a given index.
 func (handle HLISTBOX) Select(index int, state int) {
     Listbox_select(handle, index, state);
 }
 
+// Deletes the item with given index from the list.
 func Listbox_delete(handle HANDLE, index int) {
     C.go_listbox_delete(handle.GetHandle(), C.int(index));
 }
 
+// Deletes the item with given index from the list.
 func (handle HLISTBOX) Delete(index int) {
     Listbox_delete(handle, index);
 }
 
+// Get the given index item's text.
 func Listbox_get_text(handle HANDLE, index int) string {
     var buf [201]C.char;
     
@@ -2893,10 +2998,12 @@ func Listbox_get_text(handle HANDLE, index int) string {
     return C.GoString((*C.char)(unsafe.Pointer(&buf[0])));
 }
 
+// Get the given index item's text.
 func (handle HLISTBOX) GetText(index int) string {
     return Listbox_get_text(handle, index);
 }
 
+// Sets the text of a given listbox entry.
 func Listbox_set_text(handle HANDLE, index int, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -2904,66 +3011,82 @@ func Listbox_set_text(handle HANDLE, index int, text string) {
     C.go_listbox_set_text(handle.GetHandle(), C.int(index), ctext);
 }
 
+// Sets the text of a given listbox entry.
 func (handle HLISTBOX) SetText(index int, text string) {
     Listbox_set_text(handle, index, text);
 }
 
+// Returns the index to the item in the list currently selected.
 func Listbox_selected(handle HANDLE) int {
     return int(C.go_listbox_selected(handle.GetHandle()));
 }
 
+// Returns the index to the item in the list currently selected.
 func (handle HLISTBOX) Selected() int {
     return Listbox_selected(handle);
 }
 
+// Returns the index to the current selected item or -1 when done.
 func Listbox_selected_multi(handle HANDLE, where int) int {
     return int(C.go_listbox_selected_multi(handle.GetHandle(), C.int(where)));
 }
 
+// Returns the index to the current selected item or -1 when done.
 func (handle HLISTBOX) SelectedMulti(where int) int {
     return Listbox_selected_multi(handle, where);
 }
 
+// Returns the width of the screen.
 func Screen_width() int {
     return int(C.dw_screen_width());
 }
 
+// Returns the width of the screen.
 func ScreenWidth() int {
     return Screen_width();
 }
 
+// Returns the height of the screen.
 func Screen_height() int {
     return int(C.dw_screen_height());
 }
 
+// Returns the height of the screen.
 func ScreenHeight() int {
     return Screen_height();
 }
 
+// This should return the current color depth.
 func Color_depth_get() uint {
     return uint(C.dw_color_depth_get());
 }
 
+// This should return the current color depth.
 func ColorDepthGet() uint {
     return Color_depth_get();
 }
 
+// Sets the current foreground drawing color. Either a color constant such as dw.CLR_BLACK or an RGB color using the dw.RGB().
 func Color_foreground_set(color COLOR) {
     C.dw_color_foreground_set(C.ulong(color));
 }
 
+// Sets the current foreground drawing color. Either a color constant such as dw.CLR_BLACK or an RGB color using the dw.RGB().
 func ColorForegroundSet(color COLOR) {
     Color_foreground_set(color);
 }
 
+// Sets the current background drawing color. Either a color constant such as dw.CLR_BLACK or an RGB color using the dw.RGB().
 func Color_background_set(color COLOR) {
     C.dw_color_background_set(C.ulong(color));
 }
 
+// Sets the current background drawing color. Either a color constant such as dw.CLR_BLACK or an RGB color using the dw.RGB().
 func ColorBackgroundSet(color COLOR) {
     Color_background_set(color);
 }
 
+// Create a new spinbutton widget to be packed.
 func Spinbutton_new(text string, id C.ulong) HSPINBUTTON {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -2971,34 +3094,42 @@ func Spinbutton_new(text string, id C.ulong) HSPINBUTTON {
     return HSPINBUTTON{C.go_spinbutton_new(ctext, id)};
 }
 
+// Create a new spinbutton widget to be packed.
 func SpinButtonNew(text string, id C.ulong) HSPINBUTTON {
     return Spinbutton_new(text, id);
 }
 
+// Sets the spinbutton value.
 func Spinbutton_set_pos(handle HANDLE, position int) {
     C.go_spinbutton_set_pos(handle.GetHandle(), C.long(position));
 }
 
+// Sets the spinbutton value.
 func (handle HSPINBUTTON) SetPos(position int) {
     Spinbutton_set_pos(handle, position);
 }
 
+// Sets the spinbutton limits.
 func Spinbutton_set_limits(handle HANDLE, upper int, lower int) {
     C.go_spinbutton_set_limits(handle.GetHandle(), C.long(upper), C.long(lower));
 }
 
+// Sets the spinbutton limits.
 func (handle HSPINBUTTON) SetLimits(upper int, lower int) {
     Spinbutton_set_limits(handle, upper, lower);
 }
 
+// Returns the current value of the spinbutton.
 func Spinbutton_get_pos(handle HANDLE) int {
     return int(C.go_spinbutton_get_pos(handle.GetHandle()));
 }
 
+// Returns the current value of the spinbutton.
 func (handle HSPINBUTTON) GetPos() int {
     return Spinbutton_get_pos(handle);
 }
 
+// Create a new radiobutton widget to be packed.
 func Radiobutton_new(text string, id uint) HBUTTON {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -3006,10 +3137,12 @@ func Radiobutton_new(text string, id uint) HBUTTON {
     return HBUTTON{C.go_radiobutton_new(ctext, C.ulong(id))};
 }
 
+// Create a new radiobutton widget to be packed.
 func RadioButtonNew(text string id uint) HBUTTON {
     return Radiobutton_new(text, id); 
 }
 
+// Create a new checkbox widget to be packed.
 func Checkbox_new(text string, id uint) HBUTTON {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -3017,122 +3150,152 @@ func Checkbox_new(text string, id uint) HBUTTON {
     return HBUTTON{C.go_checkbox_new(ctext, C.ulong(id))};
 }
 
+// Create a new checkbox widget to be packed.
 func CheckButtonNew(text string id uint) HBUTTON {
     return Checkbox_new(text, id);
 }
 
+// Returns the state of the checkbox.
 func Checkbox_get(handle HANDLE) int {
     return int(C.go_checkbox_get(handle.GetHandle()));
 }
 
+// Returns the state of the checkbox.
 func (handle HBUTTON) Get() int {
     return Checkbox_get(handle);
 }
 
+// Sets the state of the checkbox.
 func Checkbox_set(handle HANDLE, value int) {
     C.go_checkbox_set(handle.GetHandle(), C.int(value));
 }
 
+// Sets the state of the checkbox.
 func (handle HBUTTON) Set(value int) {
     Checkbox_set(handle, value);
 }
 
+// Create a new percent bar widget to be packed.
 func Percent_new(id C.ulong) HPERCENT {
     return HPERCENT{C.go_percent_new(id)};
 }
 
+// Create a new percent bar widget to be packed.
 func PercentNew(id C.ulong) HPERCENT {
     return Percent_new(id);
 }
 
+// Sets the percent bar position.
 func Percent_set_pos(handle HANDLE, position uint) {
    C.go_percent_set_pos(handle.GetHandle(), C.uint(position));
 }
 
+// Sets the percent bar position.
 func (handle HPERCENT) SetPos(position uint) {
     Percent_set_pos(handle, position);
 }
 
+// Create a new slider widget to be packed.
 func Slider_new(vertical int, increments int, id uint) HSLIDER {
     return HSLIDER{C.go_slider_new(C.int(vertical), C.int(increments), C.ulong(id))};
 }
 
+// Create a new slider widget to be packed.
 func SliderNew(vertical int, increments int, id uint) HSLIDER {
     return Slider_new(vertical, increments, id);
 }
 
+// Create a new scrollbar widget to be packed.
 func Scrollbar_new(vertical int, id uint) HSCROLLBAR {
     return HSCROLLBAR{C.go_scrollbar_new(C.int(vertical), C.ulong(id))};
 }
 
+// Create a new scrollbar widget to be packed.
 func ScrollbarNew(vertical int, id uint) HSCROLLBAR {
     return Scrollbar_new(vertical, id);
 }
 
+// Returns the position of the slider.
 func Slider_get_pos(handle HANDLE) uint {
     return uint(C.go_slider_get_pos(handle.GetHandle()));
 }
 
+// Returns the position of the slider.
 func (handle HSLIDER) GetPos() uint {
     return Slider_get_pos(handle);
 }
 
+// Sets the slider position.
 func Slider_set_pos(handle HANDLE, position uint) {
     C.go_slider_set_pos(handle.GetHandle(), C.uint(position));
 }
 
+// Sets the slider position.
 func (handle HSLIDER) SetPos(position uint) {
     Slider_set_pos(handle, position);
 }
 
+// Returns the position of the scrollbar.
 func Scrollbar_get_pos(handle HANDLE) uint {
     return uint(C.go_scrollbar_get_pos(handle.GetHandle()));
 }
 
+// Returns the position of the scrollbar.
 func (handle HSCROLLBAR) GetPos() uint {
     return Scrollbar_get_pos(handle);
 }
 
+// Sets the scrollbar position.
 func Scrollbar_set_pos(handle HANDLE, position uint) {
     C.go_scrollbar_set_pos(handle.GetHandle(), C.uint(position));
 }
 
+// Sets the scrollbar position.
 func (handle HSCROLLBAR) SetPos(position uint) {
     Scrollbar_set_pos(handle, position);
 }
 
+// Sets the scrollbar range.
 func Scrollbar_set_range(handle HANDLE, srange uint, visible uint) {
     C.go_scrollbar_set_range(handle.GetHandle(), C.uint(srange), C.uint(visible));
 }
 
+// Sets the scrollbar range.
 func (handle HSCROLLBAR) SetRange(srange uint, visible uint) {
     Scrollbar_set_range(handle, srange, visible);
 }
 
+// Create a new scrollable Box to be packed.
 func Scrollbox_new(btype int, pad int) HSCROLLBOX {
     return HSCROLLBOX{C.go_scrollbox_new(C.int(btype), C.int(pad))};
 }
 
+// Create a new scrollable Box to be packed.
 func ScrollBoxNew(btype int, pad int) HSCROLLBOX {
     return Scrollbox_new(btype, pad);
 }
 
+// Returns the position of the scrollbar in the scrollbox.
 func Scrollbox_get_pos(handle HANDLE) (int, int) {
     return int(C.go_scrollbox_get_pos(handle.GetHandle(), C.int(C.DW_HORZ))), int(C.go_scrollbox_get_pos(handle.GetHandle(), C.int(C.DW_VERT)));
 }
 
+// Returns the position of the scrollbar in the scrollbox.
 func (handle HSCROLLBOX) GetPos() (int, int) {
     return Scrollbox_get_pos(handle);
 }
 
+// Gets the range for the scrollbar in the scrollbox.
 func Scrollbox_get_range(handle HANDLE) (int, int) {
     return int(C.go_scrollbox_get_range(handle.GetHandle(), C.int(C.DW_HORZ))), int(C.go_scrollbox_get_range(handle.GetHandle(), C.int(C.DW_VERT)));
 }
 
+// Gets the range for the scrollbar in the scrollbox.
 func (handle HSCROLLBOX) GetRange() (int, int) {
     return Scrollbox_get_range(handle);
 }
 
+// Create a new Group Box to be packed.
 func Groupbox_new(btype C.int, pad int, title string) HBOX {
     ctitle := C.CString(title);
     defer C.free(unsafe.Pointer(ctitle));
@@ -3140,18 +3303,22 @@ func Groupbox_new(btype C.int, pad int, title string) HBOX {
     return HBOX{C.go_groupbox_new(btype, C.int(pad), ctitle)};
 }
 
+// Create a new Group Box to be packed.
 func GroupboxNew(btype C.int, pad int, title string) HBOX {
     return Groupbox_new(btype, pad, title);
 }
 
+// Creates a rendering context widget to be packed.
 func Render_new(id uint) HRENDER {
     return HRENDER{C.go_render_new(C.ulong(id))};
 }
 
+// Creates a rendering context widget to be packed.
 func RenderNew(id uint) HRENDER {
     return Render_new(id);
 }
 
+// Allows the user to choose a font using the system's font chooser dialog.
 func Font_choose(currfont string) string {
     ccurrfont := C.CString(currfont);
     defer C.free(unsafe.Pointer(ccurrfont));
@@ -3160,16 +3327,19 @@ func Font_choose(currfont string) string {
     return C.GoString(newfont);
 }
 
+// Allows the user to choose a font using the system's font chooser dialog.
 func FontChoose(currfont string) string {
     return Font_choose(currfont);
 }
 
+// Sets the default font used on text based widgets.
 func Font_set_default(fontname string) {
     cfontname := C.CString(fontname);
     defer C.free(unsafe.Pointer(cfontname));
     C.dw_font_set_default(cfontname);
 }
 
+// Sets the default font used on text based widgets.
 func FontSetFefault(fontname string) {
     Font_set_default(fontname);
 }
@@ -3190,14 +3360,17 @@ func (pixmap HPIXMAP) GetTextExtents(text string) (int, int) {
     return Font_text_extents_get(NOHWND, pixmap, text);
 }
 
+// Creates a pixmap with given parameters.
 func Pixmap_new(handle HANDLE, width uint, height uint, depth uint) HPIXMAP {
     return HPIXMAP{C.go_pixmap_new(handle.GetHandle(), C.ulong(width), C.ulong(height), C.ulong(depth))};
 }
 
+// Creates a pixmap with given parameters.
 func PixmapNew(handle HANDLE, width uint, height uint, depth uint) HPIXMAP {
     return Pixmap_new(handle, width, height, depth);
 }
 
+// Creates a pixmap from a file.
 func Pixmap_new_from_file(handle HANDLE, filename string) HPIXMAP {
     cfilename := C.CString(filename);
     defer C.free(unsafe.Pointer(cfilename));
@@ -3205,70 +3378,87 @@ func Pixmap_new_from_file(handle HANDLE, filename string) HPIXMAP {
     return HPIXMAP{C.go_pixmap_new_from_file(handle.GetHandle(), cfilename)};
 }
 
+// Creates a pixmap from a file.
 func PixmapNewFromFile(handle HANDLE, filename string) HPIXMAP {
     return Pixmap_new_from_file(handle, filename);
 }
 
+// Creates a pixmap from internal resource graphic specified by id.
 func Pixmap_grab(handle HANDLE, id uint) HPIXMAP {
     return HPIXMAP{C.go_pixmap_grab(handle.GetHandle(), C.ulong(id))};
 }
 
+// Creates a pixmap from internal resource graphic specified by id.
 func PixmapGrab(handle HANDLE, id uint) HPIXMAP {
     return Pixmap_grab(handle, id);
 }
 
+// Creates a pixmap from internal resource graphic specified by id.
 func (window HRENDER) PixmapGrab(id uint) HPIXMAP {
     return Pixmap_grab(window, id);
 }
 
+// Copies from one surface to another.
 func Pixmap_bitblt(dest HANDLE, destp HPIXMAP, xdest int, ydest int, width int, height int, src HANDLE, srcp HPIXMAP, xsrc int, ysrc int) {
     C.go_pixmap_bitblt(dest.GetHandle(), unsafe.Pointer(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), src.GetHandle(), unsafe.Pointer(srcp.hpixmap), C.int(xsrc), C.int(ysrc)); 
 }
 
+// Copies from one surface to another allowing for stretching.
 func Pixmap_stretch_bitblt(dest HANDLE, destp HPIXMAP, xdest int, ydest int, width int, height int, src HANDLE, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
     return int(C.go_pixmap_stretch_bitblt(dest.GetHandle(), unsafe.Pointer(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), src.GetHandle(), unsafe.Pointer(srcp.hpixmap), C.int(xsrc), C.int(ysrc), C.int(srcwidth), C.int(srcheight))); 
 }
 
+// Copies from one surface to another allowing for stretching.
 func (window HRENDER) BitBltStretchPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
     return Pixmap_stretch_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc, srcwidth, srcheight);
 }
 
+// Copies from one surface to another allowing for stretching.
 func (window HRENDER) BitBltStretchWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int, srcwidth int, srcheight int) int {
     return Pixmap_stretch_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc, srcwidth, srcheight);
 }
 
+// Copies from one surface to another allowing for stretching.
 func (pixmap HPIXMAP) BitBltStretchPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
     return Pixmap_stretch_bitblt(NOHWND, pixmap, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc, srcwidth, srcheight);
 }
 
+// Copies from one surface to another allowing for stretching.
 func (pixmap HPIXMAP) BitBltStretchWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int, srcwidth int, srcheight int) int {
     return Pixmap_stretch_bitblt(NOHWND, pixmap, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc, srcwidth, srcheight);
 }
 
+// Copies from one surface to another.
 func (window HRENDER) BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int) {
     Pixmap_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc);
 }
 
+// Copies from one surface to another.
 func (window HRENDER) BitBltWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int) {
     Pixmap_bitblt(window, NOHPIXMAP, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc);
 }
 
+// Copies from one surface to another.
 func (pixmap HPIXMAP) BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int) {
     Pixmap_bitblt(NOHWND, pixmap, xdest, ydest, width, height, NOHWND, srcp, xsrc, ysrc);
 }
 
+// Copies from one surface to another.
 func (pixmap HPIXMAP) BitBltWindow(xdest int, ydest int, width int, height int, src HANDLE, xsrc int, ysrc int) {
     Pixmap_bitblt(NOHWND, pixmap, xdest, ydest, width, height, src, NOHPIXMAP, xsrc, ysrc);
 }
 
+// Sets the transparent color for a pixmap.
 func Pixmap_set_transparent_color(pixmap HPIXMAP, color COLOR) {
     C.go_pixmap_set_transparent_color(unsafe.Pointer(pixmap.hpixmap), C.ulong(color));
 }
 
+// Sets the transparent color for a pixmap.
 func (pixmap HPIXMAP) SetTransparentColor(color COLOR) {
     Pixmap_set_transparent_color(pixmap, color);
 }
 
+// Sets the font used by a specified pixmap.
 func Pixmap_set_font(pixmap HPIXMAP, fontname string) int {
     cfontname := C.CString(fontname);
     defer C.free(unsafe.Pointer(cfontname));
@@ -3276,58 +3466,72 @@ func Pixmap_set_font(pixmap HPIXMAP, fontname string) int {
     return int(C.go_pixmap_set_font(unsafe.Pointer(pixmap.hpixmap), cfontname));
 }
 
+// Sets the font used by a specified pixmap.
 func (pixmap HPIXMAP) SetFont(fontname string) int {
     return Pixmap_set_font(pixmap, fontname);
 }
 
+// Destroys an allocated pixmap.
 func Pixmap_destroy(pixmap HPIXMAP) {
     C.go_pixmap_destroy(unsafe.Pointer(pixmap.hpixmap));
 }
 
+// Destroys an allocated pixmap.
 func (pixmap HPIXMAP) Destroy() {
     Pixmap_destroy(pixmap);
 }
 
+// Returns the width in pixels of the specified pixmap.
 func Pixmap_width(pixmap HPIXMAP) int {
     return int(C.go_pixmap_width(unsafe.Pointer(pixmap.hpixmap)));
 }
 
+// Returns the width in pixels of the specified pixmap.
 func (pixmap HPIXMAP) GetWidth() int {
     return Pixmap_width(pixmap);
 }
 
+// Returns the height in pixels of the specified pixmap.
 func Pixmap_height(pixmap HPIXMAP) int {
     return int(C.go_pixmap_height(unsafe.Pointer(pixmap.hpixmap)));
 }
 
+// Returns the height in pixels of the specified pixmap.
 func (pixmap HPIXMAP) GetHeight() int {
     return Pixmap_height(pixmap);
 }
 
+// Draw a point.
 func Draw_point(handle HANDLE, pixmap HPIXMAP, x int, y int) {
     C.go_draw_point(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x), C.int(y));
 }
 
+// Draw a point on a widget.
 func (window HRENDER) DrawPoint(x int, y int) {
     Draw_point(window, NOHPIXMAP, x, y);
 }
 
+// Draw a point on a pixmap.
 func (pixmap HPIXMAP) DrawPoint(x int, y int) {
     Draw_point(NOHWND, pixmap, x, y);
 }
 
+// Draw a line.
 func Draw_line(handle HANDLE, pixmap HPIXMAP, x1 int, y1 int, x2 int, y2 int) {
     C.go_draw_line(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
 }
 
+// Draw a line on a widget.
 func (window HRENDER) DrawLine(x1 int, y1 int, x2 int, y2 int) {
     Draw_line(window, NOHPIXMAP, x1, y1, x2, y2);
 }
 
+// Draw a line on a pixmap.
 func (pixmap HPIXMAP) DrawLine(x1 int, y1 int, x2 int, y2 int) {
     Draw_line(NOHWND, pixmap, x1, y1, x2, y2);
 }
 
+// Draw a polygon.
 func Draw_polygon(handle HANDLE, pixmap HPIXMAP, flags int, x []int, y []int) {
     count := len(x);
     if len(y) < count {
@@ -3345,38 +3549,47 @@ func Draw_polygon(handle HANDLE, pixmap HPIXMAP, flags int, x []int, y []int) {
     C.go_draw_polygon(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(flags), C.int(count), (*C.int)(unsafe.Pointer(xHeader.Data)), (*C.int)(unsafe.Pointer(yHeader.Data)));
 }
 
+// Draw a polygon on a widget.
 func (window HRENDER) DrawPolygon(flags int, x []int, y []int) {
     Draw_polygon(window, NOHPIXMAP, flags, x, y);
 }
 
+// Draw a polygon on a pixmap.
 func (pixmap HPIXMAP) DrawPolygon(flags int, x []int, y []int) {
     Draw_polygon(NOHWND, pixmap, flags, x, y);
 }
 
+// Draw a rectangle.
 func Draw_rect(handle HANDLE, pixmap HPIXMAP, fill int, x int, y int, width int, height int) {
     C.go_draw_rect(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(fill), C.int(x), C.int(y), C.int(width), C.int(height));
 }
 
+// Draw a rectangle on a widget.
 func (window HRENDER) DrawRect(fill int, x int, y int, width int, height int) {
     Draw_rect(window, NOHPIXMAP, fill, x, y, width, height);
 }
 
+// Draw a rectangle on a pixmap.
 func (pixmap HPIXMAP) DrawRect(fill int, x int, y int, width int, height int) {
     Draw_rect(NOHWND, pixmap, fill, x, y, width, height);
 }
 
+// Draw an arc.
 func Draw_arc(handle HANDLE, pixmap HPIXMAP, flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
     C.go_draw_arc(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(flags), C.int(xorigin), C.int(yorigin), C.int(x1), C.int(y1), C.int(x2), C.int(y2));
 }
 
+// Draw an arc on a widget.
 func (window HRENDER) DrawArc(flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
     Draw_arc(window, NOHPIXMAP, flags, xorigin, yorigin, x1, y1, x2, y2);
 }
 
+// Draw an arc on a pixmap.
 func (pixmap HPIXMAP) DrawArc(flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
     Draw_arc(NOHWND, pixmap, flags, xorigin, yorigin, x1, y1, x2, y2);
 }
 
+// Draw text.
 func Draw_text(handle HANDLE, pixmap HPIXMAP, x int, y int, text string) {
     ctext := C.CString(text);
     defer C.free(unsafe.Pointer(ctext));
@@ -3384,32 +3597,39 @@ func Draw_text(handle HANDLE, pixmap HPIXMAP, x int, y int, text string) {
     C.go_draw_text(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x), C.int(y), ctext);
 }
 
+// Draw text on a widget.
 func (window HRENDER) DrawText(x int, y int, text string) {
     Draw_text(window, NOHPIXMAP, x, y, text);
 }
 
+// Draw text on a pixmap.
 func (pixmap HPIXMAP) DrawText(x int, y int, text string) {
     Draw_text(NOHWND, pixmap, x, y, text);
 }
 
+// Returns the current X and Y coordinates of the mouse pointer.
 func Pointer_query_pos() (int, int) {
    var x, y C.long;
    C.dw_pointer_query_pos(&x, &y);
    return int(x), int(y);
 }
 
+// Returns the current X and Y coordinates of the mouse pointer.
 func PointerGetPos() (int, int) {
     return Pointer_query_pos();
 }
 
+// Sets the X and Y coordinates of the mouse pointer.
 func Pointer_set_pos(x int, y int) {
    C.dw_pointer_set_pos(C.long(x), C.long(y));
 }
 
+// Sets the X and Y coordinates of the mouse pointer.
 func PointerSetPos(x int, y int) {
     Pointer_set_pos(x, y);
 }
 
+// Call this after drawing to the screen to make sure anything you have drawn is visible.
 func Flush() {
     C.dw_flush();
 }

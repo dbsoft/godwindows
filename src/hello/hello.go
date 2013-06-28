@@ -11,7 +11,7 @@ var APP_NAME = "DW Hello World Example"
 func exit_handler(win dw.HWND, message string) int {
     if dw.Messagebox(APP_NAME, dw.MB_YESNO | dw.MB_QUESTION, message) == dw.MB_RETURN_YES {
         /* Exit the application cleanly */
-        dw.Main_quit();
+        dw.MainQuit();
     }
     return dw.TRUE;
 }

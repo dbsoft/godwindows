@@ -4202,7 +4202,7 @@ func (handle HCONTAINER) SetColumnWidth(column int, width int) {
 func Container_set_row_title(contins HCONTINS, row int, title string) {
    ctitle := C.CString(title);
    C.dw_container_set_row_title(contins.ptr, C.int(row), ctitle);
-   /* TODO: Probably need to have a way to free this or leak */
+   defer C.free(unsafe.Pointer(ctitle));
 }
 
 // Sets the title of a row in the container.
@@ -4212,7 +4212,7 @@ func (handle HCONTINS) SetRowTitle(row int, title string) {
 
 // Sets the pointer of a row in the container.
 func Container_set_row_data(contins HCONTINS, row int, data POINTER) {
-   C.dw_container_set_row_title(contins.ptr, C.int(row), (*C.char)(data));
+   C.dw_container_set_row_data(contins.ptr, C.int(row), unsafe.Pointer(data));
 }
 
 // Sets the pointer of a row in the container.

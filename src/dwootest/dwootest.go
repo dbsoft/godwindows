@@ -866,7 +866,8 @@ func container_add(notebookbox4 dw.HBOX) {
         containerinfo.SetItemULong(1, z, uint(z*100));
         containerinfo.SetItemTime(2, z, z+10, z+10, z+10);
         containerinfo.SetItemDate(3, z, z+10, z+10, z+2000);
-        containerinfo.SetRowTitle(z, fmt.Sprintf("Don't allocate from stack: Item: %d", z));
+        containerinfo.SetRowTitle(z, fmt.Sprintf("We can now allocate from the stack: Item: %d", z));
+        containerinfo.SetRowData(z, dw.POINTER(uintptr(z)));
     }
     containerinfo.Insert();
 
@@ -894,8 +895,8 @@ func container_add(notebookbox4 dw.HBOX) {
     mle_point = container_mle.Import(fmt.Sprintf("[%d]\r\n\r\n", mle_point), mle_point);
     container_mle.SetCursor(mle_point);
     /* connect our event trappers... */
-    container.ConnectItemEnter(func(window dw.HCONTAINER, text string) int {
-        container_status.SetText(fmt.Sprintf("DW_SIGNAL_ITEM_ENTER: Window: %x Text: %s", dw.HANDLE_TO_UINTPTR(window), text));
+    container.ConnectItemEnter(func(window dw.HCONTAINER, text string, itemdata dw.POINTER) int {
+        container_status.SetText(fmt.Sprintf("DW_SIGNAL_ITEM_ENTER: Window: %x Text: %s Itemdata: %x", dw.HANDLE_TO_UINTPTR(window), text, uintptr(itemdata)));
         return dw.FALSE;
     });
     container.ConnectItemContext(func(window dw.HCONTAINER, text string, x int, y int, itemdata dw.POINTER) int {

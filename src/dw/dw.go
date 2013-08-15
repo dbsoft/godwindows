@@ -4322,6 +4322,16 @@ func (handle HCONTAINER) Cursor(text string) {
     Container_cursor(handle, text);
 }
 
+// Cursors the item with the data speficied, and scrolls to that item.
+func Container_cursor_by_data(handle HANDLE, data POINTER) {
+   C.go_container_cursor_by_data(handle.GetHandle(), unsafe.Pointer(data));
+}
+
+// Cursors the item with the data speficied, and scrolls to that item.
+func (handle HCONTAINER) CursorByData(data POINTER) {
+    Container_cursor_by_data(handle, data);
+}
+
 // Deletes the item with the title specified. 
 func Container_delete_row(handle HANDLE, text string) {
    ctext := C.CString(text);
@@ -4333,6 +4343,16 @@ func Container_delete_row(handle HANDLE, text string) {
 // Deletes the item with the title specified. 
 func (handle HCONTAINER) DeleteRow(text string) {
     Container_delete_row(handle, text);
+}
+
+// Deletes the item with the data specified. 
+func Container_delete_row_by_data(handle HANDLE, data POINTER) {
+   C.go_container_delete_row_by_data(handle.GetHandle(), unsafe.Pointer(data));
+}
+
+// Deletes the item with the data specified. 
+func (handle HCONTAINER) DeleteRowByData(data POINTER) {
+    Container_delete_row_by_data(handle, data);
 }
 
 // Optimizes the column widths so that all data is visible.
@@ -4704,7 +4724,7 @@ func (window HRENDER) ConnectConfigure(sigfunc func(window HRENDER, width int, h
 }
 
 // Connect a function or closure to a tree ENTER/RETURN press event.
-func (window HTREE) ConnectItemEnter(sigfunc func(window HTREE, str string) int) {
+func (window HTREE) ConnectItemEnter(sigfunc func(window HTREE, str string, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -4713,7 +4733,7 @@ func (window HTREE) ConnectItemEnter(sigfunc func(window HTREE, str string) int)
 }
 
 // Connect a function or closure to a container ENTER/RETURN press event.
-func (window HCONTAINER) ConnectItemEnter(sigfunc func(window HCONTAINER, str string) int) {
+func (window HCONTAINER) ConnectItemEnter(sigfunc func(window HCONTAINER, str string, itemdata POINTER) int) {
    csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER);
    defer C.free(unsafe.Pointer(csigname));
    
@@ -5468,149 +5488,35 @@ func go_int_callback_expose(pfunc unsafe.Pointer, window unsafe.Pointer, x C.int
    return C.int(thisfunc(HGENERIC{window}, int(x), int(y), int(width), int(height), POINTER(data)));
 }
 
-//export go_int_callback_string
-func go_int_callback_string(pfunc unsafe.Pointer, window unsafe.Pointer, str *C.char, data unsafe.Pointer, flags C.uint) C.int {
+//export go_int_callback_item_enter
+func go_int_callback_item_enter(pfunc unsafe.Pointer, window unsafe.Pointer, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.uint) C.int {
    switch flags {
-   case (1 << 8): // HWND
-       thisfunc := *(*func(HWND, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, C.GoString(str), POINTER(data)));
-   case (2 << 8): // HENTRYFIELD
-       thisfunc := *(*func(HENTRYFIELD, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HENTRYFIELD{window}, C.GoString(str), POINTER(data)));
-   case (3 << 8): // HTEXT
-       thisfunc := *(*func(HTEXT, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HTEXT{window}, C.GoString(str), POINTER(data)));
    case (4 << 8): // HTREE
-       thisfunc := *(*func(HTREE, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HTREE{window}, C.GoString(str), POINTER(data)));
+       thisfunc := *(*func(HTREE, string, POINTER, POINTER) int)(pfunc);
+       return C.int(thisfunc(HTREE{window}, C.GoString(text), POINTER(data), POINTER(itemdata)));
    case (5 << 8): // HCONTAINER
+       thisfunc := *(*func(HCONTAINER, string, POINTER, POINTER) int)(pfunc);
+       filesystem := false;
+       if Window_get_data(HCONTAINER{window, false}, "_go_filesystem") != nil {
+           filesystem = true;
+       }
+       return C.int(thisfunc(HCONTAINER{window, filesystem}, C.GoString(text), POINTER(data), POINTER(itemdata)));
+   case go_flags_no_data:
+       thisfunc := *(*func(HANDLE, string, POINTER) int)(pfunc);
+       return C.int(thisfunc(HGENERIC{window}, C.GoString(text), POINTER(itemdata)));
+   case (4 << 8) | go_flags_no_data: // HTREE
+       thisfunc := *(*func(HTREE, string, POINTER) int)(pfunc);
+       return C.int(thisfunc(HTREE{window}, C.GoString(text), POINTER(itemdata)));
+   case (5 << 8) | go_flags_no_data: // HCONTAINER
        thisfunc := *(*func(HCONTAINER, string, POINTER) int)(pfunc);
        filesystem := false;
        if Window_get_data(HCONTAINER{window, false}, "_go_filesystem") != nil {
            filesystem = true;
        }
-       return C.int(thisfunc(HCONTAINER{window, filesystem}, C.GoString(str), POINTER(data)));
-   case (6 << 8): // HMLE
-       thisfunc := *(*func(HMLE, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HMLE{window}, C.GoString(str), POINTER(data)));
-   case (7 << 8): // HBUTTON
-       thisfunc := *(*func(HBUTTON, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HBUTTON{window}, C.GoString(str), POINTER(data)));
-   case (8 << 8): // HSPINBUTTON
-       thisfunc := *(*func(HSPINBUTTON, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HSPINBUTTON{window}, C.GoString(str), POINTER(data)));
-   case (9 << 8): // HNOTEBOOK
-       thisfunc := *(*func(HNOTEBOOK, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HNOTEBOOK{window}, C.GoString(str), POINTER(data)));
-   case (10 << 8): // HBOX
-       thisfunc := *(*func(HBOX, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HBOX{window}, C.GoString(str), POINTER(data)));
-   case (11 << 8): // HSCROLLBOX
-       thisfunc := *(*func(HSCROLLBOX, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HSCROLLBOX{window}, C.GoString(str), POINTER(data)));
-   case (12 << 8): // HMENUITEM
-       thisfunc := *(*func(HMENUITEM, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HMENUITEM{window}, C.GoString(str), POINTER(data)));
-   case (13 << 8): // HLISTBOX
-       thisfunc := *(*func(HLISTBOX, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HLISTBOX{window}, C.GoString(str), POINTER(data)));
-   case (14 << 8): // HPERCENT
-       thisfunc := *(*func(HPERCENT, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HPERCENT{window}, C.GoString(str), POINTER(data)));
-   case (15 << 8): // HSLIDER
-       thisfunc := *(*func(HSLIDER, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HSLIDER{window}, C.GoString(str), POINTER(data)));
-   case (16 << 8): // HSCROLLBAR
-       thisfunc := *(*func(HSCROLLBAR, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HSCROLLBAR{window}, C.GoString(str), POINTER(data)));
-   case (17 << 8): // HRENDER
-       thisfunc := *(*func(HRENDER, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HRENDER{window}, C.GoString(str), POINTER(data)));
-   case (18 << 8): // HHTML
-       thisfunc := *(*func(HRENDER, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HRENDER{window}, C.GoString(str), POINTER(data)));
-   case (19 << 8): // HCALENDAR
-       thisfunc := *(*func(HCALENDAR, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HCALENDAR{window}, C.GoString(str), POINTER(data)));
-   case (20 << 8): // HBITMAP
-       thisfunc := *(*func(HBITMAP, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HBITMAP{window}, C.GoString(str), POINTER(data)));
-   case (21 << 8): // HSPLITBAR
-       thisfunc := *(*func(HSPLITBAR, string, POINTER) int)(pfunc);
-       return C.int(thisfunc(HSPLITBAR{window}, C.GoString(str), POINTER(data)));
-   case go_flags_no_data:
-       thisfunc := *(*func(HANDLE, string) int)(pfunc);
-       return C.int(thisfunc(HGENERIC{window}, C.GoString(str)));
-   case (1 << 8) | go_flags_no_data: // HWND
-       thisfunc := *(*func(HWND, string) int)(pfunc);
-       return C.int(thisfunc(HWND{window}, C.GoString(str)));
-   case (2 << 8) | go_flags_no_data: // HENTRYFIELD
-       thisfunc := *(*func(HENTRYFIELD, string) int)(pfunc);
-       return C.int(thisfunc(HENTRYFIELD{window}, C.GoString(str)));
-   case (3 << 8) | go_flags_no_data: // HTEXT
-       thisfunc := *(*func(HTEXT, string) int)(pfunc);
-       return C.int(thisfunc(HTEXT{window}, C.GoString(str)));
-   case (4 << 8) | go_flags_no_data: // HTREE
-       thisfunc := *(*func(HTREE, string) int)(pfunc);
-       return C.int(thisfunc(HTREE{window}, C.GoString(str)));
-   case (5 << 8) | go_flags_no_data: // HCONTAINER
-       thisfunc := *(*func(HCONTAINER, string) int)(pfunc);
-       filesystem := false;
-       if Window_get_data(HCONTAINER{window, false}, "_go_filesystem") != nil {
-           filesystem = true;
-       }
-       return C.int(thisfunc(HCONTAINER{window, filesystem}, C.GoString(str)));
-   case (6 << 8) | go_flags_no_data: // HMLE
-       thisfunc := *(*func(HMLE, string) int)(pfunc);
-       return C.int(thisfunc(HMLE{window}, C.GoString(str)));
-   case (7 << 8) | go_flags_no_data: // HBUTTON
-       thisfunc := *(*func(HBUTTON, string) int)(pfunc);
-       return C.int(thisfunc(HBUTTON{window}, C.GoString(str)));
-   case (8 << 8) | go_flags_no_data: // HSPINBUTTON
-       thisfunc := *(*func(HSPINBUTTON, string) int)(pfunc);
-       return C.int(thisfunc(HSPINBUTTON{window}, C.GoString(str)));
-   case (9 << 8) | go_flags_no_data: // HNOTEBOOK
-       thisfunc := *(*func(HNOTEBOOK, string) int)(pfunc);
-       return C.int(thisfunc(HNOTEBOOK{window}, C.GoString(str)));
-   case (10 << 8) | go_flags_no_data: // HBOX
-       thisfunc := *(*func(HBOX, string) int)(pfunc);
-       return C.int(thisfunc(HBOX{window}, C.GoString(str)));
-   case (11 << 8) | go_flags_no_data: // HSCROLLBOX
-       thisfunc := *(*func(HSCROLLBOX, string) int)(pfunc);
-       return C.int(thisfunc(HSCROLLBOX{window}, C.GoString(str)));
-   case (12 << 8) | go_flags_no_data: // HMENUITEM
-       thisfunc := *(*func(HMENUITEM, string) int)(pfunc);
-       return C.int(thisfunc(HMENUITEM{window}, C.GoString(str)));
-   case (13 << 8) | go_flags_no_data: // HLISTBOX
-       thisfunc := *(*func(HLISTBOX, string) int)(pfunc);
-       return C.int(thisfunc(HLISTBOX{window}, C.GoString(str)));
-   case (14 << 8) | go_flags_no_data: // HPERCENT
-       thisfunc := *(*func(HPERCENT, string) int)(pfunc);
-       return C.int(thisfunc(HPERCENT{window}, C.GoString(str)));
-   case (15 << 8) | go_flags_no_data: // HSLIDER
-       thisfunc := *(*func(HSLIDER, string) int)(pfunc);
-       return C.int(thisfunc(HSLIDER{window}, C.GoString(str)));
-   case (16 << 8) | go_flags_no_data: // HSCROLLBAR
-       thisfunc := *(*func(HSCROLLBAR, string) int)(pfunc);
-       return C.int(thisfunc(HSCROLLBAR{window}, C.GoString(str)));
-   case (17 << 8) | go_flags_no_data: // HRENDER
-       thisfunc := *(*func(HRENDER, string) int)(pfunc);
-       return C.int(thisfunc(HRENDER{window}, C.GoString(str)));
-   case (18 << 8) | go_flags_no_data: // HHTML
-       thisfunc := *(*func(HHTML, string) int)(pfunc);
-       return C.int(thisfunc(HHTML{window}, C.GoString(str)));
-   case (19 << 8) | go_flags_no_data: // HCALENDAR
-       thisfunc := *(*func(HCALENDAR, string) int)(pfunc);
-       return C.int(thisfunc(HCALENDAR{window}, C.GoString(str)));
-   case (20 << 8) | go_flags_no_data: // HBITMAP
-       thisfunc := *(*func(HBITMAP, string) int)(pfunc);
-       return C.int(thisfunc(HBITMAP{window}, C.GoString(str)));
-   case (21 << 8) | go_flags_no_data: // HSPLITBAR
-       thisfunc := *(*func(HSPLITBAR, string) int)(pfunc);
-       return C.int(thisfunc(HSPLITBAR{window}, C.GoString(str)));
+       return C.int(thisfunc(HCONTAINER{window, filesystem}, C.GoString(text), POINTER(itemdata)));
    }
-   thisfunc := *(*func(HANDLE, string, POINTER) int)(pfunc);
-   return C.int(thisfunc(HGENERIC{window}, C.GoString(str), POINTER(data)));
+   thisfunc := *(*func(HANDLE, string, POINTER, POINTER) int)(pfunc);
+   return C.int(thisfunc(HGENERIC{window}, C.GoString(text), POINTER(data), POINTER(itemdata)));
 }
 
 //export go_int_callback_item_context

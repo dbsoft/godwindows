@@ -910,9 +910,19 @@ static void go_container_cursor(void *handle, char *text)
     dw_container_cursor((HWND)handle, text);
 }
 
+static void go_container_cursor_by_data(void *handle, void *data)
+{
+    dw_container_cursor_by_data((HWND)handle, data);
+}
+
 static void go_container_delete_row(void *handle, char *text)
 {
     dw_container_delete_row((HWND)handle, text);
+}
+
+static void go_container_delete_row_by_data(void *handle, void *data)
+{
+    dw_container_delete_row_by_data((HWND)handle, data);
 }
 
 static void go_container_optimize(void *handle)
@@ -1096,7 +1106,7 @@ extern int go_int_callback_configure(void *pfunc, void* window, int width, int h
 extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8, unsigned int flags);
 extern int go_int_callback_mouse(void *pfunc, void* window, int x, int y, int mask, void *data, unsigned int flags);
 extern int go_int_callback_expose(void *pfunc, void* window, int x, int y, int width, int height, void *data, unsigned int flags);
-extern int go_int_callback_string(void *pfunc, void* window, char *str, void *data, unsigned int flags);
+extern int go_int_callback_item_enter(void *pfunc, void *window, char *text, void *data, void *itemdata, unsigned int flags);
 extern int go_int_callback_item_context(void *pfunc, void *window, char *text, int x, int y, void *data, void *itemdata, unsigned int flags);
 extern int go_int_callback_item_select(void *pfunc, void *window, void *item, char *text, void *data, void *itemdata, unsigned int flags);
 extern int go_int_callback_numeric(void *pfunc, void* window, int val, void *data, unsigned int flags);
@@ -1157,12 +1167,12 @@ static int DWSIGNAL go_callback_expose(HWND window,  DWExpose *exp, void *data)
    return 0;
 }
 
-static int DWSIGNAL go_callback_string(HWND window, char *str, void *data)
+static int DWSIGNAL go_callback_item_enter(HWND window, char *text, void *data, void *itemdata)
 {
    if(data)
    {
       void **param = (void **)data;
-      return go_int_callback_string(param[0], (void *)window, str, param[1], DW_POINTER_TO_INT(param[2]));
+      return go_int_callback_item_enter(param[0], (void *)window, text, param[1], itemdata, DW_POINTER_TO_INT(param[2]));
    }
    return 0;
 }
@@ -1316,7 +1326,7 @@ static void go_signal_connect(void *window, char *signame, void *sigfunc, void *
       }
       else if(strcmp(signame, DW_SIGNAL_ITEM_ENTER) == 0)
       {
-         func = (void *)go_callback_string;
+         func = (void *)go_callback_item_enter;
       }
       else if(strcmp(signame, DW_SIGNAL_ITEM_CONTEXT) == 0)
       {

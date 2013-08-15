@@ -647,8 +647,8 @@ func keypress_callback(window dw.HWND, ch uint8, vk int, state int, data dw.POIN
 }
 
 // Page 3 and 4 Callbacks
-func item_enter_cb(window dw.HCONTAINER, text string, data dw.POINTER) int {
-    message := fmt.Sprintf("DW_SIGNAL_ITEM_ENTER: Window: %x Text: %s", dw.HANDLE_TO_UINTPTR(window), text);
+func item_enter_cb(window dw.HCONTAINER, text string, data dw.POINTER, itemdata dw.POINTER) int {
+    message := fmt.Sprintf("DW_SIGNAL_ITEM_ENTER: Window: %x Text: %s Itemdata: %x", dw.HANDLE_TO_UINTPTR(window), text, uintptr(itemdata));
     dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message);
     return FALSE;
 }
@@ -1152,7 +1152,8 @@ func container_add() {
         dw.Filesystem_set_item_ulong(container, containerinfo, 1, z, uint(z*100));
         dw.Filesystem_set_item_time(container, containerinfo, 2, z, z+10, z+10, z+10);
         dw.Filesystem_set_item_date(container, containerinfo, 3, z, z+10, z+10, z+2000);
-        dw.Container_set_row_title(containerinfo, z, fmt.Sprintf("Don't allocate from stack: Item: %d", z));
+        dw.Container_set_row_title(containerinfo, z, fmt.Sprintf("We can now allocate from the stack: Item: %d", z));
+        dw.Container_set_row_data(containerinfo, z, dw.POINTER(uintptr(z)));
     }
     dw.Container_insert(container, containerinfo, 3);
 

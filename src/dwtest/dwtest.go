@@ -677,6 +677,8 @@ func container_select_cb(window dw.HCONTAINER, item dw.HTREEITEM, text string, d
     message := fmt.Sprintf("DW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x", dw.HANDLE_TO_UINTPTR(window),
             dw.HANDLE_TO_UINTPTR(item), text, uintptr(itemdata));
     dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message);
+    message = fmt.Sprintf("\r\nDW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x\r\n", dw.HANDLE_TO_UINTPTR(window),
+            dw.HANDLE_TO_UINTPTR(item), text, uintptr(itemdata));
     mle_point = dw.Mle_import(container_mle, message, mle_point);
     str := dw.Container_query_start(container, dw.CRA_SELECTED);
     for len(str) > 0 {

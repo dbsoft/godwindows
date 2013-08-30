@@ -4277,7 +4277,9 @@ func (handle HCONTAINER) Delete(rowcount int) {
 func Container_query_start(handle HANDLE, flags uint) string {
    cresult := C.go_container_query_start(handle.GetHandle(), C.ulong(flags));
    result := C.GoString(cresult);
-   /* TODO: Do I need to free this? */
+   if((flags & C.DW_CR_RETDATA) == 0) {
+      C.dw_free(unsafe.Pointer(cresult));
+   }
    return result;
 }
 
@@ -4290,7 +4292,9 @@ func (handle HCONTAINER) QueryStart(flags uint) string {
 func Container_query_next(handle HANDLE, flags uint) string {
    cresult := C.go_container_query_next(handle.GetHandle(), C.ulong(flags));
    result := C.GoString(cresult);
-   /* TODO: Do I need to free this? */
+   if((flags & C.DW_CR_RETDATA) == 0) {
+      C.dw_free(unsafe.Pointer(cresult));
+   }
    return result;
 }
 

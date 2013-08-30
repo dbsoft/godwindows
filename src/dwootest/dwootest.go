@@ -909,6 +909,8 @@ func container_add(notebookbox4 dw.HBOX) {
                                     message := fmt.Sprintf("DW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x", 
                                             dw.HANDLE_TO_UINTPTR(window), dw.HANDLE_TO_UINTPTR(item), text, uintptr(itemdata));
                                     container_status.SetText(message);
+                                    message = fmt.Sprintf("\r\nDW_SIGNAL_ITEM_SELECT: Window: %x Item: %x Text: %s Itemdata: %x\r\n", 
+                                             dw.HANDLE_TO_UINTPTR(window), dw.HANDLE_TO_UINTPTR(item), text, uintptr(itemdata));
                                     mle_point = container_mle.Import(message, mle_point);
                                     str := container.QueryStart(dw.CRA_SELECTED);
                                     for len(str) > 0 {

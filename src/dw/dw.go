@@ -821,6 +821,20 @@ func Init(newthread int) int {
     return int(C.go_init(C.int(newthread), 0, nil));
 }
 
+// Initializes a Go Routine for Dynamic Windows calls
+func InitThread() {
+   runtime.LockOSThread();
+   
+   C._dw_init_thread();
+}
+
+// Deinitializes a Go Routine when Dyamic Windows calls are complete
+func DeinitThread() {   
+   C._dw_deinit_thread();
+
+   runtime.UnlockOSThread();
+}
+
 // Cleanly terminates a DW session, should be signal handler safe but does not exit.
 func Shutdown() {
     C.dw_shutdown();

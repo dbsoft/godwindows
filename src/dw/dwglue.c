@@ -1101,6 +1101,56 @@ static void go_print_cancel(void *print)
     return dw_print_cancel((HPRINT)print);
 }
 
+static void *go_mutex_new(void)
+{
+    return (void *)dw_mutex_new();
+}
+
+static void go_mutex_close(void *mutex)
+{
+    dw_mutex_close((HMTX)mutex);
+}
+
+static void go_mutex_lock(void *mutex)
+{
+    dw_mutex_lock((HMTX)mutex);
+}
+
+static void go_mutex_unlock(void *mutex)
+{
+    dw_mutex_unlock((HMTX)mutex);
+}
+
+static int go_mutex_trylock(void *mutex)
+{
+    return dw_mutex_trylock((HMTX)mutex);
+}
+
+static void *go_event_new(void)
+{
+    return (void *)dw_event_new();
+}
+
+static int go_event_close(void *event)
+{
+    return dw_event_close((HMTX)event);
+}
+
+static int go_event_post(void *event)
+{
+    return dw_event_post((HMTX)event);
+}
+
+static int go_event_reset(void *event)
+{
+    return dw_event_reset((HMTX)event);
+}
+
+static int go_event_wait(void *event, unsigned long timeout)
+{
+    return dw_event_wait((HMTX)event, timeout);
+}
+
 extern int go_int_callback_basic(void *pfunc, void* window, void *data, unsigned int flags);
 extern int go_int_callback_configure(void *pfunc, void* window, int width, int height, void *data, unsigned int flags);
 extern int go_int_callback_keypress(void *pfunc, void *window, char ch, int vk, int state, void *data, char *utf8, unsigned int flags);

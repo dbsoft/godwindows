@@ -108,6 +108,12 @@ type HCONTINS struct {
     hcont HANDLE
     filesystem bool
 }
+type HEV struct {
+    hev unsafe.Pointer
+}
+type HMTX struct {
+    hmtx unsafe.Pointer
+}
 type HICN unsafe.Pointer
 type HTIMER struct {
     tid C.int
@@ -804,6 +810,22 @@ func (contins HCONTINS) GetHandle() unsafe.Pointer {
 }
 
 func (window HCONTINS) GetType() C.uint {
+   return 0;
+}
+
+func (event HEV) GetHandle() unsafe.Pointer {
+   return event.hev;
+}
+
+func (window HEV) GetType() C.uint {
+   return 0;
+}
+
+func (mutex HMTX) GetHandle() unsafe.Pointer {
+   return mutex.hmtx;
+}
+
+func (window HMTX) GetType() C.uint {
    return 0;
 }
 
@@ -4289,12 +4311,15 @@ func (handle HCONTAINER) Delete(rowcount int) {
 
 // Starts a new query of a container.
 func Container_query_start(handle HANDLE, flags uint) string {
-   cresult := C.go_container_query_start(handle.GetHandle(), C.ulong(flags));
+   cresult := C.go_container_query_start(handle.GetHandle(), C.ulong(flags) &^ C.DW_CR_RETDATA);
    result := C.GoString(cresult);
-   if((flags & C.DW_CR_RETDATA) == 0) {
-      C.dw_free(unsafe.Pointer(cresult));
-   }
+   defer C.dw_free(unsafe.Pointer(cresult));
    return result;
+}
+
+func Container_query_start_data(handle HANDLE, flags uint) POINTER {
+   cresult := C.go_container_query_start(handle.GetHandle(), C.ulong(flags) | C.DW_CR_RETDATA);
+   return POINTER(cresult);
 }
 
 // Starts a new query of a container.
@@ -4304,12 +4329,15 @@ func (handle HCONTAINER) QueryStart(flags uint) string {
 
 // Continues an existing query of a container.
 func Container_query_next(handle HANDLE, flags uint) string {
-   cresult := C.go_container_query_next(handle.GetHandle(), C.ulong(flags));
+   cresult := C.go_container_query_next(handle.GetHandle(), C.ulong(flags) &^ C.DW_CR_RETDATA);
    result := C.GoString(cresult);
-   if((flags & C.DW_CR_RETDATA) == 0) {
-      C.dw_free(unsafe.Pointer(cresult));
-   }
+   defer C.dw_free(unsafe.Pointer(cresult));
    return result;
+}
+
+func Container_query_next_data(handle HANDLE, flags uint) POINTER {
+   cresult := C.go_container_query_next(handle.GetHandle(), C.ulong(flags) | C.DW_CR_RETDATA);
+   return POINTER(cresult);
 }
 
 // Continues an existing query of a container.
@@ -4647,6 +4675,106 @@ func (print HPRINT) Cancel() {
 
 func init() {
    runtime.LockOSThread();
+}
+
+// Creates a new mutex semaphore.
+func Mutex_new() HMTX {
+   return HMTX{C.go_mutex_new()};
+}
+
+// Creates a new mutex semaphore.
+func MutexNew() HMTX {
+    return Mutex_new();
+}
+
+// Closes a semaphore created by Mutex_new().
+func Mutex_close(handle HMTX) {
+    C.go_mutex_close(unsafe.Pointer(handle.hmtx));
+}
+
+// Closes a semaphore created by MutexNew().
+func (handle HMTX) Close() {
+    Mutex_close(handle);
+}
+
+// Tries to gain access to the semaphore, if it can't it blocks.
+func Mutex_lock(handle HMTX) {
+    C.go_mutex_lock(unsafe.Pointer(handle.hmtx));
+}
+
+// Tries to gain access to the semaphore, if it can't it blocks.
+func (handle HMTX) Lock() {
+    Mutex_lock(handle);
+}
+
+// Reliquishes the access to the semaphore.
+func Mutex_unlock(handle HMTX) {
+    C.go_mutex_unlock(unsafe.Pointer(handle.hmtx));
+}
+
+// Reliquishes the access to the semaphore.
+func (handle HMTX) Unlock() {
+    Mutex_lock(handle);
+}
+
+// Tries to gain access to the semaphore.
+func Mutex_trylock(handle HMTX) int {
+    return int(C.go_mutex_trylock(unsafe.Pointer(handle.hmtx)));
+}
+
+// Tries to gain access to the semaphore.
+func (handle HMTX) TryLock() int {
+    return Mutex_trylock(handle);
+}
+
+// Creates an unnamed event semaphore.
+func Event_new() HEV {
+   return HEV{C.go_event_new()};
+}
+
+// Creates an unnamed event semaphore.
+func EventNew() HEV {
+    return Event_new();
+}
+
+// Closes a semaphore created by Event_new().
+func Event_close(handle HEV) int {
+    return int(C.go_event_close(unsafe.Pointer(handle.hev)));
+}
+
+// Closes a semaphore created by EventNew().
+func (handle HEV) Close() int {
+    return Event_close(handle);
+}
+
+// Posts a semaphore created by Event_new(). Causing all threads waiting on this event in Event_wait() to continue.
+func Event_post(handle HEV) int {
+    return int(C.go_event_post(unsafe.Pointer(handle.hev)));
+}
+
+// Posts a semaphore created by EventNew(). Causing all threads waiting on this event in Wait() to continue.
+func (handle HEV) Post() int {
+    return Event_post(handle);
+}
+
+// Resets a semaphore created by Event_new().
+func Event_reset(handle HEV) int {
+    return int(C.go_event_reset(unsafe.Pointer(handle.hev)));
+}
+
+// Resets a semaphore created by EventNew().
+func (handle HEV) Reset() int {
+    return Event_reset(handle);
+}
+
+// Waits on a semaphore created by Event_new(), until the event gets posted or until the timeout expires.
+func Event_wait(handle HEV, timeout int) int {
+    return int(C.go_event_wait(unsafe.Pointer(handle.hev), C.ulong(timeout)));
+}
+
+// Waits on a semaphore created by EventNew(), until the event gets posted or until the timeout expires.
+func (handle HEV) Wait(timeout int) int {
+    return Event_wait(handle, timeout);
 }
 
 var go_flags_no_data C.uint = 1;

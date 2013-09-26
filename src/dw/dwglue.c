@@ -1133,22 +1133,23 @@ static void *go_event_new(void)
 
 static int go_event_close(void *event)
 {
-    return dw_event_close((HMTX)event);
+    HEV thisevent = (HEV)event;
+    return dw_event_close(&thisevent);
 }
 
 static int go_event_post(void *event)
 {
-    return dw_event_post((HMTX)event);
+    return dw_event_post((HEV)event);
 }
 
 static int go_event_reset(void *event)
 {
-    return dw_event_reset((HMTX)event);
+    return dw_event_reset((HEV)event);
 }
 
 static int go_event_wait(void *event, unsigned long timeout)
 {
-    return dw_event_wait((HMTX)event, timeout);
+    return dw_event_wait((HEV)event, timeout);
 }
 
 extern int go_int_callback_basic(void *pfunc, void* window, void *data, unsigned int flags);

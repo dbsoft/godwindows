@@ -81,6 +81,15 @@ var MAX_WIDGETS = 20
 
 var iteration = 0;
 
+// Page 9
+var notebookbox9 dw.HBOX
+var threadmle dw.HMLE
+var startbutton dw.HBUTTON
+var mutex dw.HMTX;
+var workevent, controlevent dw.HEV
+var finished = 0
+var ready = 0
+var mlepos = 0
 
 // Miscellaneous
 var fileicon, foldericon dw.HICN
@@ -790,6 +799,111 @@ func scrollbox_button_callback(window dw.HBUTTON, data dw.POINTER) int {
     return FALSE;
 }
 
+// Page 9 Callbacks
+func run_thread(threadnum int) {
+    dw.InitThread();
+    update_mle(fmt.Sprintf("Thread %d started.\r\n", threadnum), TRUE);
+
+    /* Increment the ready count while protected by mutex */
+    dw.Mutex_lock(mutex);
+    ready++;
+    /* If all 4 threads have incrememted the ready count...
+     * Post the control event semaphore so things will get started.
+     */
+    if(ready == 4) {
+        dw.Event_post(controlevent);
+    }
+    dw.Mutex_unlock(mutex);
+
+    for finished == 0 {
+        result := dw.Event_wait(workevent, 2000);
+
+        if(result == dw.ERROR_TIMEOUT) {
+            update_mle(fmt.Sprintf("Thread %d timeout waiting for event.\r\n", threadnum), dw.TRUE);
+        } else if(result == dw.ERROR_NONE) {
+            update_mle(fmt.Sprintf("Thread %d doing some work.\r\n", threadnum), dw.TRUE);
+            /* Pretend to do some work */
+            dw.Main_sleep(1000 * threadnum);
+
+            /* Increment the ready count while protected by mutex */
+            dw.Mutex_lock(mutex);
+            ready++;
+            buf := fmt.Sprintf("Thread %d work done. ready=%d", threadnum, ready);
+            /* If all 4 threads have incrememted the ready count...
+            * Post the control event semaphore so things will get started.
+            */
+            if(ready == 4) {
+                dw.Event_post(controlevent);
+                buf = fmt.Sprintf("%s%s", buf, " Control posted.");
+            }
+            dw.Mutex_unlock(mutex);
+            update_mle(fmt.Sprintf("%s\r\n", buf), dw.TRUE);
+        } else {
+            update_mle(fmt.Sprintf("Thread %d error %d.\r\n", threadnum), dw.TRUE);
+            dw.Main_sleep(10000);
+        }
+    }
+    update_mle(fmt.Sprintf("Thread %d finished.\r\n", threadnum), dw.TRUE);
+    dw.DeinitThread();
+}
+
+func control_thread() {
+    dw.InitThread();
+    
+    inprogress := 5;
+
+    for inprogress != 0 {
+        result := dw.Event_wait(controlevent, 2000);
+
+        if(result == dw.ERROR_TIMEOUT) {
+            update_mle("Control thread timeout waiting for event.\r\n", dw.TRUE);
+        } else if(result == dw.ERROR_NONE) {
+            /* Reset the control event */
+            dw.Event_reset(controlevent);
+            ready = 0;
+            update_mle(fmt.Sprintf("Control thread starting worker threads. Inprogress=%d\r\n", inprogress), dw.TRUE);
+            /* Start the work threads */
+            dw.Event_post(workevent);
+            dw.Main_sleep(100);
+            /* Reset the work event */
+            dw.Event_reset(workevent);
+            inprogress--;
+        } else {
+            update_mle(fmt.Sprintf("Control thread error %d.\r\n", result), dw.TRUE);
+            dw.Main_sleep(10000);
+        }
+    }
+    /* Tell the other threads we are done */
+    finished = dw.TRUE;
+    dw.Event_post(workevent);
+    /* Close the control event */
+    dw.Event_close(controlevent);
+    update_mle("Control thread finished.\r\n", dw.TRUE);
+    dw.Window_enable(startbutton);
+    dw.DeinitThread();
+}
+
+func start_threads_button_callback(window dw.HWND, data dw.POINTER) int {
+    dw.Window_disable(startbutton);
+    dw.Mutex_lock(mutex);
+    controlevent = dw.Event_new();
+    dw.Event_reset(workevent);
+    finished = FALSE;
+    ready = 0;
+    update_mle("Starting thread 1\r\n", FALSE);
+    go run_thread(1);
+    update_mle("Starting thread 2\r\n", FALSE);
+    go run_thread(2);
+    update_mle("Starting thread 3\r\n", FALSE);
+    go run_thread(3);
+    update_mle("Starting thread 4\r\n", FALSE);
+    go run_thread(4);
+    update_mle("Starting control thread\r\n", FALSE);
+    go control_thread();
+    dw.Mutex_unlock(mutex);
+    return FALSE;
+}
+
 var exit_callback_func = exit_callback;
 var copy_clicked_callback_func = copy_clicked_callback;
 var paste_clicked_callback_func = paste_clicked_callback;
@@ -829,6 +943,7 @@ var spinbutton_valuechanged_callback_func = spinbutton_valuechanged_callback;
 var slider_valuechanged_callback_func = slider_valuechanged_callback;
 var print_callback_func = print_callback;
 var draw_page_func = draw_page;
+var start_threads_button_callback_func = start_threads_button_callback;
 
 var checkable_string = "checkable";
 var noncheckable_string = "non-checkable";
@@ -1312,6 +1427,35 @@ func scrollbox_add() {
     }
 }
 
+// Page 9
+func update_mle(text string, lock int) {
+    /* Protect pos from being changed by different threads */
+    if(lock != 0) {
+        dw.Mutex_lock(mutex);
+    }
+    mlepos = dw.Mle_import(threadmle, text, mlepos);
+    dw.Mle_set_cursor(threadmle, mlepos);
+    if(lock != 0) {
+        dw.Mutex_unlock(mutex);
+    }
+}
+
+func thread_add() {
+    /* create a box to pack into the notebook page */
+    tmpbox := dw.Box_new(dw.VERT, 0);
+    dw.Box_pack_start(notebookbox9, tmpbox, 0, 0, dw.TRUE, dw.TRUE, 1);
+
+    startbutton = dw.Button_new("Start Threads", 0);
+    dw.Box_pack_start(tmpbox, startbutton, -1, 30, dw.FALSE, dw.FALSE, 0);
+    dw.Signal_connect(startbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(&start_threads_button_callback_func), nil);
+
+    /* Create the base threading components */
+    threadmle = dw.Mle_new(0);
+    dw.Box_pack_start(tmpbox, threadmle, 1, 1, TRUE, TRUE, 0);
+    mutex = dw.Mutex_new();
+    workevent = dw.Event_new();
+}
+
 func main() {
    /* Pick an approriate font for our platform */
    if runtime.GOOS == "windows" {
@@ -1410,6 +1554,12 @@ func main() {
    dw.Notebook_page_set_text(notebook, notebookpage8, "scrollbox");
    scrollbox_add();
 
+   notebookbox9 = dw.Box_new(dw.VERT, 8);
+   notebookpage9 := dw.Notebook_page_new(notebook, 1, FALSE);
+   dw.Notebook_pack(notebook, notebookpage9, notebookbox9);
+   dw.Notebook_page_set_text(notebook, notebookpage9, "thread/event");
+   thread_add();
+    
    /* Set the default field */
    dw.Window_default(mainwindow, copypastefield);
 

@@ -46,6 +46,15 @@ var iteration = 0;
 // Page 8
 var MAX_WIDGETS = 20
 
+// Page 9
+var threadmle dw.HMLE
+var startbutton dw.HBUTTON
+var mutex dw.HMTX;
+var workevent, controlevent dw.HEV
+var finished = 0
+var ready = 0
+var mlepos = 0
+
 // Miscellaneous
 var fileicon, foldericon dw.HICN
 var current_file string
@@ -1082,6 +1091,138 @@ func scrollbox_add(notebookbox8 dw.HBOX) {
     }
 }
 
+// Page 9
+func update_mle(text string, lock int) {
+    /* Protect pos from being changed by different threads */
+    if(lock != 0) {
+        mutex.Lock();
+    }
+    mlepos = threadmle.Import(text, mlepos);
+    threadmle.SetCursor(mlepos);
+    if(lock != 0) {
+        mutex.Unlock();
+    }
+}
+
+func thread_add(notebookbox9 dw.HBOX) {
+    /* create a box to pack into the notebook page */
+    tmpbox := dw.BoxNew(dw.VERT, 0);
+    notebookbox9.PackStart(tmpbox, 0, 0, dw.TRUE, dw.TRUE, 1);
+
+    startbutton := dw.ButtonNew("Start Threads", 0);
+    tmpbox.PackStart(startbutton, -1, 30, dw.FALSE, dw.FALSE, 0);
+    /* Create the base threading components */
+    threadmle = dw.MLENew(0);
+    tmpbox.PackStart(threadmle, 1, 1, dw.TRUE, dw.TRUE, 0);
+    mutex = dw.MutexNew();
+    workevent = dw.EventNew();
+    /* Connect signal handlers */
+    startbutton.ConnectClicked(func(window dw.HBUTTON) int {
+        startbutton.Disable();
+        mutex.Lock();
+        controlevent = dw.EventNew();
+        workevent.Reset();
+        finished = dw.FALSE;
+        ready = 0;
+        update_mle("Starting thread 1\r\n", dw.FALSE);
+        go run_thread(1);
+        update_mle("Starting thread 2\r\n", dw.FALSE);
+        go run_thread(2);
+        update_mle("Starting thread 3\r\n", dw.FALSE);
+        go run_thread(3);
+        update_mle("Starting thread 4\r\n", dw.FALSE);
+        go run_thread(4);
+        update_mle("Starting control thread\r\n", dw.FALSE);
+        go control_thread();
+        mutex.Unlock();
+        return dw.FALSE;
+    });
+
+}
+
+func run_thread(threadnum int) {
+    dw.InitThread();
+    update_mle(fmt.Sprintf("Thread %d started.\r\n", threadnum), dw.TRUE);
+
+    /* Increment the ready count while protected by mutex */
+    mutex.Lock();
+    ready++;
+    /* If all 4 threads have incrememted the ready count...
+     * Post the control event semaphore so things will get started.
+     */
+    if(ready == 4) {
+        controlevent.Post();
+    }
+    mutex.Unlock();
+
+    for finished == 0 {
+        result := workevent.Wait(2000);
+
+        if(result == dw.ERROR_TIMEOUT) {
+            update_mle(fmt.Sprintf("Thread %d timeout waiting for event.\r\n", threadnum), dw.TRUE);
+        } else if(result == dw.ERROR_NONE) {
+            update_mle(fmt.Sprintf("Thread %d doing some work.\r\n", threadnum), dw.TRUE);
+            /* Pretend to do some work */
+            dw.MainSleep(1000 * threadnum);
+
+            /* Increment the ready count while protected by mutex */
+            mutex.Lock();
+            ready++;
+            buf := fmt.Sprintf("Thread %d work done. ready=%d", threadnum, ready);
+            /* If all 4 threads have incrememted the ready count...
+            * Post the control event semaphore so things will get started.
+            */
+            if(ready == 4) {
+                controlevent.Post();
+                buf = fmt.Sprintf("%s%s", buf, " Control posted.");
+            }
+            mutex.Unlock();
+            update_mle(fmt.Sprintf("%s\r\n", buf), dw.TRUE);
+        } else {
+            update_mle(fmt.Sprintf("Thread %d error %d.\r\n", threadnum), dw.TRUE);
+            dw.MainSleep(10000);
+        }
+    }
+    update_mle(fmt.Sprintf("Thread %d finished.\r\n", threadnum), dw.TRUE);
+    dw.DeinitThread();
+}
+
+func control_thread() {
+    dw.InitThread();
+    
+    inprogress := 5;
+
+    for inprogress != 0 {
+        result := controlevent.Wait(2000);
+
+        if(result == dw.ERROR_TIMEOUT) {
+            update_mle("Control thread timeout waiting for event.\r\n", dw.TRUE);
+        } else if(result == dw.ERROR_NONE) {
+            /* Reset the control event */
+            controlevent.Reset();
+            ready = 0;
+            update_mle(fmt.Sprintf("Control thread starting worker threads. Inprogress=%d\r\n", inprogress), dw.TRUE);
+            /* Start the work threads */
+            workevent.Post();
+            dw.MainSleep(100);
+            /* Reset the work event */
+            workevent.Reset();
+            inprogress--;
+        } else {
+            update_mle(fmt.Sprintf("Control thread error %d.\r\n", result), dw.TRUE);
+            dw.MainSleep(10000);
+        }
+    }
+    /* Tell the other threads we are done */
+    finished = dw.TRUE;
+    workevent.Post();
+    /* Close the control event */
+    controlevent.Close();
+    update_mle("Control thread finished.\r\n", dw.TRUE);
+    startbutton.Enable();
+    dw.DeinitThread();
+}
+
 func main() {
    /* Pick an approriate font for our platform */
    if runtime.GOOS == "windows" {
@@ -1182,6 +1323,12 @@ func main() {
    notebookpage8.Pack(notebookbox8);
    notebookpage8.SetText("scrollbox");
    scrollbox_add(notebookbox8);
+
+   notebookbox9 := dw.BoxNew(dw.VERT, 8);
+   notebookpage9 := notebook.PageNew(1, dw.FALSE);
+   notebookpage9.Pack(notebookbox9);
+   notebookpage9.SetText("thread/event");
+   thread_add(notebookbox9);
 
    mainwindow.ConnectDelete(func(window dw.HWND) int { return exit_handler(); });
    /*

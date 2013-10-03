@@ -1109,7 +1109,7 @@ func thread_add(notebookbox9 dw.HBOX) {
     tmpbox := dw.BoxNew(dw.VERT, 0);
     notebookbox9.PackStart(tmpbox, 0, 0, dw.TRUE, dw.TRUE, 1);
 
-    startbutton := dw.ButtonNew("Start Threads", 0);
+    startbutton = dw.ButtonNew("Start Threads", 0);
     tmpbox.PackStart(startbutton, -1, 30, dw.FALSE, dw.FALSE, 0);
     /* Create the base threading components */
     threadmle = dw.MLENew(0);

@@ -4714,7 +4714,7 @@ func Mutex_unlock(handle HMTX) {
 
 // Reliquishes the access to the semaphore.
 func (handle HMTX) Unlock() {
-    Mutex_lock(handle);
+    Mutex_unlock(handle);
 }
 
 // Tries to gain access to the semaphore.

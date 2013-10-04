@@ -877,7 +877,7 @@ func control_thread() {
     finished = dw.TRUE;
     dw.Event_post(workevent);
     /* Close the control event */
-    dw.Event_close(controlevent);
+    dw.Event_close(&controlevent);
     update_mle("Control thread finished.\r\n", dw.TRUE);
     dw.Window_enable(startbutton);
     dw.DeinitThread();

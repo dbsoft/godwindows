@@ -4738,12 +4738,14 @@ func EventNew() HEV {
 }
 
 // Closes a semaphore created by Event_new().
-func Event_close(handle HEV) int {
-    return int(C.go_event_close(unsafe.Pointer(handle.hev)));
+func Event_close(handle *HEV) int {
+    retval := int(C.go_event_close(unsafe.Pointer(handle.hev)));
+    handle.hev = nil;
+    return retval;
 }
 
 // Closes a semaphore created by EventNew().
-func (handle HEV) Close() int {
+func (handle *HEV) Close() int {
     return Event_close(handle);
 }
 

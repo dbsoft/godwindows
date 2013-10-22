@@ -108,6 +108,9 @@ type HCONTINS struct {
     hcont HANDLE
     filesystem bool
 }
+type HDIALOG struct {
+    hdialog unsafe.Pointer
+}
 type HEV struct {
     hev unsafe.Pointer
 }
@@ -4725,6 +4728,36 @@ func Mutex_trylock(handle HMTX) int {
 // Tries to gain access to the semaphore.
 func (handle HMTX) TryLock() int {
     return Mutex_trylock(handle);
+}
+
+// Allocates and initializes a dialog.
+func Dialog_new() HDIALOG {
+   return HDIALOG{C.go_dialog_new()};
+}
+
+// Allocates and initializes a dialog.
+func DialogNew() HDIALOG {
+    return Dialog_new();
+}
+
+// Accepts a dialog and returns the given data to the initial call of Dialog_wait().
+func Dialog_dismiss(handle HDIALOG, result POINTER) int {
+	return int(C.go_dialog_dismiss(unsafe.Pointer(handle.hdialog), unsafe.Pointer(result)));
+}
+
+// Returns the given data to the initial call of Wait().
+func (handle HDIALOG) Dismiss(result uintptr) int {
+	return Dialog_dismiss(handle, POINTER(result));
+}
+
+// Accepts a dialog, waits for Dialog_dismiss() to be called by a signal handler with the given dialog.
+func Dialog_wait(handle HDIALOG) POINTER {
+	return POINTER(C.go_dialog_wait(unsafe.Pointer(handle.hdialog)));
+}
+
+// Waits for Dismiss() to be called by a signal handler.
+func (handle HDIALOG) Wait() uintptr {
+	return uintptr(Dialog_wait(handle));
 }
 
 // Creates an unnamed event semaphore.

@@ -1126,6 +1126,21 @@ static int go_mutex_trylock(void *mutex)
     return dw_mutex_trylock((HMTX)mutex);
 }
 
+static void *go_dialog_new(void)
+{
+    return (void *)dw_dialog_new(NULL);
+}
+
+static int go_dialog_dismiss(void *dialog, void *result)
+{
+	return dw_dialog_dismiss((DWDialog *)dialog, result);
+}
+
+static void *go_dialog_wait(void *dialog)
+{
+	return (void *)dw_dialog_wait((DWDialog *)dialog);
+}
+
 static void *go_event_new(void)
 {
     return (void *)dw_event_new();

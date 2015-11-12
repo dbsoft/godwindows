@@ -3205,7 +3205,7 @@ func Radiobutton_new(text string, id uint) HBUTTON {
 }
 
 // Create a new radiobutton widget to be packed.
-func RadioButtonNew(text string id uint) HBUTTON {
+func RadioButtonNew(text string, id uint) HBUTTON {
     return Radiobutton_new(text, id); 
 }
 
@@ -3218,7 +3218,7 @@ func Checkbox_new(text string, id uint) HBUTTON {
 }
 
 // Create a new checkbox widget to be packed.
-func CheckButtonNew(text string id uint) HBUTTON {
+func CheckButtonNew(text string, id uint) HBUTTON {
     return Checkbox_new(text, id);
 }
 

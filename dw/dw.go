@@ -5,8 +5,8 @@ package dw
 #cgo freebsd pkg-config: dwindows
 #cgo darwin CFLAGS: -I/usr/local/include -g -O2 -D__MAC__
 #cgo darwin LDFLAGS: -L/usr/local/lib -ldwindows -lresolv -framework Cocoa -framework WebKit -lpthread
-#cgo windows CFLAGS: -IC:/Work/BitBucket/dwindows -g -O2 -D__WIN32__ -mthreads
-#cgo windows LDFLAGS: -LC:/Work/BitBucket/dwindows -ldw
+#cgo windows CFLAGS: -IC:/Work/DBSoft/dwindows -g -O2 -D__WIN32__ -mthreads
+#cgo windows LDFLAGS: -LC:/Work/DBSoft/dwindows -ldw
 #include "dwglue.c"
 */
 import "C"

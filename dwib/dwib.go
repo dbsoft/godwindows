@@ -5,8 +5,8 @@ package dwib
 #cgo freebsd pkg-config: dwib dwindows libxml-2.0
 #cgo darwin CFLAGS: -I/usr/local/include -g -O2 -D__MAC__
 #cgo darwin LDFLAGS: -L/usr/local/lib -ldwindows -ldwib -lresolv -framework Cocoa -framework WebKit -lpthread
-#cgo windows CFLAGS: -IC:/Work/BitBucket/dwindows -IC:/Work/BitBucket/dwib -g -O2 -D__WIN32__ -mthreads
-#cgo windows LDFLAGS: -LC:/Work/BitBucket/dwindows -ldw -LC:/Work/BitBucket/dwib -ldwib
+#cgo windows CFLAGS: -IC:/Work/DBSoft/dwindows -IC:/Work/DBSoft/dwib -g -O2 -D__WIN32__ -mthreads
+#cgo windows LDFLAGS: -LC:/Work/DBSoft/dwindows -ldw -LC:/Work/DBSoft/dwib -ldwib
 #include "dwibglue.c"
 */
 import "C"

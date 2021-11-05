@@ -3,9 +3,9 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"dw"
 	"fmt"
 	"go/build"
+	"hg.code.sf.net/p/godwindows/code.hg/dw"
 	"io"
 	"os"
 	"runtime"

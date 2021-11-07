@@ -950,7 +950,7 @@ func container_add(notebookbox4 dw.HBOX) {
 			thisicon = foldericon
 		}
 		fmt.Printf("Initial: container: %x containerinfo: %x icon: %x\n", uintptr(dw.HANDLE_TO_POINTER(container)),
-			dw.HANDLE_TO_UINTPTR(containerinfo), uintptr(dw.POINTER(thisicon)))
+			dw.HANDLE_TO_UINTPTR(containerinfo), uintptr(thisicon))
 		containerinfo.SetFile(z, fmt.Sprintf("Filename %d", z+1), thisicon)
 		containerinfo.SetItemIcon(0, z, thisicon)
 		containerinfo.SetItemULong(1, z, uint(z*100))
@@ -1395,7 +1395,7 @@ func main() {
 	notebookpage7.SetText("html")
 
 	rawhtml := dw.HtmlNew(1001)
-	if rawhtml.GetHandle() != nil {
+	if rawhtml.GetHandle() != 0 {
 		notebookbox7.PackStart(rawhtml, 0, 100, dw.TRUE, dw.FALSE, 0)
 		rawhtml.Raw("<html><body><center><h1>dwtest</h1></center></body></html>")
 		html := dw.HtmlNew(1002)

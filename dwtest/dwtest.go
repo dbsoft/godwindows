@@ -1335,7 +1335,7 @@ func container_add() {
 			thisicon = foldericon
 		}
 		fmt.Printf("Initial: container: %x containerinfo: %x icon: %x\n", uintptr(dw.HANDLE_TO_POINTER(container)),
-			dw.HANDLE_TO_UINTPTR(containerinfo), uintptr(dw.POINTER(thisicon)))
+			dw.HANDLE_TO_UINTPTR(containerinfo), uintptr(thisicon))
 		dw.Filesystem_set_file(container, containerinfo, z, fmt.Sprintf("Filename %d", z+1), thisicon)
 		dw.Filesystem_set_item_icon(container, containerinfo, 0, z, thisicon)
 		dw.Filesystem_set_item_ulong(container, containerinfo, 1, z, uint(z*100))
@@ -1609,7 +1609,7 @@ func main() {
 	dw.Notebook_page_set_text(notebook, notebookpage7, "html")
 
 	rawhtml := dw.Html_new(1001)
-	if rawhtml.GetHandle() != nil {
+	if rawhtml.GetHandle() != 0 {
 		dw.Box_pack_start(notebookbox7, rawhtml, 0, 100, TRUE, FALSE, 0)
 		dw.Html_raw(rawhtml, "<html><body><center><h1>dwtest</h1></center></body></html>")
 		html = dw.Html_new(1002)

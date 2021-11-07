@@ -17,7 +17,7 @@ import "reflect"
 import "os"
 
 type HANDLE interface {
-	GetHandle() unsafe.Pointer
+	GetHandle() C.uintptr_t
 	GetType() C.uint
 }
 type DRAWABLE interface {
@@ -33,103 +33,103 @@ type DRAWABLE interface {
 	BitBltPixmap(xdest int, ydest int, width int, height int, srcp HPIXMAP, xsrc int, ysrc int)
 }
 type HGENERIC struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HWND struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HENTRYFIELD struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HTEXT struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HTREE struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HCONTAINER struct {
-	hwnd       unsafe.Pointer
+	hwnd       C.uintptr_t
 	filesystem bool
 }
 type HMLE struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HBUTTON struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HSPINBUTTON struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HNOTEBOOK struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HBOX struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HSCROLLBOX struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HMENUITEM struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HLISTBOX struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HPERCENT struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HSLIDER struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HSCROLLBAR struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HRENDER struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HHTML struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HCALENDAR struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HBITMAP struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HSPLITBAR struct {
-	hwnd unsafe.Pointer
+	hwnd C.uintptr_t
 }
 type HTREEITEM struct {
-	htreeitem unsafe.Pointer
+	htreeitem C.uintptr_t
 	htree     HANDLE
 }
 type HCONTINS struct {
-	ptr        unsafe.Pointer
+	ptr        C.uintptr_t
 	rowcount   int
 	hcont      HANDLE
 	filesystem bool
 }
 type HDIALOG struct {
-	hdialog unsafe.Pointer
+	hdialog C.uintptr_t
 }
 type HEV struct {
-	hev unsafe.Pointer
+	hev C.uintptr_t
 }
 type HMTX struct {
-	hmtx unsafe.Pointer
+	hmtx C.uintptr_t
 }
-type HICN unsafe.Pointer
+type HICN C.uintptr_t
 type HTIMER struct {
 	tid C.int
 }
 type HMENUI struct {
-	hmenui unsafe.Pointer
+	hmenui C.uintptr_t
 }
 type HPIXMAP struct {
-	hpixmap unsafe.Pointer
+	hpixmap C.uintptr_t
 }
 type HPRINT struct {
-	hprint  unsafe.Pointer
+	hprint  C.uintptr_t
 	jobname string
 }
 type HNOTEPAGE struct {
@@ -162,7 +162,7 @@ var NOHPIXMAP HPIXMAP
 var NOHMENUI HMENUI
 var NOMENU HMENUI
 var NOHTREEITEM HTREEITEM
-var NOHICN HICN = nil
+var NOHICN HICN = 0
 
 // Import as much as we can from C
 var HORZ = C.DW_HORZ
@@ -436,7 +436,8 @@ func SIGNAL_FUNC(h interface{}) DWFUNC {
 
 // Convert a POINTER to a HANDLE (use with care)
 func POINTER_TO_HANDLE(ptr POINTER) HANDLE {
-	return HANDLE(HGENERIC{unsafe.Pointer(ptr)})
+	h := cgo.Handle(ptr)
+	return h.Value().(HANDLE)
 }
 
 // Convert a HANDLE to a UINTPTR, mostly used for display purposes
@@ -445,8 +446,9 @@ func HANDLE_TO_UINTPTR(handle HANDLE) uintptr {
 }
 
 // Convert a HANDLE to a POINTER (use with care)
-func HANDLE_TO_POINTER(handle HANDLE) POINTER {
-	return POINTER(handle.GetHandle())
+func HANDLE_TO_POINTER(h interface{}) POINTER {
+	handle := cgo.NewHandle(h)
+	return POINTER(handle)
 }
 
 // Convert a Go Object to a POINTER
@@ -476,7 +478,7 @@ func HANDLE_TO_HWND(handle HANDLE) HWND {
 	if handle.GetType() == 1 || handle.GetType() == 0 {
 		return HWND{handle.GetHandle()}
 	}
-	return HWND{nil}
+	return HWND{0}
 }
 
 // Convert HANDLE to HENTRYFIELD (use with care)
@@ -484,7 +486,7 @@ func HANDLE_TO_HENTRYFIELD(handle HANDLE) HENTRYFIELD {
 	if handle.GetType() == 2 || handle.GetType() == 0 {
 		return HENTRYFIELD{handle.GetHandle()}
 	}
-	return HENTRYFIELD{nil}
+	return HENTRYFIELD{0}
 }
 
 // Convert HANDLE to HTEXT (use with care)
@@ -492,7 +494,7 @@ func HANDLE_TO_HTEXT(handle HANDLE) HTEXT {
 	if handle.GetType() == 3 || handle.GetType() == 0 {
 		return HTEXT{handle.GetHandle()}
 	}
-	return HTEXT{nil}
+	return HTEXT{0}
 }
 
 // Convert HANDLE to HTREE (use with care)
@@ -500,7 +502,7 @@ func HANDLE_TO_HTREE(handle HANDLE) HTREE {
 	if handle.GetType() == 4 || handle.GetType() == 0 {
 		return HTREE{handle.GetHandle()}
 	}
-	return HTREE{nil}
+	return HTREE{0}
 }
 
 // Convert HANDLE to HCONTAINER (use with care)
@@ -512,7 +514,7 @@ func HANDLE_TO_HCONTAINER(handle HANDLE) HCONTAINER {
 		}
 		return HCONTAINER{handle.GetHandle(), filesystem}
 	}
-	return HCONTAINER{nil, false}
+	return HCONTAINER{0, false}
 }
 
 // Convert HANDLE to HMLE (use with care)
@@ -520,7 +522,7 @@ func HANDLE_TO_HMLE(handle HANDLE) HMLE {
 	if handle.GetType() == 6 || handle.GetType() == 0 {
 		return HMLE{handle.GetHandle()}
 	}
-	return HMLE{nil}
+	return HMLE{0}
 }
 
 // Convert HANDLE to HBUTTON (use with care)
@@ -528,7 +530,7 @@ func HANDLE_TO_HBUTTON(handle HANDLE) HBUTTON {
 	if handle.GetType() == 7 || handle.GetType() == 0 {
 		return HBUTTON{handle.GetHandle()}
 	}
-	return HBUTTON{nil}
+	return HBUTTON{0}
 }
 
 // Convert HANDLE to HSPINBUTTON (use with care)
@@ -536,7 +538,7 @@ func HANDLE_TO_HSPINBUTTON(handle HANDLE) HSPINBUTTON {
 	if handle.GetType() == 8 || handle.GetType() == 0 {
 		return HSPINBUTTON{handle.GetHandle()}
 	}
-	return HSPINBUTTON{nil}
+	return HSPINBUTTON{0}
 }
 
 // Convert HANDLE to HNOTEBOOK (use with care)
@@ -544,7 +546,7 @@ func HANDLE_TO_HNOTEBOOK(handle HANDLE) HNOTEBOOK {
 	if handle.GetType() == 9 || handle.GetType() == 0 {
 		return HNOTEBOOK{handle.GetHandle()}
 	}
-	return HNOTEBOOK{nil}
+	return HNOTEBOOK{0}
 }
 
 // Convert HANDLE to HBOX (use with care)
@@ -552,7 +554,7 @@ func HANDLE_TO_HBOX(handle HANDLE) HBOX {
 	if handle.GetType() == 10 || handle.GetType() == 0 {
 		return HBOX{handle.GetHandle()}
 	}
-	return HBOX{nil}
+	return HBOX{0}
 }
 
 // Convert HANDLE to HSCROLLBOX (use with care)
@@ -560,7 +562,7 @@ func HANDLE_TO_HSCROLLBOX(handle HANDLE) HSCROLLBOX {
 	if handle.GetType() == 11 || handle.GetType() == 0 {
 		return HSCROLLBOX{handle.GetHandle()}
 	}
-	return HSCROLLBOX{nil}
+	return HSCROLLBOX{0}
 }
 
 // Convert HANDLE to HMENUITEM (use with care)
@@ -568,7 +570,7 @@ func HANDLE_TO_HMENUITEM(handle HANDLE) HMENUITEM {
 	if handle.GetType() == 12 || handle.GetType() == 0 {
 		return HMENUITEM{handle.GetHandle()}
 	}
-	return HMENUITEM{nil}
+	return HMENUITEM{0}
 }
 
 // Convert HANDLE to HLISTBOX (use with care)
@@ -576,7 +578,7 @@ func HANDLE_TO_HLISTBOX(handle HANDLE) HLISTBOX {
 	if handle.GetType() == 13 || handle.GetType() == 0 {
 		return HLISTBOX{handle.GetHandle()}
 	}
-	return HLISTBOX{nil}
+	return HLISTBOX{0}
 }
 
 // Convert HANDLE to HPERCENT (use with care)
@@ -584,7 +586,7 @@ func HANDLE_TO_HPERCENT(handle HANDLE) HPERCENT {
 	if handle.GetType() == 14 || handle.GetType() == 0 {
 		return HPERCENT{handle.GetHandle()}
 	}
-	return HPERCENT{nil}
+	return HPERCENT{0}
 }
 
 // Convert HANDLE to HSLIDER (use with care)
@@ -592,7 +594,7 @@ func HANDLE_TO_HSLIDER(handle HANDLE) HSLIDER {
 	if handle.GetType() == 15 || handle.GetType() == 0 {
 		return HSLIDER{handle.GetHandle()}
 	}
-	return HSLIDER{nil}
+	return HSLIDER{0}
 }
 
 // Convert HANDLE to HSCROLLBAR (use with care)
@@ -600,7 +602,7 @@ func HANDLE_TO_HSCROLLBAR(handle HANDLE) HSCROLLBAR {
 	if handle.GetType() == 16 || handle.GetType() == 0 {
 		return HSCROLLBAR{handle.GetHandle()}
 	}
-	return HSCROLLBAR{nil}
+	return HSCROLLBAR{0}
 }
 
 // Convert HANDLE to HRENDER (use with care)
@@ -608,7 +610,7 @@ func HANDLE_TO_HRENDER(handle HANDLE) HRENDER {
 	if handle.GetType() == 17 || handle.GetType() == 0 {
 		return HRENDER{handle.GetHandle()}
 	}
-	return HRENDER{nil}
+	return HRENDER{0}
 }
 
 // Convert HANDLE to HHTML (use with care)
@@ -616,7 +618,7 @@ func HANDLE_TO_HHTML(handle HANDLE) HHTML {
 	if handle.GetType() == 18 || handle.GetType() == 0 {
 		return HHTML{handle.GetHandle()}
 	}
-	return HHTML{nil}
+	return HHTML{0}
 }
 
 // Convert HANDLE to HCALENDAR (use with care)
@@ -624,7 +626,7 @@ func HANDLE_TO_HCALENDAR(handle HANDLE) HCALENDAR {
 	if handle.GetType() == 19 || handle.GetType() == 0 {
 		return HCALENDAR{handle.GetHandle()}
 	}
-	return HCALENDAR{nil}
+	return HCALENDAR{0}
 }
 
 // Convert HANDLE to HBITMAP (use with care)
@@ -632,7 +634,7 @@ func HANDLE_TO_HBITMAP(handle HANDLE) HBITMAP {
 	if handle.GetType() == 20 || handle.GetType() == 0 {
 		return HBITMAP{handle.GetHandle()}
 	}
-	return HBITMAP{nil}
+	return HBITMAP{0}
 }
 
 // Convert HANDLE to HSPLITBAR (use with care)
@@ -640,10 +642,10 @@ func HANDLE_TO_HSPLITBAR(handle HANDLE) HSPLITBAR {
 	if handle.GetType() == 21 || handle.GetType() == 0 {
 		return HSPLITBAR{handle.GetHandle()}
 	}
-	return HSPLITBAR{nil}
+	return HSPLITBAR{0}
 }
 
-func (window HGENERIC) GetHandle() unsafe.Pointer {
+func (window HGENERIC) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -651,7 +653,7 @@ func (window HGENERIC) GetType() C.uint {
 	return 0
 }
 
-func (window HWND) GetHandle() unsafe.Pointer {
+func (window HWND) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -659,7 +661,7 @@ func (window HWND) GetType() C.uint {
 	return 1
 }
 
-func (window HENTRYFIELD) GetHandle() unsafe.Pointer {
+func (window HENTRYFIELD) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -667,7 +669,7 @@ func (window HENTRYFIELD) GetType() C.uint {
 	return 2
 }
 
-func (window HTEXT) GetHandle() unsafe.Pointer {
+func (window HTEXT) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -675,7 +677,7 @@ func (window HTEXT) GetType() C.uint {
 	return 3
 }
 
-func (window HTREE) GetHandle() unsafe.Pointer {
+func (window HTREE) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -683,7 +685,7 @@ func (window HTREE) GetType() C.uint {
 	return 4
 }
 
-func (window HCONTAINER) GetHandle() unsafe.Pointer {
+func (window HCONTAINER) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -691,7 +693,7 @@ func (window HCONTAINER) GetType() C.uint {
 	return 5
 }
 
-func (window HMLE) GetHandle() unsafe.Pointer {
+func (window HMLE) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -699,7 +701,7 @@ func (window HMLE) GetType() C.uint {
 	return 6
 }
 
-func (window HBUTTON) GetHandle() unsafe.Pointer {
+func (window HBUTTON) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -707,7 +709,7 @@ func (window HBUTTON) GetType() C.uint {
 	return 7
 }
 
-func (window HSPINBUTTON) GetHandle() unsafe.Pointer {
+func (window HSPINBUTTON) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -715,7 +717,7 @@ func (window HSPINBUTTON) GetType() C.uint {
 	return 8
 }
 
-func (window HNOTEBOOK) GetHandle() unsafe.Pointer {
+func (window HNOTEBOOK) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -723,7 +725,7 @@ func (window HNOTEBOOK) GetType() C.uint {
 	return 9
 }
 
-func (window HBOX) GetHandle() unsafe.Pointer {
+func (window HBOX) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -731,7 +733,7 @@ func (window HBOX) GetType() C.uint {
 	return 10
 }
 
-func (window HSCROLLBOX) GetHandle() unsafe.Pointer {
+func (window HSCROLLBOX) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -739,7 +741,7 @@ func (window HSCROLLBOX) GetType() C.uint {
 	return 11
 }
 
-func (window HMENUITEM) GetHandle() unsafe.Pointer {
+func (window HMENUITEM) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -747,7 +749,7 @@ func (window HMENUITEM) GetType() C.uint {
 	return 12
 }
 
-func (window HLISTBOX) GetHandle() unsafe.Pointer {
+func (window HLISTBOX) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -755,7 +757,7 @@ func (window HLISTBOX) GetType() C.uint {
 	return 13
 }
 
-func (window HPERCENT) GetHandle() unsafe.Pointer {
+func (window HPERCENT) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -763,7 +765,7 @@ func (window HPERCENT) GetType() C.uint {
 	return 14
 }
 
-func (window HSLIDER) GetHandle() unsafe.Pointer {
+func (window HSLIDER) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -771,7 +773,7 @@ func (window HSLIDER) GetType() C.uint {
 	return 15
 }
 
-func (window HSCROLLBAR) GetHandle() unsafe.Pointer {
+func (window HSCROLLBAR) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -779,7 +781,7 @@ func (window HSCROLLBAR) GetType() C.uint {
 	return 16
 }
 
-func (window HRENDER) GetHandle() unsafe.Pointer {
+func (window HRENDER) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -787,7 +789,7 @@ func (window HRENDER) GetType() C.uint {
 	return 17
 }
 
-func (window HHTML) GetHandle() unsafe.Pointer {
+func (window HHTML) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -795,7 +797,7 @@ func (window HHTML) GetType() C.uint {
 	return 18
 }
 
-func (window HCALENDAR) GetHandle() unsafe.Pointer {
+func (window HCALENDAR) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -803,7 +805,7 @@ func (window HCALENDAR) GetType() C.uint {
 	return 19
 }
 
-func (window HBITMAP) GetHandle() unsafe.Pointer {
+func (window HBITMAP) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -811,7 +813,7 @@ func (window HBITMAP) GetType() C.uint {
 	return 20
 }
 
-func (window HSPLITBAR) GetHandle() unsafe.Pointer {
+func (window HSPLITBAR) GetHandle() C.uintptr_t {
 	return window.hwnd
 }
 
@@ -819,7 +821,7 @@ func (window HSPLITBAR) GetType() C.uint {
 	return 21
 }
 
-func (treeitem HTREEITEM) GetHandle() unsafe.Pointer {
+func (treeitem HTREEITEM) GetHandle() C.uintptr_t {
 	return treeitem.htreeitem
 }
 
@@ -827,7 +829,7 @@ func (window HTREEITEM) GetType() C.uint {
 	return 22
 }
 
-func (contins HCONTINS) GetHandle() unsafe.Pointer {
+func (contins HCONTINS) GetHandle() C.uintptr_t {
 	return contins.ptr
 }
 
@@ -835,7 +837,7 @@ func (window HCONTINS) GetType() C.uint {
 	return 0
 }
 
-func (event HEV) GetHandle() unsafe.Pointer {
+func (event HEV) GetHandle() C.uintptr_t {
 	return event.hev
 }
 
@@ -843,7 +845,7 @@ func (window HEV) GetType() C.uint {
 	return 0
 }
 
-func (mutex HMTX) GetHandle() unsafe.Pointer {
+func (mutex HMTX) GetHandle() C.uintptr_t {
 	return mutex.hmtx
 }
 
@@ -927,7 +929,7 @@ func Window_new(owner HWND, title string, flags uint) HWND {
 	ctitle := C.CString(title)
 	defer C.free(unsafe.Pointer(ctitle))
 
-	return HWND{C.go_window_new(unsafe.Pointer(owner.hwnd), ctitle, C.ulong(flags))}
+	return HWND{C.go_window_new(owner.GetHandle(), ctitle, C.ulong(flags))}
 }
 
 // Create a new Window Frame.
@@ -1037,7 +1039,7 @@ func (window HWND) ClickDefault(next HANDLE) {
 
 // Sets the default focus item for a window/dialog.
 func Window_default(window HWND, defaultitem HANDLE) {
-	C.go_window_default(unsafe.Pointer(window.hwnd), defaultitem.GetHandle())
+	C.go_window_default(window.GetHandle(), defaultitem.GetHandle())
 }
 
 // Sets the default focus item for a window/dialog.
@@ -1226,7 +1228,7 @@ func (window HWND) SetGravity(horz int, vert int) {
 
 // Sets the icon used for a given window.
 func Window_set_icon(handle HANDLE, icon HICN) {
-	C.go_window_set_icon(handle.GetHandle(), unsafe.Pointer(icon))
+	C.go_window_set_icon(handle.GetHandle(), C.uintptr_t(icon))
 }
 
 // Sets the icon used for a given window.
@@ -2785,7 +2787,7 @@ func MenuNew(id uint) HMENUI {
 
 // Create a menubar on a window.
 func Menubar_new(location HWND) HMENUI {
-	return HMENUI{C.go_menubar_new(unsafe.Pointer(location.hwnd))}
+	return HMENUI{C.go_menubar_new(location.GetHandle())}
 }
 
 // Create a menubar on a window.
@@ -2939,7 +2941,7 @@ func IconLoad(id uint) HICN {
 
 // Deletes an icon from the taskbar.
 func Taskbar_delete(handle HANDLE, icon HICN) {
-	C.go_taskbar_delete(handle.GetHandle(), unsafe.Pointer(icon))
+	C.go_taskbar_delete(handle.GetHandle(), C.uintptr_t(icon))
 }
 
 // Deletes an icon from the taskbar.
@@ -2952,7 +2954,7 @@ func Taskbar_insert(handle HANDLE, icon HICN, bubbletext string) {
 	cbubbletext := C.CString(bubbletext)
 	defer C.free(unsafe.Pointer(cbubbletext))
 
-	C.go_taskbar_insert(handle.GetHandle(), unsafe.Pointer(icon), cbubbletext)
+	C.go_taskbar_insert(handle.GetHandle(), C.uintptr_t(icon), cbubbletext)
 }
 
 // Inserts an icon into the taskbar.
@@ -3437,7 +3439,7 @@ func Font_text_extents_get(handle HANDLE, pixmap HPIXMAP, text string) (int, int
 	ctext := C.CString(text)
 	defer C.free(unsafe.Pointer(ctext))
 
-	C.go_font_text_extents_get(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), ctext, &width, &height)
+	C.go_font_text_extents_get(handle.GetHandle(), pixmap.hpixmap, ctext, &width, &height)
 	return int(width), int(height)
 }
 
@@ -3486,12 +3488,12 @@ func (window HRENDER) PixmapGrab(id uint) HPIXMAP {
 
 // Copies from one surface to another.
 func Pixmap_bitblt(dest HANDLE, destp HPIXMAP, xdest int, ydest int, width int, height int, src HANDLE, srcp HPIXMAP, xsrc int, ysrc int) {
-	C.go_pixmap_bitblt(dest.GetHandle(), unsafe.Pointer(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), src.GetHandle(), unsafe.Pointer(srcp.hpixmap), C.int(xsrc), C.int(ysrc))
+	C.go_pixmap_bitblt(dest.GetHandle(), C.uintptr_t(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), src.GetHandle(), C.uintptr_t(srcp.hpixmap), C.int(xsrc), C.int(ysrc))
 }
 
 // Copies from one surface to another allowing for stretching.
 func Pixmap_stretch_bitblt(dest HANDLE, destp HPIXMAP, xdest int, ydest int, width int, height int, src HANDLE, srcp HPIXMAP, xsrc int, ysrc int, srcwidth int, srcheight int) int {
-	return int(C.go_pixmap_stretch_bitblt(dest.GetHandle(), unsafe.Pointer(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), src.GetHandle(), unsafe.Pointer(srcp.hpixmap), C.int(xsrc), C.int(ysrc), C.int(srcwidth), C.int(srcheight)))
+	return int(C.go_pixmap_stretch_bitblt(dest.GetHandle(), C.uintptr_t(destp.hpixmap), C.int(xdest), C.int(ydest), C.int(width), C.int(height), src.GetHandle(), C.uintptr_t(srcp.hpixmap), C.int(xsrc), C.int(ysrc), C.int(srcwidth), C.int(srcheight)))
 }
 
 // Copies from one surface to another allowing for stretching.
@@ -3536,7 +3538,7 @@ func (pixmap HPIXMAP) BitBltWindow(xdest int, ydest int, width int, height int, 
 
 // Sets the transparent color for a pixmap.
 func Pixmap_set_transparent_color(pixmap HPIXMAP, color COLOR) {
-	C.go_pixmap_set_transparent_color(unsafe.Pointer(pixmap.hpixmap), C.ulong(color))
+	C.go_pixmap_set_transparent_color(C.uintptr_t(pixmap.hpixmap), C.ulong(color))
 }
 
 // Sets the transparent color for a pixmap.
@@ -3549,7 +3551,7 @@ func Pixmap_set_font(pixmap HPIXMAP, fontname string) int {
 	cfontname := C.CString(fontname)
 	defer C.free(unsafe.Pointer(cfontname))
 
-	return int(C.go_pixmap_set_font(unsafe.Pointer(pixmap.hpixmap), cfontname))
+	return int(C.go_pixmap_set_font(C.uintptr_t(pixmap.hpixmap), cfontname))
 }
 
 // Sets the font used by a specified pixmap.
@@ -3559,7 +3561,7 @@ func (pixmap HPIXMAP) SetFont(fontname string) int {
 
 // Destroys an allocated pixmap.
 func Pixmap_destroy(pixmap HPIXMAP) {
-	C.go_pixmap_destroy(unsafe.Pointer(pixmap.hpixmap))
+	C.go_pixmap_destroy(C.uintptr_t(pixmap.hpixmap))
 }
 
 // Destroys an allocated pixmap.
@@ -3569,7 +3571,7 @@ func (pixmap HPIXMAP) Destroy() {
 
 // Returns the width in pixels of the specified pixmap.
 func Pixmap_width(pixmap HPIXMAP) int {
-	return int(C.go_pixmap_width(unsafe.Pointer(pixmap.hpixmap)))
+	return int(C.go_pixmap_width(C.uintptr_t(pixmap.hpixmap)))
 }
 
 // Returns the width in pixels of the specified pixmap.
@@ -3579,7 +3581,7 @@ func (pixmap HPIXMAP) GetWidth() int {
 
 // Returns the height in pixels of the specified pixmap.
 func Pixmap_height(pixmap HPIXMAP) int {
-	return int(C.go_pixmap_height(unsafe.Pointer(pixmap.hpixmap)))
+	return int(C.go_pixmap_height(C.uintptr_t(pixmap.hpixmap)))
 }
 
 // Returns the height in pixels of the specified pixmap.
@@ -3589,7 +3591,7 @@ func (pixmap HPIXMAP) GetHeight() int {
 
 // Draw a point.
 func Draw_point(handle HANDLE, pixmap HPIXMAP, x int, y int) {
-	C.go_draw_point(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x), C.int(y))
+	C.go_draw_point(handle.GetHandle(), C.uintptr_t(pixmap.hpixmap), C.int(x), C.int(y))
 }
 
 // Draw a point on a widget.
@@ -3604,7 +3606,7 @@ func (pixmap HPIXMAP) DrawPoint(x int, y int) {
 
 // Draw a line.
 func Draw_line(handle HANDLE, pixmap HPIXMAP, x1 int, y1 int, x2 int, y2 int) {
-	C.go_draw_line(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x1), C.int(y1), C.int(x2), C.int(y2))
+	C.go_draw_line(handle.GetHandle(), C.uintptr_t(pixmap.hpixmap), C.int(x1), C.int(y1), C.int(x2), C.int(y2))
 }
 
 // Draw a line on a widget.
@@ -3632,7 +3634,7 @@ func Draw_polygon(handle HANDLE, pixmap HPIXMAP, flags int, x []int, y []int) {
 	xHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cx)))
 	yHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cy)))
 
-	C.go_draw_polygon(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(flags), C.int(count), (*C.int)(unsafe.Pointer(xHeader.Data)), (*C.int)(unsafe.Pointer(yHeader.Data)))
+	C.go_draw_polygon(handle.GetHandle(), C.uintptr_t(pixmap.hpixmap), C.int(flags), C.int(count), (*C.int)(unsafe.Pointer(xHeader.Data)), (*C.int)(unsafe.Pointer(yHeader.Data)))
 }
 
 // Draw a polygon on a widget.
@@ -3647,7 +3649,7 @@ func (pixmap HPIXMAP) DrawPolygon(flags int, x []int, y []int) {
 
 // Draw a rectangle.
 func Draw_rect(handle HANDLE, pixmap HPIXMAP, fill int, x int, y int, width int, height int) {
-	C.go_draw_rect(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(fill), C.int(x), C.int(y), C.int(width), C.int(height))
+	C.go_draw_rect(handle.GetHandle(), C.uintptr_t(pixmap.hpixmap), C.int(fill), C.int(x), C.int(y), C.int(width), C.int(height))
 }
 
 // Draw a rectangle on a widget.
@@ -3662,7 +3664,7 @@ func (pixmap HPIXMAP) DrawRect(fill int, x int, y int, width int, height int) {
 
 // Draw an arc.
 func Draw_arc(handle HANDLE, pixmap HPIXMAP, flags int, xorigin int, yorigin int, x1 int, y1 int, x2 int, y2 int) {
-	C.go_draw_arc(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(flags), C.int(xorigin), C.int(yorigin), C.int(x1), C.int(y1), C.int(x2), C.int(y2))
+	C.go_draw_arc(handle.GetHandle(), C.uintptr_t(pixmap.hpixmap), C.int(flags), C.int(xorigin), C.int(yorigin), C.int(x1), C.int(y1), C.int(x2), C.int(y2))
 }
 
 // Draw an arc on a widget.
@@ -3680,7 +3682,7 @@ func Draw_text(handle HANDLE, pixmap HPIXMAP, x int, y int, text string) {
 	ctext := C.CString(text)
 	defer C.free(unsafe.Pointer(ctext))
 
-	C.go_draw_text(handle.GetHandle(), unsafe.Pointer(pixmap.hpixmap), C.int(x), C.int(y), ctext)
+	C.go_draw_text(handle.GetHandle(), C.uintptr_t(pixmap.hpixmap), C.int(x), C.int(y), ctext)
 }
 
 // Draw text on a widget.
@@ -3735,7 +3737,7 @@ func Tree_insert(handle HANDLE, title string, icon HICN, parent HTREEITEM, itemd
 	ctitle := C.CString(title)
 	defer C.free(unsafe.Pointer(ctitle))
 
-	return HTREEITEM{C.go_tree_insert(handle.GetHandle(), ctitle, unsafe.Pointer(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle}
+	return HTREEITEM{C.go_tree_insert(handle.GetHandle(), ctitle, C.uintptr_t(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle}
 }
 
 // Inserts an item into a tree widget.
@@ -3748,7 +3750,7 @@ func Tree_insert_after(handle HANDLE, item HTREEITEM, title string, icon HICN, p
 	ctitle := C.CString(title)
 	defer C.free(unsafe.Pointer(ctitle))
 
-	return HTREEITEM{C.go_tree_insert_after(handle.GetHandle(), item.htreeitem, ctitle, unsafe.Pointer(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle}
+	return HTREEITEM{C.go_tree_insert_after(handle.GetHandle(), item.htreeitem, ctitle, C.uintptr_t(icon), parent.htreeitem, unsafe.Pointer(itemdata)), handle}
 }
 
 // Inserts an item into a tree widget after another item.
@@ -3781,7 +3783,7 @@ func Tree_item_change(handle HANDLE, item HTREEITEM, title string, icon HICN) {
 	ctitle := C.CString(title)
 	defer C.free(unsafe.Pointer(ctitle))
 
-	C.go_tree_item_change(handle.GetHandle(), item.htreeitem, ctitle, unsafe.Pointer(icon))
+	C.go_tree_item_change(handle.GetHandle(), item.htreeitem, ctitle, C.uintptr_t(icon))
 }
 
 // Sets the text and icon of an item in a tree widget.
@@ -4144,7 +4146,7 @@ func (handle HCONTINS) SetItemULong(column int, row int, val uint) {
 
 // Sets an item in specified row and column to the given icon.
 func Container_set_item_icon(handle HANDLE, contins HCONTINS, column int, row int, icon HICN) {
-	C.go_container_set_item_icon(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), unsafe.Pointer(icon))
+	C.go_container_set_item_icon(handle.GetHandle(), contins.GetHandle(), C.int(column), C.int(row), C.uintptr_t(icon))
 }
 
 // Sets an item in specified row and column to the given icon.
@@ -4157,7 +4159,7 @@ func (handle HCONTINS) SetItemIcon(column int, row int, icon HICN) {
 
 // Sets an item in specified row and column to the given time.
 func Container_set_item_time(handle HANDLE, contins HCONTINS, column int, row int, seconds int, minutes int, hours int) {
-	C.go_container_set_item_time(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours))
+	C.go_container_set_item_time(handle.GetHandle(), contins.GetHandle(), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours))
 }
 
 // Sets an item in specified row and column to the given time.
@@ -4170,7 +4172,7 @@ func (handle HCONTINS) SetItemTime(column int, row int, seconds int, minutes int
 
 // Sets an item in specified row and column to the given date.
 func Container_set_item_date(handle HANDLE, contins HCONTINS, column int, row int, day int, month int, year int) {
-	C.go_container_set_item_date(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.int(day), C.int(month), C.int(year))
+	C.go_container_set_item_date(handle.GetHandle(), contins.GetHandle(), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year))
 }
 
 // Sets an item in specified row and column to the given date.
@@ -4209,7 +4211,7 @@ func (handle HCONTAINER) ChangeItemULong(column int, row int, val uint) {
 
 // Changes an existing item in specified row and column to the given icon.
 func Container_change_item_icon(handle HANDLE, column int, row int, icon HICN) {
-	C.go_container_change_item_icon(handle.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(icon))
+	C.go_container_change_item_icon(handle.GetHandle(), C.int(column), C.int(row), C.uintptr_t(icon))
 }
 
 // Changes an existing item in specified row and column to the given icon.
@@ -4259,7 +4261,7 @@ func (handle HCONTAINER) SetColumnWidth(column int, width int) {
 // Sets the title of a row in the container.
 func Container_set_row_title(contins HCONTINS, row int, title string) {
 	ctitle := C.CString(title)
-	C.dw_container_set_row_title(contins.ptr, C.int(row), ctitle)
+	C.go_container_set_row_title(contins.GetHandle(), C.int(row), ctitle)
 	defer C.free(unsafe.Pointer(ctitle))
 }
 
@@ -4270,7 +4272,7 @@ func (handle HCONTINS) SetRowTitle(row int, title string) {
 
 // Sets the pointer of a row in the container.
 func Container_set_row_data(contins HCONTINS, row int, data POINTER) {
-	C.dw_container_set_row_data(contins.ptr, C.int(row), unsafe.Pointer(data))
+	C.go_container_set_row_data(contins.GetHandle(), C.int(row), unsafe.Pointer(data))
 }
 
 // Sets the pointer of a row in the container.
@@ -4301,8 +4303,8 @@ func (handle HCONTAINER) ChangeRowData(row int, data POINTER) {
 
 // Inserts allocated rows into the container widget.
 func Container_insert(handle HANDLE, contins HCONTINS, rowcount int) {
-	C.go_container_insert(handle.GetHandle(), contins.ptr, C.int(rowcount))
-	contins.ptr = nil
+	C.go_container_insert(handle.GetHandle(), contins.GetHandle(), C.int(rowcount))
+	contins.ptr = 0
 	contins.rowcount = 0
 }
 
@@ -4476,27 +4478,27 @@ func (handle HCONTAINER) SetColumnTitle(title string) {
 
 // Sets an item in specified row and column to the given data.
 func Filesystem_set_item(handle HANDLE, contins HCONTINS, column int, row int, data POINTER) {
-	C.go_filesystem_set_item(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), unsafe.Pointer(data))
+	C.go_filesystem_set_item(handle.GetHandle(), contins.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(data))
 }
 
 // Sets an item in specified row and column to the given unsigned integer.
 func Filesystem_set_item_ulong(handle HANDLE, contins HCONTINS, column int, row int, val uint) {
-	C.go_filesystem_set_item_ulong(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.ulong(val))
+	C.go_filesystem_set_item_ulong(handle.GetHandle(), contins.GetHandle(), C.int(column), C.int(row), C.ulong(val))
 }
 
 // Sets an item in specified row and column to the given icon.
 func Filesystem_set_item_icon(handle HANDLE, contins HCONTINS, column int, row int, icon HICN) {
-	C.go_filesystem_set_item_icon(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), unsafe.Pointer(icon))
+	C.go_filesystem_set_item_icon(handle.GetHandle(), contins.GetHandle(), C.int(column), C.int(row), C.uintptr_t(icon))
 }
 
 // Sets an item in specified row and column to the given time.
 func Filesystem_set_item_time(handle HANDLE, contins HCONTINS, column int, row int, seconds int, minutes int, hours int) {
-	C.go_filesystem_set_item_time(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours))
+	C.go_filesystem_set_item_time(handle.GetHandle(), contins.GetHandle(), C.int(column), C.int(row), C.int(seconds), C.int(minutes), C.int(hours))
 }
 
 // Sets an item in specified row and column to the given date.
 func Filesystem_set_item_date(handle HANDLE, contins HCONTINS, column int, row int, day int, month int, year int) {
-	C.go_filesystem_set_item_date(handle.GetHandle(), contins.ptr, C.int(column), C.int(row), C.int(day), C.int(month), C.int(year))
+	C.go_filesystem_set_item_date(handle.GetHandle(), contins.GetHandle(), C.int(column), C.int(row), C.int(day), C.int(month), C.int(year))
 }
 
 // Sets the filename and icon of the row in a filesystem style container.
@@ -4504,7 +4506,7 @@ func Filesystem_set_file(handle HANDLE, contins HCONTINS, row int, filename stri
 	cfilename := C.CString(filename)
 	defer C.free(unsafe.Pointer(cfilename))
 
-	C.go_filesystem_set_file(handle.GetHandle(), contins.ptr, C.int(row), cfilename, unsafe.Pointer(icon))
+	C.go_filesystem_set_file(handle.GetHandle(), contins.GetHandle(), C.int(row), cfilename, C.uintptr_t(icon))
 }
 
 // Sets the filename and icon of the row in a filesystem style container.
@@ -4526,7 +4528,7 @@ func Filesystem_change_item_ulong(handle HANDLE, column int, row int, val uint) 
 
 // Changes an existing item in specified row and column to the given icon.
 func Filesystem_change_item_icon(handle HANDLE, column int, row int, icon HICN) {
-	C.go_filesystem_change_item_icon(handle.GetHandle(), C.int(column), C.int(row), unsafe.Pointer(icon))
+	C.go_filesystem_change_item_icon(handle.GetHandle(), C.int(column), C.int(row), C.uintptr_t(icon))
 }
 
 // Changes an existing item in specified row and column to the given time.
@@ -4544,7 +4546,7 @@ func Filesystem_change_file(handle HANDLE, row int, filename string, icon HICN) 
 	cfilename := C.CString(filename)
 	defer C.free(unsafe.Pointer(cfilename))
 
-	C.go_filesystem_change_file(handle.GetHandle(), C.int(row), cfilename, unsafe.Pointer(icon))
+	C.go_filesystem_change_file(handle.GetHandle(), C.int(row), cfilename, C.uintptr_t(icon))
 }
 
 // Changes the filename and icon of the row in a filesystem style container.
@@ -4627,7 +4629,7 @@ func BitmapButtonNewFromFile(text string, id uint, filename string) HBUTTON {
 
 // Creates a splitbar widget with given widgets on either side.
 func Splitbar_new(btype int, topleft HWND, bottomright HWND, id uint) HSPLITBAR {
-	return HSPLITBAR{C.go_splitbar_new(C.int(btype), unsafe.Pointer(topleft.hwnd), unsafe.Pointer(bottomright.hwnd), C.ulong(id))}
+	return HSPLITBAR{C.go_splitbar_new(C.int(btype), topleft.GetHandle(), bottomright.GetHandle(), C.ulong(id))}
 }
 
 // Creates a splitbar widget with given widgets on either side.
@@ -4657,7 +4659,7 @@ func (handle HSPLITBAR) Get() float32 {
 
 // Creates a new print object.
 func PrintNew(jobname string) HPRINT {
-	return HPRINT{nil, jobname}
+	return HPRINT{0, jobname}
 }
 
 // Creates a new print object.
@@ -4670,8 +4672,8 @@ func Print_new(jobname string, flags uint, pages uint, drawfunc DWFUNC, drawdata
 
 // Runs the print job, causing the draw page callbacks to fire.
 func Print_run(print HPRINT, flags uint) int {
-	if print.hprint != nil {
-		return int(C.go_print_run(unsafe.Pointer(print.hprint), C.ulong(flags)))
+	if print.hprint != 0 {
+		return int(C.go_print_run(C.uintptr_t(print.hprint), C.ulong(flags)))
 	}
 	return C.DW_ERROR_UNKNOWN
 }
@@ -4683,8 +4685,8 @@ func (print HPRINT) Run(flags uint) {
 
 // Cancels the print job, typically called from a draw page callback.
 func Print_cancel(print HPRINT) {
-	if print.hprint != nil {
-		C.go_print_cancel(unsafe.Pointer(print.hprint))
+	if print.hprint != 0 {
+		C.go_print_cancel(C.uintptr_t(print.hprint))
 	}
 }
 
@@ -4709,7 +4711,7 @@ func MutexNew() HMTX {
 
 // Closes a semaphore created by Mutex_new().
 func Mutex_close(handle HMTX) {
-	C.go_mutex_close(unsafe.Pointer(handle.hmtx))
+	C.go_mutex_close(C.uintptr_t(handle.hmtx))
 }
 
 // Closes a semaphore created by MutexNew().
@@ -4719,7 +4721,7 @@ func (handle HMTX) Close() {
 
 // Tries to gain access to the semaphore, if it can't it blocks.
 func Mutex_lock(handle HMTX) {
-	C.go_mutex_lock(unsafe.Pointer(handle.hmtx))
+	C.go_mutex_lock(C.uintptr_t(handle.hmtx))
 }
 
 // Tries to gain access to the semaphore, if it can't it blocks.
@@ -4729,7 +4731,7 @@ func (handle HMTX) Lock() {
 
 // Reliquishes the access to the semaphore.
 func Mutex_unlock(handle HMTX) {
-	C.go_mutex_unlock(unsafe.Pointer(handle.hmtx))
+	C.go_mutex_unlock(C.uintptr_t(handle.hmtx))
 }
 
 // Reliquishes the access to the semaphore.
@@ -4739,7 +4741,7 @@ func (handle HMTX) Unlock() {
 
 // Tries to gain access to the semaphore.
 func Mutex_trylock(handle HMTX) int {
-	return int(C.go_mutex_trylock(unsafe.Pointer(handle.hmtx)))
+	return int(C.go_mutex_trylock(C.uintptr_t(handle.hmtx)))
 }
 
 // Tries to gain access to the semaphore.
@@ -4759,7 +4761,7 @@ func DialogNew() HDIALOG {
 
 // Accepts a dialog and returns the given data to the initial call of Dialog_wait().
 func Dialog_dismiss(handle HDIALOG, result POINTER) int {
-	return int(C.go_dialog_dismiss(unsafe.Pointer(handle.hdialog), unsafe.Pointer(result)))
+	return int(C.go_dialog_dismiss(C.uintptr_t(handle.hdialog), unsafe.Pointer(result)))
 }
 
 // Returns the given data to the initial call of Wait().
@@ -4769,7 +4771,7 @@ func (handle HDIALOG) Dismiss(result uintptr) int {
 
 // Accepts a dialog, waits for Dialog_dismiss() to be called by a signal handler with the given dialog.
 func Dialog_wait(handle HDIALOG) POINTER {
-	return POINTER(C.go_dialog_wait(unsafe.Pointer(handle.hdialog)))
+	return POINTER(C.go_dialog_wait(C.uintptr_t(handle.hdialog)))
 }
 
 // Waits for Dismiss() to be called by a signal handler.
@@ -4789,8 +4791,8 @@ func EventNew() HEV {
 
 // Closes a semaphore created by Event_new().
 func Event_close(handle *HEV) int {
-	retval := int(C.go_event_close(unsafe.Pointer(handle.hev)))
-	handle.hev = nil
+	retval := int(C.go_event_close(C.uintptr_t(handle.hev)))
+	handle.hev = 0
 	return retval
 }
 
@@ -4801,7 +4803,7 @@ func (handle *HEV) Close() int {
 
 // Posts a semaphore created by Event_new(). Causing all threads waiting on this event in Event_wait() to continue.
 func Event_post(handle HEV) int {
-	return int(C.go_event_post(unsafe.Pointer(handle.hev)))
+	return int(C.go_event_post(C.uintptr_t(handle.hev)))
 }
 
 // Posts a semaphore created by EventNew(). Causing all threads waiting on this event in Wait() to continue.
@@ -4811,7 +4813,7 @@ func (handle HEV) Post() int {
 
 // Resets a semaphore created by Event_new().
 func Event_reset(handle HEV) int {
-	return int(C.go_event_reset(unsafe.Pointer(handle.hev)))
+	return int(C.go_event_reset(C.uintptr_t(handle.hev)))
 }
 
 // Resets a semaphore created by EventNew().
@@ -4821,7 +4823,7 @@ func (handle HEV) Reset() int {
 
 // Waits on a semaphore created by Event_new(), until the event gets posted or until the timeout expires.
 func Event_wait(handle HEV, timeout int) int {
-	return int(C.go_event_wait(unsafe.Pointer(handle.hev), C.ulong(timeout)))
+	return int(C.go_event_wait(C.uintptr_t(handle.hev), C.ulong(timeout)))
 }
 
 // Waits on a semaphore created by EventNew(), until the event gets posted or until the timeout expires.
@@ -4836,7 +4838,7 @@ func (window HWND) ConnectDelete(sigfunc func(window HWND) int) {
 	csigname := C.CString(C.DW_SIGNAL_DELETE)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a widget clicked event.
@@ -4844,7 +4846,7 @@ func (window HBUTTON) ConnectClicked(sigfunc func(window HBUTTON) int) {
 	csigname := C.CString(C.DW_SIGNAL_CLICKED)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a focus clicked event.
@@ -4852,7 +4854,7 @@ func (window HWND) ConnectSetFocus(sigfunc func(window HWND) int) {
 	csigname := C.CString(C.DW_SIGNAL_SET_FOCUS)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a key press event.
@@ -4860,7 +4862,7 @@ func (window HWND) ConnectKeyPress(sigfunc func(window HWND, ch uint8, vk int, s
 	csigname := C.CString(C.DW_SIGNAL_KEY_PRESS)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a key press event.
@@ -4868,7 +4870,7 @@ func (window HRENDER) ConnectKeyPress(sigfunc func(window HRENDER, ch uint8, vk 
 	csigname := C.CString(C.DW_SIGNAL_KEY_PRESS)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a mouse motion event.
@@ -4876,7 +4878,7 @@ func (window HRENDER) ConnectMotion(sigfunc func(window HRENDER, x int, y int, m
 	csigname := C.CString(C.DW_SIGNAL_MOTION_NOTIFY)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a mouse button press event.
@@ -4884,7 +4886,7 @@ func (window HRENDER) ConnectButtonPress(sigfunc func(window HRENDER, x int, y i
 	csigname := C.CString(C.DW_SIGNAL_BUTTON_PRESS)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a mouse button release event.
@@ -4892,7 +4894,7 @@ func (window HRENDER) ConnectButtonRelease(sigfunc func(window HRENDER, x int, y
 	csigname := C.CString(C.DW_SIGNAL_BUTTON_RELEASE)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a render expose event.
@@ -4900,7 +4902,7 @@ func (window HRENDER) ConnectExpose(sigfunc func(window HRENDER, x int, y int, w
 	csigname := C.CString(C.DW_SIGNAL_EXPOSE)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a configure (size change) event.
@@ -4908,7 +4910,7 @@ func (window HRENDER) ConnectConfigure(sigfunc func(window HRENDER, width int, h
 	csigname := C.CString(C.DW_SIGNAL_CONFIGURE)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a tree ENTER/RETURN press event.
@@ -4916,7 +4918,7 @@ func (window HTREE) ConnectItemEnter(sigfunc func(window HTREE, str string, item
 	csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a container ENTER/RETURN press event.
@@ -4924,7 +4926,7 @@ func (window HCONTAINER) ConnectItemEnter(sigfunc func(window HCONTAINER, str st
 	csigname := C.CString(C.DW_SIGNAL_ITEM_ENTER)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a tree context event.
@@ -4932,7 +4934,7 @@ func (window HTREE) ConnectItemContext(sigfunc func(window HTREE, text string, x
 	csigname := C.CString(C.DW_SIGNAL_ITEM_CONTEXT)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a container context event.
@@ -4940,7 +4942,7 @@ func (window HCONTAINER) ConnectItemContext(sigfunc func(window HCONTAINER, text
 	csigname := C.CString(C.DW_SIGNAL_ITEM_CONTEXT)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a tree select event.
@@ -4948,7 +4950,7 @@ func (window HTREE) ConnectItemSelect(sigfunc func(window HTREE, item HTREEITEM,
 	csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a container select event.
@@ -4956,7 +4958,7 @@ func (window HCONTAINER) ConnectItemSelect(sigfunc func(window HCONTAINER, item 
 	csigname := C.CString(C.DW_SIGNAL_ITEM_SELECT)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a listbox select event.
@@ -4964,7 +4966,7 @@ func (window HLISTBOX) ConnectListSelect(sigfunc func(window HLISTBOX, index int
 	csigname := C.CString(C.DW_SIGNAL_LIST_SELECT)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a value changed event.
@@ -4972,7 +4974,7 @@ func (window HSCROLLBAR) ConnectValueChanged(sigfunc func(window HSCROLLBAR, ind
 	csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a value changed event.
@@ -4980,7 +4982,7 @@ func (window HSLIDER) ConnectValueChanged(sigfunc func(window HSLIDER, index int
 	csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a value changed event.
@@ -4988,7 +4990,7 @@ func (window HSPINBUTTON) ConnectValueChanged(sigfunc func(window HSPINBUTTON, i
 	csigname := C.CString(C.DW_SIGNAL_VALUE_CHANGED)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a column title click event.
@@ -4996,7 +4998,7 @@ func (window HCONTAINER) ConnectColumnClick(sigfunc func(window HCONTAINER, inde
 	csigname := C.CString(C.DW_SIGNAL_COLUMN_CLICK)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a notebook switch page event.
@@ -5004,7 +5006,7 @@ func (window HNOTEBOOK) ConnectSwitchPage(sigfunc func(window HNOTEBOOK, pageid 
 	csigname := C.CString(C.DW_SIGNAL_SWITCH_PAGE)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a tree item (node) expand event.
@@ -5012,7 +5014,7 @@ func (window HTREE) ConnectTreeExpand(sigfunc func(window HTREE, item HTREEITEM)
 	csigname := C.CString(C.DW_SIGNAL_TREE_EXPAND)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a menu item clicked event.
@@ -5020,7 +5022,7 @@ func (window HMENUITEM) ConnectClicked(sigfunc func(window HMENUITEM) int) {
 	csigname := C.CString(C.DW_SIGNAL_CLICKED)
 	defer C.free(unsafe.Pointer(csigname))
 
-	C.go_signal_connect(unsafe.Pointer(window.hwnd), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
 // Connect a function or closure to a timer event.
@@ -5039,7 +5041,7 @@ func (id HTIMER) Disconnect() {
 
 // Connect a function or closure to a print object draw page event.
 func (print HPRINT) Connect(drawfunc func(HPRINT, HPIXMAP, int) int, flags uint, pages int) {
-	if print.hprint == nil {
+	if print.hprint == 0 {
 		cjobname := C.CString(print.jobname)
 		defer C.free(unsafe.Pointer(cjobname))
 
@@ -5054,7 +5056,7 @@ func go_callback_remove(h unsafe.Pointer) {
 }
 
 //export go_int_callback_basic
-func go_int_callback_basic(h unsafe.Pointer, window unsafe.Pointer, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_basic(h unsafe.Pointer, window C.uintptr_t, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (1 << 8): // HWND
@@ -5200,7 +5202,7 @@ func go_int_callback_basic(h unsafe.Pointer, window unsafe.Pointer, data unsafe.
 }
 
 //export go_int_callback_configure
-func go_int_callback_configure(h unsafe.Pointer, window unsafe.Pointer, width C.int, height C.int, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_configure(h unsafe.Pointer, window C.uintptr_t, width C.int, height C.int, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (1 << 8): // HWND
@@ -5346,7 +5348,7 @@ func go_int_callback_configure(h unsafe.Pointer, window unsafe.Pointer, width C.
 }
 
 //export go_int_callback_keypress
-func go_int_callback_keypress(h unsafe.Pointer, window unsafe.Pointer, ch C.char, vk C.int, state C.int, data unsafe.Pointer, utf8 *C.char, flags C.uint) C.int {
+func go_int_callback_keypress(h unsafe.Pointer, window C.uintptr_t, ch C.char, vk C.int, state C.int, data unsafe.Pointer, utf8 *C.char, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (1 << 8): // HWND
@@ -5492,7 +5494,7 @@ func go_int_callback_keypress(h unsafe.Pointer, window unsafe.Pointer, ch C.char
 }
 
 //export go_int_callback_mouse
-func go_int_callback_mouse(h unsafe.Pointer, window unsafe.Pointer, x C.int, y C.int, mask C.int, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_mouse(h unsafe.Pointer, window C.uintptr_t, x C.int, y C.int, mask C.int, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (1 << 8): // HWND
@@ -5638,7 +5640,7 @@ func go_int_callback_mouse(h unsafe.Pointer, window unsafe.Pointer, x C.int, y C
 }
 
 //export go_int_callback_expose
-func go_int_callback_expose(h unsafe.Pointer, window unsafe.Pointer, x C.int, y C.int, width C.int, height C.int, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_expose(h unsafe.Pointer, window C.uintptr_t, x C.int, y C.int, width C.int, height C.int, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (17 << 8): // HRENDER
@@ -5656,7 +5658,7 @@ func go_int_callback_expose(h unsafe.Pointer, window unsafe.Pointer, x C.int, y 
 }
 
 //export go_int_callback_item_enter
-func go_int_callback_item_enter(h unsafe.Pointer, window unsafe.Pointer, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_item_enter(h unsafe.Pointer, window C.uintptr_t, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (4 << 8): // HTREE
@@ -5688,7 +5690,7 @@ func go_int_callback_item_enter(h unsafe.Pointer, window unsafe.Pointer, text *C
 }
 
 //export go_int_callback_item_context
-func go_int_callback_item_context(h unsafe.Pointer, window unsafe.Pointer, text *C.char, x C.int, y C.int, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_item_context(h unsafe.Pointer, window C.uintptr_t, text *C.char, x C.int, y C.int, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (4 << 8): // HTREE
@@ -5720,7 +5722,7 @@ func go_int_callback_item_context(h unsafe.Pointer, window unsafe.Pointer, text 
 }
 
 //export go_int_callback_item_select
-func go_int_callback_item_select(h unsafe.Pointer, window unsafe.Pointer, item unsafe.Pointer, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_item_select(h unsafe.Pointer, window C.uintptr_t, item C.uintptr_t, text *C.char, data unsafe.Pointer, itemdata unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (4 << 8): // HTREE
@@ -5752,7 +5754,7 @@ func go_int_callback_item_select(h unsafe.Pointer, window unsafe.Pointer, item u
 }
 
 //export go_int_callback_numeric
-func go_int_callback_numeric(h unsafe.Pointer, window unsafe.Pointer, val C.int, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_numeric(h unsafe.Pointer, window C.uintptr_t, val C.int, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (1 << 8): // HWND
@@ -5898,7 +5900,7 @@ func go_int_callback_numeric(h unsafe.Pointer, window unsafe.Pointer, val C.int,
 }
 
 //export go_int_callback_ulong
-func go_int_callback_ulong(h unsafe.Pointer, window unsafe.Pointer, val C.ulong, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_ulong(h unsafe.Pointer, window C.uintptr_t, val C.ulong, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (1 << 8): // HWND
@@ -6044,7 +6046,7 @@ func go_int_callback_ulong(h unsafe.Pointer, window unsafe.Pointer, val C.ulong,
 }
 
 //export go_int_callback_notepage
-func go_int_callback_notepage(h unsafe.Pointer, window unsafe.Pointer, val C.ulong, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_notepage(h unsafe.Pointer, window C.uintptr_t, val C.ulong, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (9 << 8): // HNOTEBOOK
@@ -6062,7 +6064,7 @@ func go_int_callback_notepage(h unsafe.Pointer, window unsafe.Pointer, val C.ulo
 }
 
 //export go_int_callback_tree
-func go_int_callback_tree(h unsafe.Pointer, window unsafe.Pointer, tree unsafe.Pointer, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_tree(h unsafe.Pointer, window C.uintptr_t, tree C.uintptr_t, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	switch flags {
 	case (4 << 8): // HTREE
@@ -6091,7 +6093,7 @@ func go_int_callback_timer(h unsafe.Pointer, data unsafe.Pointer, flags C.uint) 
 }
 
 //export go_int_callback_print
-func go_int_callback_print(h unsafe.Pointer, print unsafe.Pointer, pixmap unsafe.Pointer, page_num C.int, data unsafe.Pointer, flags C.uint) C.int {
+func go_int_callback_print(h unsafe.Pointer, print C.uintptr_t, pixmap C.uintptr_t, page_num C.int, data unsafe.Pointer, flags C.uint) C.int {
 	pfunc := cgo.Handle(h)
 	if (flags & go_flags_no_data) == go_flags_no_data {
 		thisfunc := pfunc.Value().(func(HPRINT, HPIXMAP, int) int)

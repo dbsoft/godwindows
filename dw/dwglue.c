@@ -872,7 +872,7 @@ static void go_container_change_row_title(uintptr_t handle, int row, char *title
 
 static void go_container_change_row_data(uintptr_t handle, int row, void *data)
 {
-    dw_container_change_row_title((HWND)handle, row, (char *)data);
+    dw_container_change_row_data((HWND)handle, row, data);
 }
 
 static void go_container_set_row_title(uintptr_t pointer, int row, char *title)
@@ -882,7 +882,7 @@ static void go_container_set_row_title(uintptr_t pointer, int row, char *title)
 
 static void go_container_set_row_data(uintptr_t pointer, int row, void *data)
 {
-    dw_container_set_row_title((void *)pointer, row, (char *)data);
+    dw_container_set_row_data((void *)pointer, row, data);
 }
 
 static void go_container_insert(uintptr_t handle, uintptr_t pointer, int rowcount)

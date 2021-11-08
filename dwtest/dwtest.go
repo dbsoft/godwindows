@@ -150,6 +150,13 @@ func exit_callback(window dw.HWND, data dw.POINTER) int {
 	return TRUE
 }
 
+func exit_button_callback(window dw.HBUTTON, data dw.POINTER) int {
+	if dw.Messagebox("dwtest", dw.MB_YESNO|dw.MB_QUESTION, "Are you sure you want to exit?") != 0 {
+		dw.Main_quit()
+	}
+	return TRUE
+}
+
 func switch_page_callback(window dw.HNOTEBOOK, page_num dw.HNOTEPAGE, itemdata dw.POINTER) int {
 	fmt.Printf("DW_SIGNAL_SWITCH_PAGE: PageNum: %d\n", dw.HNOTEPAGE_TO_UINT(page_num))
 	return FALSE
@@ -978,6 +985,7 @@ func start_threads_button_callback(window dw.HWND, data dw.POINTER) int {
 }
 
 var exit_callback_func = exit_callback
+var exit_button_callback_func = exit_button_callback
 var copy_clicked_callback_func = copy_clicked_callback
 var paste_clicked_callback_func = paste_clicked_callback
 var browse_file_callback_func = browse_file_callback
@@ -1141,7 +1149,7 @@ func archive_add() {
 	dw.Signal_connect(copybutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(copy_clicked_callback_func), dw.HANDLE_TO_POINTER(copypastefield))
 	dw.Signal_connect(pastebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(paste_clicked_callback_func), dw.HANDLE_TO_POINTER(copypastefield))
 	dw.Signal_connect(okbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(beep_callback_func), nil)
-	dw.Signal_connect(cancelbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(exit_callback_func), dw.HANDLE_TO_POINTER(mainwindow))
+	dw.Signal_connect(cancelbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(exit_button_callback_func), dw.HANDLE_TO_POINTER(mainwindow))
 	dw.Signal_connect(cursortogglebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(cursortoggle_callback_func), dw.HANDLE_TO_POINTER(mainwindow))
 	dw.Signal_connect(colorchoosebutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(colorchoose_callback_func), dw.HANDLE_TO_POINTER(mainwindow))
 }

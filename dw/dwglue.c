@@ -182,6 +182,46 @@ static void go_window_set_pointer(uintptr_t handle, int cursortype)
    dw_window_set_pointer((HWND)handle, cursortype);
 }
 
+static int go_window_compare(uintptr_t window1, uintptr_t window2)
+{
+   return dw_window_compare((HWND)window1, (HWND)window2);
+}
+
+
+static uintptr_t go_notification_new(char *title, char *imagepath, char *description)
+{
+   return (uintptr_t)dw_notification_new(title, imagepath, description);
+}
+
+static int go_notification_send(uintptr_t notification)
+{
+   return dw_notification_send((HWND)notification);
+}
+
+static int go_feature_get(int feature) 
+{
+   if(feature >= 0 && feature < DW_FEATURE_MAX)
+      return dw_feature_get((DWFEATURE)feature);
+   return DW_FEATURE_UNSUPPORTED;
+}
+
+static int go_feature_set(int feature, int state) 
+{
+   if(feature >= 0 && feature < DW_FEATURE_MAX)
+      return dw_feature_set((DWFEATURE)feature, state);
+   return DW_FEATURE_UNSUPPORTED;
+}
+
+static char *go_app_dir(void)
+{
+   return dw_app_dir();
+}
+
+static int go_app_id_set(char *appid, char *appname)
+{
+   return dw_app_id_set(appid, appname);
+}
+
 static uintptr_t go_box_new(int type, int pad)
 {
    return (uintptr_t)dw_box_new(type, pad);
@@ -513,6 +553,11 @@ static uintptr_t go_render_new(unsigned long id)
    return (uintptr_t)dw_render_new(id);
 }
 
+static void go_render_redraw(uintptr_t handle)
+{
+   dw_render_redraw((HWND)handle);
+}
+
 static void go_font_text_extents_get(uintptr_t handle, uintptr_t pixmap, char *text, int *width, int *height)
 {
    dw_font_text_extents_get((HWND)handle, (HPIXMAP)pixmap, text, width, height);
@@ -663,7 +708,6 @@ static uintptr_t go_html_new(unsigned long id)
    return (uintptr_t)dw_html_new(id);
 }
 
-
 static void go_html_action(uintptr_t hwnd, int action)
 {
     dw_html_action((HWND)hwnd, action);
@@ -677,6 +721,11 @@ static int go_html_raw(uintptr_t hwnd, char *string)
 static int go_html_url(uintptr_t hwnd, char *url)
 {
     return dw_html_url((HWND)hwnd, url);
+}
+
+static int go_html_javascript_run(uintptr_t handle, char *script, void *scriptdata)
+{
+    return dw_html_javascript_run((HWND)handle, script, scriptdata);
 }
 
 static uintptr_t go_mle_new(unsigned long id)
@@ -737,6 +786,11 @@ static void go_mle_set_editable(uintptr_t handle, int state)
 static void go_mle_set_word_wrap(uintptr_t handle, int state)
 {
     dw_mle_set_word_wrap((HWND)handle, state);
+}
+
+static void go_mle_set_auto_complete(uintptr_t handle, int state)
+{
+    dw_mle_set_auto_complete((HWND)handle, state);
 }
 
 static int go_mle_search(uintptr_t handle, char *text, int point, unsigned long flags)

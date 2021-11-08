@@ -99,6 +99,9 @@ type HBITMAP struct {
 type HSPLITBAR struct {
 	hwnd C.uintptr_t
 }
+type HNOTIFICATION struct {
+	hwnd C.uintptr_t
+}
 type HTREEITEM struct {
 	htreeitem C.uintptr_t
 	htree     HANDLE
@@ -254,6 +257,12 @@ var HTML_RELOAD = C.DW_HTML_RELOAD
 var HTML_STOP = C.DW_HTML_STOP
 var HTML_PRINT = C.DW_HTML_PRINT
 
+/* Embedded HTML notifcations */
+var HTML_CHANGE_STARTED = C.DW_HTML_CHANGE_STARTED
+var HTML_CHANGE_REDIRECT = C.DW_HTML_CHANGE_REDIRECT
+var HTML_CHANGE_LOADING = C.DW_HTML_CHANGE_LOADING
+var HTML_CHANGE_COMPLETE = C.DW_HTML_CHANGE_COMPLETE
+
 /* Drawing flags  */
 var DRAW_DEFAULT = C.DW_DRAW_DEFAULT
 var DRAW_FILL = C.DW_DRAW_FILL
@@ -328,6 +337,11 @@ var CFA_SEPARATOR uint = C.DW_CFA_SEPARATOR
 
 var CRA_SELECTED uint = C.DW_CRA_SELECTED
 var CRA_CUROSRED uint = C.DW_CRA_CURSORED
+
+/* MLE Auto Complete States */
+var MLE_COMPLETE_TEXT = int(C.DW_MLE_COMPLETE_TEXT)
+var MLE_COMPLETE_DASH = int(C.DW_MLE_COMPLETE_DASH)
+var MLE_COMPLETE_QUITE = int(C.DW_MLE_COMPLETE_QUOTE)
 
 /* Mouse buttons */
 var BUTTON1_MASK = C.DW_BUTTON1_MASK
@@ -414,6 +428,28 @@ var VK_LSHIFT = int(C.VK_LSHIFT)
 var VK_RSHIFT = int(C.VK_RSHIFT)
 var VK_LCONTROL = int(C.VK_LCONTROL)
 var VK_RCONTROL = int(C.VK_RCONTROL)
+
+/* Feature constants */
+var FEATURE_UNSUPPORTED = int(C.DW_FEATURE_UNSUPPORTED)
+var FEATURE_ENABLED = int(C.DW_FEATURE_ENABLED)
+var FEATURE_DISABLED = int(C.DW_FEATURE_DISABLED)
+
+var FEATURE_HTML = int(C.DW_FEATURE_HTML)
+var FEATURE_HTML_RESULT = int(C.DW_FEATURE_HTML_RESULT)
+var FEATURE_WINDOW_BORDER = int(C.DW_FEATURE_WINDOW_BORDER)
+var FEATURE_WINDOW_TRANSPARENCY = int(C.DW_FEATURE_WINDOW_TRANSPARENCY)
+var FEATURE_DARK_MODE = int(C.DW_FEATURE_DARK_MODE)
+var FEATURE_MLE_AUTO_COMPLETE = int(C.DW_FEATURE_MLE_AUTO_COMPLETE)
+var FEATURE_MLE_WORD_WRAP = int(C.DW_FEATURE_MLE_WORD_WRAP)
+var FEATURE_CONTAINER_STRIPE = int(C.DW_FEATURE_CONTAINER_STRIPE)
+var FEATURE_MDI = int(C.DW_FEATURE_MDI)
+var FEATURE_NOTEBOOK_STATUS_TEXT = int(C.DW_FEATURE_NOTEBOOK_STATUS_TEXT)
+var FEATURE_NOTIFICATION = int(C.DW_FEATURE_NOTIFICATION)
+var FEATURE_UTF8_UNICODE = int(C.DW_FEATURE_UTF8_UNICODE)
+var FEATURE_MLE_RICH_EDIT = int(C.DW_FEATURE_MLE_RICH_EDIT)
+var FEATURE_TASK_BAR = int(C.DW_FEATURE_TASK_BAR)
+var FEATURE_TREE = int(C.DW_FEATURE_TREE)
+var FEATURE_WINDOW_PLACEMENT = int(C.DW_FEATURE_WINDOW_PLACEMENT)
 
 // Convert a resource ID into a pointer
 func RESOURCE(id uintptr) unsafe.Pointer {
@@ -853,6 +889,14 @@ func (window HMTX) GetType() C.uint {
 	return 0
 }
 
+func (notification HNOTIFICATION) GetHandle() C.uintptr_t {
+	return notification.hwnd
+}
+
+func (notification HNOTIFICATION) GetType() C.uint {
+	return 0
+}
+
 // Initializes the Dynamic Windows engine.
 func Init(newthread int) int {
 	if len(os.Args) > 0 {
@@ -884,6 +928,51 @@ func DeinitThread() {
 // Cleanly terminates a DW session, should be signal handler safe but does not exit.
 func Shutdown() {
 	C.dw_shutdown()
+}
+
+// Gets the path to the application
+func App_dir() string {
+	cappdir := C.go_app_dir()
+	return C.GoString(cappdir)
+}
+
+// Gets the path to the application
+func AppDir() string {
+	return App_dir()
+}
+
+// Sets the application ID and name
+func App_id_set(appid string, appname string) int {
+	cappid := C.CString(appid)
+	defer C.free(unsafe.Pointer(cappid))
+	cappname := C.CString(appname)
+	defer C.free(unsafe.Pointer(cappname))
+	return int(C.go_app_id_set(cappid, cappname))
+}
+
+// Sets the application ID and name
+func AppIdSet(appid string, appname string) int {
+	return App_id_set(appid, appname)
+}
+
+// Gets the status of a feature on the current platform
+func Feature_get(feature int) int {
+	return int(C.go_feature_get(C.int(feature)))
+}
+
+// Gets the status of a feature on the current platform
+func FeatureGet(feature int) int {
+	return Feature_get(feature)
+}
+
+// Sets the status of a feature on the current platform
+func Feature_set(feature int, status int) int {
+	return int(C.go_feature_set(C.int(feature), C.int(status)))
+}
+
+// Sets the status of a feature on the current platform
+func FeatureSet(feature int, status int) int {
+	return Feature_set(feature, status)
 }
 
 // Returns some information about the current operating environment.
@@ -1151,6 +1240,11 @@ func Window_set_tooltip(handle HANDLE, bubbletext string) {
 // Causes entire window to be invalidated and redrawn.
 func Window_redraw(handle HANDLE) {
 	C.go_window_redraw(handle.GetHandle())
+}
+
+// Check if two window handles are the same window
+func Window_compare(handle1 HANDLE, handle2 HANDLE) int {
+	return int(C.go_window_compare(handle1.GetHandle(), handle2.GetHandle()))
 }
 
 // Causes entire window to be invalidated and redrawn.
@@ -3406,6 +3500,16 @@ func RenderNew(id uint) HRENDER {
 	return Render_new(id)
 }
 
+// Causes an expose event to trigger for the render widget
+func Render_redraw(handle HANDLE) {
+	C.go_render_redraw(handle.GetHandle())
+}
+
+// Causes an expose event to trigger for the render widget
+func (handle HRENDER) Redraw() {
+	Render_redraw(handle)
+}
+
 // Allows the user to choose a font using the system's font chooser dialog.
 func Font_choose(currfont string) string {
 	ccurrfont := C.CString(currfont)
@@ -3900,6 +4004,19 @@ func (handle HHTML) URL(url string) int {
 	return Html_url(handle, url)
 }
 
+// Run javascript code in the embedded HTML widget
+func Html_javascript_run(handle HANDLE, script string, data POINTER) int {
+	cscript := C.CString(script)
+	defer C.free(unsafe.Pointer(cscript))
+
+	return int(C.go_html_javascript_run(handle.GetHandle(), cscript, unsafe.Pointer(data)))
+}
+
+// Run javascript code in the embedded HTML widget
+func (handle HHTML) JavascriptRun(script string, data POINTER) int {
+	return Html_javascript_run(handle, script, data)
+}
+
 // Create a new Multiline Editbox widget to be packed.
 func Mle_new(id uint) HMLE {
 	return HMLE{C.go_mle_new(C.ulong(id))}
@@ -4027,6 +4144,16 @@ func Mle_set_word_wrap(handle HANDLE, state int) {
 // Sets the word wrap state of an MLE box.
 func (handle HMLE) SetWordWrap(state int) {
 	Mle_set_word_wrap(handle, state)
+}
+
+// Sets the auto complete state of an MLE box.
+func Mle_set_auto_complete(handle HANDLE, state int) {
+	C.go_mle_set_auto_complete(handle.GetHandle(), C.int(state))
+}
+
+// Sets the auto complete state of an MLE box.
+func (handle HMLE) SetAutoComplete(state int) {
+	Mle_set_auto_complete(handle, state)
 }
 
 // Finds text in an MLE box.
@@ -4747,6 +4874,32 @@ func Mutex_trylock(handle HMTX) int {
 // Tries to gain access to the semaphore.
 func (handle HMTX) TryLock() int {
 	return Mutex_trylock(handle)
+}
+
+// Creates a new notificaiton
+func Notification_new(title string, imagepath string, description string) HNOTIFICATION {
+	ctitle := C.CString(title)
+	defer C.free(unsafe.Pointer(ctitle))
+	cimagepath := C.CString(imagepath)
+	defer C.free(unsafe.Pointer(cimagepath))
+	cdescription := C.CString(description)
+	defer C.free(unsafe.Pointer(cdescription))
+	return HNOTIFICATION{C.go_notification_new(ctitle, cimagepath, cdescription)}
+}
+
+// Creates a new notificaiton
+func NotificatioNew(title string, imagepath string, description string) HNOTIFICATION {
+	return Notification_new(title, imagepath, description)
+}
+
+// Sends a created notification
+func Notification_send(handle HANDLE) int {
+	return int(C.go_notification_send(handle.GetHandle()))
+}
+
+// Sends a created notification
+func (handle HNOTIFICATION) Send() int {
+	return Notification_send(handle)
 }
 
 // Allocates and initializes a dialog.

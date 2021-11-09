@@ -984,6 +984,58 @@ func start_threads_button_callback(window dw.HWND, data dw.POINTER) int {
 	return FALSE
 }
 
+/* Handle web back navigation */
+func web_back_clicked(button dw.HBUTTON, data dw.POINTER) int {
+	dw.Html_action(dw.POINTER_TO_HANDLE(data), dw.HTML_GOBACK)
+	return FALSE
+}
+
+/* Handle web forward navigation */
+func web_forward_clicked(button dw.HBUTTON, data dw.POINTER) int {
+	dw.Html_action(dw.POINTER_TO_HANDLE(data), dw.HTML_GOFORWARD)
+	return FALSE
+}
+
+/* Handle web reload */
+func web_reload_clicked(button dw.HBUTTON, data dw.POINTER) int {
+	dw.Html_action(dw.POINTER_TO_HANDLE(data), dw.HTML_RELOAD)
+	return FALSE
+}
+
+/* Handle web run */
+func web_run_clicked(button dw.HBUTTON, data dw.POINTER) int {
+	html := dw.POINTER_TO_HANDLE(data)
+	javascript := dw.POINTER_TO_HANDLE(dw.Window_get_data(button, "javascript"))
+	script := dw.Window_get_text(javascript)
+
+	dw.Html_javascript_run(html, script, nil)
+	return FALSE
+}
+
+/* Handle web javascript result */
+func web_html_result(html dw.HHTML, status int, result string, script_data dw.POINTER, user_data dw.POINTER) int {
+	var style = dw.MB_INFORMATION
+	var message = result
+	if(status != dw.ERROR_NONE) {
+		style = dw.MB_ERROR
+	}
+	if(result != "") {
+		message = "Javascript result is not a string value"
+	}
+	dw.Messagebox("Javascript Result", style, message)
+	return TRUE
+}
+
+/* Handle web html changed */
+func web_html_changed(html dw.HHTML, status int, url string, data dw.POINTER) int {
+	statusnames := []string{"none", "started", "redirect", "loading", "complete" }
+
+	if(status < 5) {
+		dw.Window_set_text(dw.POINTER_TO_HANDLE(data), "Status " + statusnames[status] + ": " + url)
+	}
+	return FALSE
+}
+
 var exit_callback_func = exit_callback
 var exit_button_callback_func = exit_button_callback
 var copy_clicked_callback_func = copy_clicked_callback
@@ -1485,6 +1537,61 @@ func create_button(redraw bool) {
 	}
 }
 
+// Page 7
+func html_add() {
+	rawhtml := dw.Html_new(1001);
+	if rawhtml.GetHandle() != 0 {
+		hbox := dw.Box_new(dw.HORZ, 0);
+		javascript := dw.Combobox_new("", 0);
+
+		dw.Listbox_append(javascript, "window.scrollTo(0,500);");
+		dw.Listbox_append(javascript, "window.document.title;");
+		dw.Listbox_append(javascript, "window.navigator.userAgent;");
+
+		dw.Box_pack_start(notebookbox7, rawhtml, 0, 100, TRUE, FALSE, 0);
+		dw.Html_raw(rawhtml, "<html><body><center><h1>dwtest</h1></center></body></html>");
+		html := dw.Html_new(1002);
+
+		dw.Box_pack_start(notebookbox7, hbox, 0, 0, TRUE, FALSE, 0);
+
+		/* Add navigation buttons */
+		item := dw.Button_new("Back", 0);
+		dw.Box_pack_start(hbox, item, -1, -1, FALSE, FALSE, 0);
+		dw.Signal_connect(item, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(web_back_clicked), dw.HANDLE_TO_POINTER(html));
+
+		item = dw.Button_new("Forward", 0);
+		dw.Box_pack_start(hbox, item, -1, -1, FALSE, FALSE, 0);
+		dw.Signal_connect(item, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(web_forward_clicked), dw.HANDLE_TO_POINTER(html));
+
+		/* Put in some extra space */
+		dw.Box_pack_start(hbox, dw.NOHWND, 5, 1, FALSE, FALSE, 0);
+
+		item = dw.Button_new("Reload", 0);
+		dw.Box_pack_start(hbox, item, -1, -1, FALSE, FALSE, 0);
+		dw.Signal_connect(item, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(web_reload_clicked), dw.HANDLE_TO_POINTER(html));
+
+		/* Put in some extra space */
+		dw.Box_pack_start(hbox, dw.NOHWND, 5, 1, FALSE, FALSE, 0);
+		dw.Box_pack_start(hbox, javascript, -1, -1, TRUE, FALSE, 0);
+
+		item = dw.Button_new("Run", 0);
+		dw.Window_set_data(item, "javascript", dw.HANDLE_TO_POINTER(javascript));
+		dw.Box_pack_start(hbox, item, -1, -1, FALSE, FALSE, 0);
+		dw.Signal_connect(item, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(web_run_clicked), dw.HANDLE_TO_POINTER(html));
+		dw.Window_click_default(javascript, item);
+
+		dw.Box_pack_start(notebookbox7, html, 0, 100, TRUE, TRUE, 0);
+		dw.Html_url(html, "https://dbsoft.org/dw_help.php");
+		htmlstatus := dw.Status_text_new("HTML status loading...", 0);
+		dw.Box_pack_start(notebookbox7, htmlstatus, 100, -1, TRUE, FALSE, 1);
+		dw.Signal_connect(html, dw.SIGNAL_HTML_CHANGED, dw.SIGNAL_FUNC(web_html_changed), dw.HANDLE_TO_POINTER(htmlstatus));
+		dw.Signal_connect(html, dw.SIGNAL_HTML_RESULT, dw.SIGNAL_FUNC(web_html_result), dw.HANDLE_TO_POINTER(javascript));
+	} else {
+		label := dw.Text_new("HTML widget not available.", 0)
+		dw.Box_pack_start(notebookbox7, label, 0, 100, TRUE, TRUE, 0)
+	}
+}
+
 // Page 8
 func scrollbox_add() {
 	var i int
@@ -1615,18 +1722,7 @@ func main() {
 	notebookpage7 := dw.Notebook_page_new(notebook, 1, FALSE)
 	dw.Notebook_pack(notebook, notebookpage7, notebookbox7)
 	dw.Notebook_page_set_text(notebook, notebookpage7, "html")
-
-	rawhtml := dw.Html_new(1001)
-	if rawhtml.GetHandle() != 0 {
-		dw.Box_pack_start(notebookbox7, rawhtml, 0, 100, TRUE, FALSE, 0)
-		dw.Html_raw(rawhtml, "<html><body><center><h1>dwtest</h1></center></body></html>")
-		html = dw.Html_new(1002)
-		dw.Box_pack_start(notebookbox7, html, 0, 100, TRUE, TRUE, 0)
-		dw.Html_url(html, "http://dwindows.netlabs.org")
-	} else {
-		label := dw.Text_new("HTML widget not available.", 0)
-		dw.Box_pack_start(notebookbox7, label, 0, 100, TRUE, TRUE, 0)
-	}
+	html_add()
 
 	notebookbox8 = dw.Box_new(dw.VERT, 7)
 	notebookpage8 := dw.Notebook_page_new(notebook, 1, FALSE)

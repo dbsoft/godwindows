@@ -1245,6 +1245,8 @@ extern int go_int_callback_notepage(void *pfunc, uintptr_t window, unsigned long
 extern int go_int_callback_tree(void *pfunc, uintptr_t window, uintptr_t item, void *data, unsigned int flags);
 extern int go_int_callback_timer(void *pfunc, void *data, unsigned int flags);
 extern int go_int_callback_print(void *pfunc, uintptr_t print, uintptr_t pixmap, int page_num, void *data, unsigned int flags);
+extern int go_int_callback_html_changed(void *pfunc, uintptr_t html, int status, char *url, void *data, unsigned int flags);
+extern int go_int_callback_html_result(void *pfunc, uintptr_t html, int status, char *result, void *scriptdata, void *data, unsigned int flags);
 extern void go_callback_remove(void *pfunc);
 
 static int DWSIGNAL go_callback_basic(HWND window, void *data)
@@ -1387,6 +1389,26 @@ static int DWSIGNAL go_callback_print(HPRINT print, HPIXMAP pixmap, int page_num
     return 0;
 }
 
+static int DWSIGNAL go_callback_html_changed(HWND html, int status, char *url, void *data)
+{
+    if(data)
+    {
+       void **param = (void **)data;
+       return go_int_callback_html_changed(param[0], (uintptr_t)html, status, url, param[1], DW_POINTER_TO_INT(param[2]));
+    }
+    return 0;
+}
+
+static int DWSIGNAL go_callback_html_result(HWND html, int status, char *result, void *scriptdata, void *data)
+{
+    if(data)
+    {
+       void **param = (void **)data;
+       return go_int_callback_html_result(param[0], (uintptr_t)html, status, result, scriptdata, param[1], DW_POINTER_TO_INT(param[2]));
+    }
+    return 0;
+}
+
 static uintptr_t go_print_new(char *jobname, unsigned long flags, unsigned int pages, void *drawfunc, void *drawdata, unsigned int sflags)
 {
     void **param = malloc(sizeof(void *) * 3);
@@ -1401,7 +1423,7 @@ static uintptr_t go_print_new(char *jobname, unsigned long flags, unsigned int p
     return 0;
 }
 
-static int go_timer_connect(int interval, void *sigfunc, void *data, unsigned int flags)
+static uintptr_t go_timer_connect(int interval, void *sigfunc, void *data, unsigned int flags)
 {
    void **param = malloc(sizeof(void *) * 3);
    
@@ -1410,9 +1432,14 @@ static int go_timer_connect(int interval, void *sigfunc, void *data, unsigned in
       param[0] = sigfunc;
       param[1] = data;
       param[2] = DW_UINT_TO_POINTER(flags);
-      return dw_timer_connect(interval, DW_SIGNAL_FUNC(go_callback_timer), param);
+      return (uintptr_t)dw_timer_connect(interval, DW_SIGNAL_FUNC(go_callback_timer), param);
    }
    return 0;
+}
+
+static void go_timer_disconnect(uintptr_t tid)
+{
+    dw_timer_disconnect((HTIMER)tid);
 }
 
 static void DWSIGNAL go_signal_free(HWND window, void *data)
@@ -1479,6 +1506,14 @@ static void go_signal_connect(uintptr_t window, char *signame, void *sigfunc, vo
       else if(strcmp(signame, DW_SIGNAL_TREE_EXPAND) == 0)
       {
          func = (void *)go_callback_tree;
+      }
+      else if(strcmp(signame, DW_SIGNAL_HTML_CHANGED) == 0)
+      {
+         func = (void *)go_callback_html_changed;
+      }
+      else if(strcmp(signame, DW_SIGNAL_HTML_RESULT) == 0)
+      {
+         func = (void *)go_callback_html_result;
       }
       
       dw_signal_connect_data((HWND)window, signame, func, DW_SIGNAL_FUNC(go_signal_free), param);

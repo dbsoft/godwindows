@@ -123,7 +123,7 @@ type HMTX struct {
 }
 type HICN C.uintptr_t
 type HTIMER struct {
-	tid C.int
+	tid C.uintptr_t
 }
 type HMENUI struct {
 	hmenui C.uintptr_t
@@ -306,6 +306,8 @@ var SIGNAL_VALUE_CHANGED = C.DW_SIGNAL_VALUE_CHANGED
 var SIGNAL_SWITCH_PAGE = C.DW_SIGNAL_SWITCH_PAGE
 var SIGNAL_COLUMN_CLICK = C.DW_SIGNAL_COLUMN_CLICK
 var SIGNAL_TREE_EXPAND = C.DW_SIGNAL_TREE_EXPAND
+var SIGNAL_HTML_CHANGED = C.DW_SIGNAL_HTML_CHANGED
+var SIGNAL_HTML_RESULT = C.DW_SIGNAL_HTML_RESULT
 
 /* status of menu items */
 var MIS_ENABLED uint = C.DW_MIS_ENABLED
@@ -2850,7 +2852,7 @@ func TimerNew() HTIMER {
 //Removes timer callback.
 func Timer_disconnect(id HTIMER) {
 	if id.tid > 0 {
-		C.dw_timer_disconnect(C.int(id.tid))
+		C.go_timer_disconnect(C.uintptr_t(id.tid))
 	}
 }
 
@@ -5178,6 +5180,22 @@ func (window HMENUITEM) ConnectClicked(sigfunc func(window HMENUITEM) int) {
 	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
+// Connect a function or closure to a HTML changed event.
+func (window HHTML) ConnectChanged(sigfunc func(window HHTML, status int, url string) int) {
+	csigname := C.CString(C.DW_SIGNAL_HTML_CHANGED)
+	defer C.free(unsafe.Pointer(csigname))
+
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+}
+
+// Connect a function or closure to a HTML javascript result event.
+func (window HHTML) ConnectResult(sigfunc func(window HHTML, status int, result string) int) {
+	csigname := C.CString(C.DW_SIGNAL_HTML_RESULT)
+	defer C.free(unsafe.Pointer(csigname))
+
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+}
+
 // Connect a function or closure to a timer event.
 func (id *HTIMER) Connect(sigfunc func() int, interval int) {
 	if id.tid == 0 {
@@ -5188,7 +5206,7 @@ func (id *HTIMER) Connect(sigfunc func() int, interval int) {
 // Disconnect an active timer event.
 func (id HTIMER) Disconnect() {
 	if id.tid > 0 {
-		C.dw_timer_disconnect(C.int(id.tid))
+		C.go_timer_disconnect(C.uintptr_t(id.tid))
 	}
 }
 
@@ -6232,6 +6250,42 @@ func go_int_callback_tree(h unsafe.Pointer, window C.uintptr_t, tree C.uintptr_t
 	}
 	thisfunc := pfunc.Value().(func(HANDLE, HTREEITEM, POINTER) int)
 	return C.int(thisfunc(HGENERIC{window}, HTREEITEM{tree, HWND{window}}, POINTER(data)))
+}
+
+//export go_int_callback_html_changed
+func go_int_callback_html_changed(h unsafe.Pointer, window C.uintptr_t, status C.int, url *C.char, data unsafe.Pointer, flags C.uint) C.int {
+	pfunc := cgo.Handle(h)
+	switch flags {
+	case (18 << 8): // HHTML
+		thisfunc := pfunc.Value().(func(HHTML, int, string, POINTER) int)
+		return C.int(thisfunc(HHTML{window}, int(status), C.GoString(url), POINTER(data)))
+	case go_flags_no_data:
+		thisfunc := pfunc.Value().(func(HANDLE, int, string) int)
+		return C.int(thisfunc(HGENERIC{window}, int(status), C.GoString(url)))
+	case (18 << 8) | go_flags_no_data: // HHTML
+		thisfunc := pfunc.Value().(func(HHTML, int, string) int)
+		return C.int(thisfunc(HHTML{window}, int(status), C.GoString(url)))
+	}
+	thisfunc := pfunc.Value().(func(HANDLE, int, string, POINTER) int)
+	return C.int(thisfunc(HGENERIC{window}, int(status), C.GoString(url), POINTER(data)))
+}
+
+//export go_int_callback_html_result
+func go_int_callback_html_result(h unsafe.Pointer, window C.uintptr_t, status C.int, url *C.char, scriptdata unsafe.Pointer, data unsafe.Pointer, flags C.uint) C.int {
+	pfunc := cgo.Handle(h)
+	switch flags {
+	case (18 << 8): // HHTML
+		thisfunc := pfunc.Value().(func(HHTML, int, string, POINTER, POINTER) int)
+		return C.int(thisfunc(HHTML{window}, int(status), C.GoString(url), POINTER(scriptdata), POINTER(data)))
+	case go_flags_no_data:
+		thisfunc := pfunc.Value().(func(HANDLE, int, string, POINTER) int)
+		return C.int(thisfunc(HGENERIC{window}, int(status), C.GoString(url), POINTER(scriptdata)))
+	case (18 << 8) | go_flags_no_data: // HHTML
+		thisfunc := pfunc.Value().(func(HHTML, int, string, POINTER) int)
+		return C.int(thisfunc(HHTML{window}, int(status), C.GoString(url), POINTER(scriptdata)))
+	}
+	thisfunc := pfunc.Value().(func(HANDLE, int, string, POINTER, POINTER) int)
+	return C.int(thisfunc(HGENERIC{window}, int(status), C.GoString(url), POINTER(scriptdata), POINTER(data)))
 }
 
 //export go_int_callback_timer

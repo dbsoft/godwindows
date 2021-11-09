@@ -5189,7 +5189,7 @@ func (window HHTML) ConnectChanged(sigfunc func(window HHTML, status int, url st
 }
 
 // Connect a function or closure to a HTML javascript result event.
-func (window HHTML) ConnectResult(sigfunc func(window HHTML, status int, result string) int) {
+func (window HHTML) ConnectResult(sigfunc func(window HHTML, status int, result string, script_data POINTER) int) {
 	csigname := C.CString(C.DW_SIGNAL_HTML_RESULT)
 	defer C.free(unsafe.Pointer(csigname))
 

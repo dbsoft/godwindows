@@ -1152,6 +1152,93 @@ func create_button(buttonboxperm, buttonsbox dw.HBOX, percent dw.HPERCENT) {
 	filetoolbarbox.PackStart(dw.NOHWND, 25, 5, dw.FALSE, dw.FALSE, 0)
 }
 
+// Page 7
+func html_add(notebookbox7 dw.HBOX) {
+	rawhtml := dw.HtmlNew(1001)
+	if rawhtml.GetHandle() != 0 {
+		hbox := dw.BoxNew(dw.HORZ, 0)
+		javascript := dw.ComboboxNew("", 0)
+
+		javascript.Append("window.scrollTo(0,500);")
+		javascript.Append("window.document.title;")
+		javascript.Append("window.navigator.userAgent;")
+
+		notebookbox7.PackStart(rawhtml, 0, 100, dw.TRUE, dw.FALSE, 0)
+		rawhtml.Raw("<html><body><center><h1>dwtest</h1></center></body></html>")
+		html := dw.HtmlNew(1002)
+
+		notebookbox7.PackStart(hbox, 0, 0, dw.TRUE, dw.FALSE, 0)
+
+		/* Add navigation buttons */
+		item := dw.ButtonNew("Back", 0)
+		hbox.PackStart(item, -1, -1, dw.FALSE, dw.FALSE, 0)
+		item.ConnectClicked(func(window dw.HBUTTON) int {
+			html.Action(dw.HTML_GOBACK)
+			return dw.FALSE
+		})
+
+		item = dw.ButtonNew("Forward", 0)
+		hbox.PackStart(item, -1, -1, dw.FALSE, dw.FALSE, 0)
+		item.ConnectClicked(func(window dw.HBUTTON) int {
+			html.Action(dw.HTML_GOFORWARD)
+			return dw.FALSE
+		})
+
+		/* Put in some extra space */
+		hbox.PackStart(dw.NOHWND, 5, 1, dw.FALSE, dw.FALSE, 0)
+
+		item = dw.ButtonNew("Reload", 0)
+		hbox.PackStart(item, -1, -1, dw.FALSE, dw.FALSE, 0)
+		item.ConnectClicked(func(window dw.HBUTTON) int {
+			html.Action(dw.HTML_RELOAD)
+			return dw.FALSE
+		})
+
+		/* Put in some extra space */
+		hbox.PackStart(dw.NOHWND, 5, 1, dw.FALSE, dw.FALSE, 0)
+		hbox.PackStart(javascript, -1, -1, dw.TRUE, dw.FALSE, 0)
+
+		item = dw.ButtonNew("Run", 0)
+		hbox.PackStart(item, -1, -1, dw.FALSE, dw.FALSE, 0)
+		item.ConnectClicked(func(window dw.HBUTTON) int {
+			script := dw.Window_get_text(javascript)
+			html.JavascriptRun(script, nil)
+			return dw.FALSE
+		})
+		//javascript.ClickDefault(item)
+
+		notebookbox7.PackStart(html, 0, 100, dw.TRUE, dw.TRUE, 0)
+		htmlstatus := dw.StatusTextNew("HTML status loading...", 0)
+		notebookbox7.PackStart(htmlstatus, 100, -1, dw.TRUE, dw.FALSE, 1)
+
+		html.ConnectChanged(func(window dw.HHTML, status int, url string) int {
+			statusnames := []string{"none", "started", "redirect", "loading", "complete"}
+
+			if status < 5 {
+				htmlstatus.SetText("Status " + statusnames[status] + ": " + url)
+			}
+			return dw.FALSE
+		})
+		html.ConnectResult(func(window dw.HHTML, status int, result string, script_data dw.POINTER) int {
+			var style = dw.MB_INFORMATION
+			var message = result
+			if status != dw.ERROR_NONE {
+				style = dw.MB_ERROR
+			}
+			if result == "" {
+				message = "Javascript result is not a string value"
+			}
+			dw.Messagebox("Javascript Result", style, message)
+			return dw.FALSE
+		})
+
+		html.URL("https://dbsoft.org/dw_help.php")
+	} else {
+		label := dw.TextNew("HTML widget not available.", 0)
+		notebookbox7.PackStart(label, 0, 100, dw.TRUE, dw.TRUE, 0)
+	}
+}
+
 // Page 8
 func scrollbox_add(notebookbox8 dw.HBOX) {
 	var i int
@@ -1393,18 +1480,7 @@ func main() {
 	notebookpage7 := notebook.PageNew(1, dw.FALSE)
 	notebookpage7.Pack(notebookbox7)
 	notebookpage7.SetText("html")
-
-	rawhtml := dw.HtmlNew(1001)
-	if rawhtml.GetHandle() != 0 {
-		notebookbox7.PackStart(rawhtml, 0, 100, dw.TRUE, dw.FALSE, 0)
-		rawhtml.Raw("<html><body><center><h1>dwtest</h1></center></body></html>")
-		html := dw.HtmlNew(1002)
-		notebookbox7.PackStart(html, 0, 100, dw.TRUE, dw.TRUE, 0)
-		html.URL("http://dwindows.netlabs.org")
-	} else {
-		label := dw.Text_new("HTML widget not available.", 0)
-		notebookbox7.PackStart(label, 0, 100, dw.TRUE, dw.TRUE, 0)
-	}
+	html_add(notebookbox7)
 
 	notebookbox8 := dw.BoxNew(dw.VERT, 7)
 	notebookpage8 := notebook.PageNew(1, dw.FALSE)

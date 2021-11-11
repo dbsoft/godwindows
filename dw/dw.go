@@ -903,7 +903,7 @@ func (notification HNOTIFICATION) GetHandle() C.uintptr_t {
 }
 
 func (notification HNOTIFICATION) GetType() C.uint {
-	return 0
+	return 23
 }
 
 // Initializes the Dynamic Windows engine.
@@ -4897,7 +4897,7 @@ func Notification_new(title string, imagepath string, description string) HNOTIF
 }
 
 // Creates a new notificaiton
-func NotificatioNew(title string, imagepath string, description string) HNOTIFICATION {
+func NotificationNew(title string, imagepath string, description string) HNOTIFICATION {
 	return Notification_new(title, imagepath, description)
 }
 
@@ -5195,6 +5195,14 @@ func (window HHTML) ConnectChanged(sigfunc func(window HHTML, status int, url st
 	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
 }
 
+// Connect a function or closure to a widget clicked event.
+func (window HNOTIFICATION) ConnectClicked(sigfunc func(window HNOTIFICATION) int) {
+	csigname := C.CString(C.DW_SIGNAL_CLICKED)
+	defer C.free(unsafe.Pointer(csigname))
+
+	C.go_signal_connect(window.GetHandle(), csigname, unsafe.Pointer(cgo.NewHandle(sigfunc)), nil, (window.GetType()<<8)|go_flags_no_data)
+}
+
 // Connect a function or closure to a HTML javascript result event.
 func (window HHTML) ConnectResult(sigfunc func(window HHTML, status int, result string, script_data POINTER) int) {
 	csigname := C.CString(C.DW_SIGNAL_HTML_RESULT)
@@ -5304,6 +5312,9 @@ func go_int_callback_basic(h unsafe.Pointer, window C.uintptr_t, data unsafe.Poi
 	case (21 << 8): // HSPLITBAR
 		thisfunc := pfunc.Value().(func(HSPLITBAR, POINTER) int)
 		return C.int(thisfunc(HSPLITBAR{window}, POINTER(data)))
+	case (23 << 8): // HNOTIFICATION
+		thisfunc := pfunc.Value().(func(HNOTIFICATION, POINTER) int)
+		return C.int(thisfunc(HNOTIFICATION{window}, POINTER(data)))
 	case go_flags_no_data:
 		thisfunc := pfunc.Value().(func(HANDLE) int)
 		return C.int(thisfunc(HGENERIC{window}))
@@ -5374,6 +5385,9 @@ func go_int_callback_basic(h unsafe.Pointer, window C.uintptr_t, data unsafe.Poi
 	case (21 << 8) | go_flags_no_data: // HSPLITBAR
 		thisfunc := pfunc.Value().(func(HSPLITBAR) int)
 		return C.int(thisfunc(HSPLITBAR{window}))
+	case (23 << 8) | go_flags_no_data: // HNOTIFICATION
+		thisfunc := pfunc.Value().(func(HNOTIFICATION) int)
+		return C.int(thisfunc(HNOTIFICATION{window}))
 	}
 	thisfunc := pfunc.Value().(func(HANDLE, POINTER) int)
 	return C.int(thisfunc(HGENERIC{window}, POINTER(data)))

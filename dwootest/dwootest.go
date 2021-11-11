@@ -628,12 +628,19 @@ func archive_add(notebookbox1 dw.HBOX) {
 	browsefilebutton.ConnectClicked(func(window dw.HBUTTON) int {
 		tmp := dw.FileBrowse("Pick a file", "dwootest.go", "go", dw.FILE_OPEN)
 		if len(tmp) > 0 {
+			notification := dw.NotificationNew("New file loaded", "image/test.png", "dwtest loaded \""+tmp+"\" into the file browser on the Render tab, with \"File Display\" selected from the drop down list.")
+
 			current_file = tmp
 			entryfield.SetText(current_file)
 			read_file()
 			current_col = 0
 			current_row = 0
 			update_render()
+			notification.ConnectClicked(func(notif dw.HNOTIFICATION) int {
+				fmt.Printf("Notification clicked\n")
+				return dw.TRUE
+			})
+			notification.Send()
 		}
 		copypastefield.SetFocus()
 		return dw.FALSE
@@ -1431,11 +1438,11 @@ func main() {
 	}
 
 	/* Setup the Application ID for sending notifications */
-	dw.App_id_set("org.dbsoft.dwindows.dwtest", "Dynamic Windows Test")
+	dw.AppIdSet("org.dbsoft.dwindows.dwtest", "Dynamic Windows Test")
 
 	/* Enable full dark mode on platforms that support it */
 	if os.Getenv("DW_DARK_MODE") != "" {
-		dw.Feature_set(dw.FEATURE_DARK_MODE, dw.DARK_MODE_FULL)
+		dw.FeatureSet(dw.FEATURE_DARK_MODE, dw.DARK_MODE_FULL)
 	}
 
 	/* Initialize the Dynamic Windows engine */
@@ -1443,7 +1450,7 @@ func main() {
 
 	/* Test all the features and display the results */
 	for feat := 0; feat < dw.FEATURE_MAX && feat < len(DWFeatureList); feat++ {
-		result := dw.Feature_get(feat)
+		result := dw.FeatureGet(feat)
 		status := "Unsupported"
 
 		if result == 0 {

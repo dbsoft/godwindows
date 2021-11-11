@@ -215,15 +215,24 @@ func copy_clicked_callback(button dw.HBUTTON, data dw.POINTER) int {
 	return TRUE
 }
 
+func notification_clicked_callback(button dw.HNOTIFICATION, data dw.POINTER) int {
+	fmt.Printf("Notification clicked\n")
+	return TRUE
+}
+
 func browse_file_callback(window dw.HBUTTON, data dw.POINTER) int {
-	tmp := dw.File_browse("Pick a file", "dwtest.c", "c", dw.FILE_OPEN)
+	tmp := dw.File_browse("Pick a file", "dwtest.c", "go", dw.FILE_OPEN)
 	if len(tmp) > 0 {
+		notification := dw.Notification_new("New file loaded", "image/test.png", "dwtest loaded \""+tmp+"\" into the file browser on the Render tab, with \"File Display\" selected from the drop down list.")
+
 		current_file = tmp
 		dw.Window_set_text(entryfield, current_file)
 		read_file()
 		current_col = 0
 		current_row = 0
 		update_render()
+		dw.Signal_connect(notification, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(notification_clicked_callback), nil)
+		dw.Notification_send(notification)
 	}
 	dw.Window_set_focus(copypastefield)
 	return FALSE

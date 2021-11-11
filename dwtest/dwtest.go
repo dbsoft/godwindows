@@ -1603,6 +1603,24 @@ func thread_add() {
 }
 
 func main() {
+	DWFeatureList := []string{
+		"Supports the HTML Widget",
+		"Supports the DW_SIGNAL_HTML_RESULT callback",
+		"Supports custom window border sizes",
+		"Supports window frame transparency",
+		"Supports Dark Mode user interface",
+		"Supports auto completion in Multi-line Edit boxes",
+		"Supports word wrapping in Multi-line Edit boxes",
+		"Supports striped line display in container widgets",
+		"Supports Multiple Document Interface window frame",
+		"Supports status text area on notebook/tabbed controls",
+		"Supports sending system notifications",
+		"Supports UTF8 encoded Unicode text",
+		"Supports Rich Edit based MLE control (Windows)",
+		"Supports icons in the taskbar or similar system widget",
+		"Supports the Tree Widget",
+		"Supports arbitrary window placement"}
+
 	/* Pick an approriate font for our platform */
 	if runtime.GOOS == "windows" {
 		FIXEDFONT = "10.Lucida Console"
@@ -1616,8 +1634,30 @@ func main() {
 		SRCROOT = fmt.Sprintf("%s/dwtest", pkg.SrcRoot)
 	}
 
+	/* Setup the Application ID for sending notifications */
+	dw.App_id_set("org.dbsoft.dwindows.dwtest", "Dynamic Windows Test")
+
+	/* Enable full dark mode on platforms that support it */
+	if os.Getenv("DW_DARK_MODE") != "" {
+		dw.Feature_set(dw.FEATURE_DARK_MODE, dw.DARK_MODE_FULL)
+	}
+
 	/* Initialize the Dynamic Windows engine */
 	dw.Init(dw.TRUE)
+
+	/* Test all the features and display the results */
+	for feat := 0; feat < dw.FEATURE_MAX && feat < len(DWFeatureList); feat++ {
+		result := dw.Feature_get(feat)
+		status := "Unsupported"
+
+		if result == 0 {
+			status = "Disabled"
+		} else if result > 0 {
+			status = "Enabled"
+		}
+
+		fmt.Printf("%s: %s (%d)\n", DWFeatureList[feat], status, result)
+	}
 
 	/* Create our window */
 	mainwindow = dw.Window_new(dw.DESKTOP, "dwindows test UTF8 中国語 (繁体) cañón", dw.FCF_SYSMENU|dw.FCF_TITLEBAR|dw.FCF_TASKLIST|dw.FCF_DLGBORDER|dw.FCF_SIZEBORDER|dw.FCF_MINMAX)

@@ -47,10 +47,13 @@ var font_height = 12
 var rows = 10
 var width1 = 6
 var cols = 80
-var render_type = 0
 var current_row = 0
 var current_col = 0
 var max_linewidth = 0
+var SHAPES_DOUBLE_BUFFERED = 0
+var SHAPES_DIRECT = 1
+var DRAW_FILE = 2
+var render_type = SHAPES_DOUBLE_BUFFERED
 
 // Page 3
 var notebookbox3 dw.HBOX
@@ -230,7 +233,7 @@ func browse_file_callback(window dw.HBUTTON, data dw.POINTER) int {
 		read_file()
 		current_col = 0
 		current_row = 0
-		update_render()
+		render_draw()
 		dw.Signal_connect(notification, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(notification_clicked_callback), nil)
 		dw.Notification_send(notification)
 	}
@@ -346,10 +349,6 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
 				dw.Draw_text(dw.NOHWND, hpm, 0, y, thisline[col:])
 			}
 		}
-		if hpma == dw.NOHPIXMAP {
-			text_expose(textbox1, 0, 0, 0, 0, nil)
-			text_expose(textbox2, 0, 0, 0, 0, nil)
-		}
 	}
 }
 
@@ -407,22 +406,32 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
 			dw.Pixmap_bitblt(window, pixmap, image_x, image_y, dw.Pixmap_width(image), dw.Pixmap_height(image), dw.NOHWND, image, 0, 0)
 		}
 	}
-
-	/* If we aren't drawing direct do a bitblt */
-	if direct == FALSE && hpma == dw.NOHPIXMAP {
-		text_expose(textbox2, 0, 0, 0, 0, nil)
-	}
 }
 
 func update_render() {
 	switch render_type {
-	case 0:
+	case SHAPES_DOUBLE_BUFFERED:
 		draw_shapes(FALSE, dw.NOHPIXMAP)
-	case 1:
+	case SHAPES_DIRECT:
 		draw_shapes(TRUE, dw.NOHPIXMAP)
-	case 2:
+	case DRAW_FILE:
 		draw_file(current_row, current_col, rows, font_height, dw.NOHPIXMAP)
 	}
+}
+
+/* Request that the render widgets redraw...
+ * If not using direct rendering, call update_render() to
+ * redraw the in memory pixmaps. Then trigger the expose events.
+ * Expose will call update_render() to draw directly or bitblt the pixmaps.
+ */
+func render_draw() {
+	/* If we are double buffered, draw to the pixmaps */
+	if render_type != SHAPES_DIRECT {
+		update_render()
+	}
+	/* Trigger expose event */
+	dw.Render_redraw(textbox1)
+	dw.Render_redraw(textbox2)
 }
 
 func draw_page(print dw.HPRINT, pixmap dw.HPIXMAP, page_num int, data dw.POINTER) int {
@@ -464,7 +473,7 @@ func print_callback(window dw.HANDLE, data dw.POINTER) int {
 
 /* This gets called when a part of the graph needs to be repainted. */
 func text_expose(hwnd dw.HRENDER, x int, y int, width int, height int, data dw.POINTER) int {
-	if render_type != 1 {
+	if render_type != SHAPES_DIRECT {
 		var hpm dw.HPIXMAP
 
 		if hwnd.GetHandle() == textbox1.GetHandle() {
@@ -511,19 +520,19 @@ func configure_event(hwnd dw.HRENDER, width int, height int, data dw.POINTER) in
 	dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols))
 	dw.Scrollbar_set_range(vscrollbar, uint(len(lines)), uint(rows))
 
-	/* Redraw the window */
-	update_render()
+	/* Redraw the render widgets */
+	render_draw()
 	return TRUE
 }
 
 func refresh_callback(window dw.HBUTTON, data dw.POINTER) int {
-	update_render()
+	render_draw()
 	return FALSE
 }
 
 func render_select_event_callback(window dw.HLISTBOX, index int, data dw.POINTER) int {
 	if index != render_type {
-		if index == 2 {
+		if index == DRAW_FILE {
 			dw.Scrollbar_set_range(hscrollbar, uint(max_linewidth), uint(cols))
 			dw.Scrollbar_set_pos(hscrollbar, 0)
 			dw.Scrollbar_set_range(vscrollbar, uint(len(lines)), uint(rows))
@@ -537,7 +546,7 @@ func render_select_event_callback(window dw.HLISTBOX, index int, data dw.POINTER
 			dw.Scrollbar_set_pos(vscrollbar, 0)
 		}
 		render_type = index
-		update_render()
+		render_draw()
 	}
 	return FALSE
 }
@@ -553,7 +562,7 @@ func scrollbar_valuechanged_callback(hwnd dw.HSCROLLBAR, value int, data dw.POIN
 			current_col = value
 		}
 		dw.Window_set_text(stext, fmt.Sprintf("Row:%d Col:%d Lines:%d Cols:%d", current_row, current_col, len(lines), max_linewidth))
-		update_render()
+		render_draw()
 	}
 	return FALSE
 }

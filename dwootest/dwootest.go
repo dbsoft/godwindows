@@ -32,10 +32,13 @@ var font_height = 12
 var rows = 10
 var width1 = 6
 var cols = 80
-var render_type = 0
 var current_row = 0
 var current_col = 0
 var max_linewidth = 0
+var SHAPES_DOUBLE_BUFFERED = 0
+var SHAPES_DIRECT = 1
+var DRAW_FILE = 2
+var render_type = SHAPES_DOUBLE_BUFFERED
 
 // Page 4
 var mle_point = 0
@@ -146,10 +149,6 @@ func draw_file(row int, col int, nrows int, fheight int, hpma dw.HPIXMAP) {
 				hpm.DrawText(0, y, thisline[col:])
 			}
 		}
-		if hpma == dw.NOHPIXMAP {
-			text_expose(textbox1, text1pm)
-			text_expose(textbox2, text2pm)
-		}
 	}
 }
 
@@ -205,22 +204,32 @@ func draw_shapes(direct int, hpma dw.HPIXMAP) {
 			drawable.BitBltPixmap(image_x, image_y, image.GetWidth(), image.GetHeight(), image, 0, 0)
 		}
 	}
-
-	/* If we aren't drawing direct do a bitblt */
-	if direct == dw.FALSE && hpma == dw.NOHPIXMAP {
-		text_expose(textbox2, text2pm)
-	}
 }
 
 func update_render() {
 	switch render_type {
-	case 0:
+	case SHAPES_DOUBLE_BUFFERED:
 		draw_shapes(dw.FALSE, dw.NOHPIXMAP)
-	case 1:
+	case SHAPES_DIRECT:
 		draw_shapes(dw.TRUE, dw.NOHPIXMAP)
-	case 2:
+	case DRAW_FILE:
 		draw_file(current_row, current_col, rows, font_height, dw.NOHPIXMAP)
 	}
+}
+
+/* Request that the render widgets redraw...
+ * If not using direct rendering, call update_render() to
+ * redraw the in memory pixmaps. Then trigger the expose events.
+ * Expose will call update_render() to draw directly or bitblt the pixmaps.
+ */
+func render_draw() {
+	/* If we are double buffered, draw to the pixmaps */
+	if render_type != SHAPES_DIRECT {
+		update_render()
+	}
+	/* Trigger expose event */
+	textbox1.Redraw()
+	textbox2.Redraw()
 }
 
 func print_callback() {
@@ -281,7 +290,7 @@ func context_menu() {
 
 /* This gets called when a part of the graph needs to be repainted. */
 func text_expose(hwnd dw.HRENDER, hpm dw.HPIXMAP) int {
-	if render_type != 1 {
+	if render_type != SHAPES_DIRECT {
 		width := hpm.GetWidth()
 		height := hpm.GetHeight()
 
@@ -635,7 +644,7 @@ func archive_add(notebookbox1 dw.HBOX) {
 			read_file()
 			current_col = 0
 			current_row = 0
-			update_render()
+			render_draw()
 			notification.ConnectClicked(func(notif dw.HNOTIFICATION) int {
 				fmt.Printf("Notification clicked\n")
 				return dw.TRUE
@@ -819,8 +828,8 @@ func text_add(notebookbox2 dw.HBOX) {
 		hscrollbar.SetRange(uint(max_linewidth), uint(cols))
 		vscrollbar.SetRange(uint(len(lines)), uint(rows))
 
-		/* Redraw the window */
-		update_render()
+		/* Redraw the render widgets */
+		render_draw()
 		return dw.TRUE
 	})
 	textbox2.ConnectMotion(func(window dw.HRENDER, x int, y int, buttonmask int) int {
@@ -834,13 +843,13 @@ func text_add(notebookbox2 dw.HBOX) {
 	hscrollbar.ConnectValueChanged(func(hwnd dw.HSCROLLBAR, value int) int {
 		current_col = value
 		status1.SetText(fmt.Sprintf("Row:%d Col:%d Lines:%d Cols:%d", current_row, current_col, len(lines), max_linewidth))
-		update_render()
+		render_draw()
 		return dw.FALSE
 	})
 	vscrollbar.ConnectValueChanged(func(hwnd dw.HSCROLLBAR, value int) int {
 		current_row = value
 		status1.SetText(fmt.Sprintf("Row:%d Col:%d Lines:%d Cols:%d", current_row, current_col, len(lines), max_linewidth))
-		update_render()
+		render_draw()
 		return dw.FALSE
 	})
 	imagestretchcheck.ConnectClicked(func(window dw.HBUTTON) int { update_render(); return dw.FALSE })

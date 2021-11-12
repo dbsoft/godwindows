@@ -755,6 +755,146 @@ func keypress_callback(window dw.HWND, ch uint8, vk int, state int, data dw.POIN
 }
 
 // Page 3 and 4 Callbacks
+func word_wrap_click_cb(wordwrap dw.HBUTTON, data dw.POINTER) int {
+	container_mle := dw.POINTER_TO_HANDLE(data)
+
+	dw.Mle_set_word_wrap(container_mle, dw.Checkbox_get(wordwrap))
+	return TRUE
+}
+
+func color_combobox() dw.HLISTBOX {
+	combobox := dw.Combobox_new("DW_CLR_DEFAULT", 0)
+
+	dw.Listbox_append(combobox, "DW_CLR_DEFAULT")
+	dw.Listbox_append(combobox, "DW_CLR_BLACK")
+	dw.Listbox_append(combobox, "DW_CLR_DARKRED")
+	dw.Listbox_append(combobox, "DW_CLR_DARKGREEN")
+	dw.Listbox_append(combobox, "DW_CLR_BROWN")
+	dw.Listbox_append(combobox, "DW_CLR_DARKBLUE")
+	dw.Listbox_append(combobox, "DW_CLR_DARKPINK")
+	dw.Listbox_append(combobox, "DW_CLR_DARKCYAN")
+	dw.Listbox_append(combobox, "DW_CLR_PALEGRAY")
+	dw.Listbox_append(combobox, "DW_CLR_DARKGRAY")
+	dw.Listbox_append(combobox, "DW_CLR_RED")
+	dw.Listbox_append(combobox, "DW_CLR_GREEN")
+	dw.Listbox_append(combobox, "DW_CLR_YELLOW")
+	dw.Listbox_append(combobox, "DW_CLR_BLUE")
+	dw.Listbox_append(combobox, "DW_CLR_PINK")
+	dw.Listbox_append(combobox, "DW_CLR_CYAN")
+	dw.Listbox_append(combobox, "DW_CLR_WHITE")
+	return combobox
+}
+
+func combobox_color(colortext string) dw.COLOR {
+	color := dw.CLR_DEFAULT
+
+	if colortext == "DW_CLR_BLACK" {
+		color = dw.CLR_BLACK
+	} else if colortext == "DW_CLR_DARKRED" {
+		color = dw.CLR_DARKRED
+	} else if colortext == "DW_CLR_DARKGREEN" {
+		color = dw.CLR_DARKGREEN
+	} else if colortext == "DW_CLR_BROWN" {
+		color = dw.CLR_BROWN
+	} else if colortext == "DW_CLR_DARKBLUE" {
+		color = dw.CLR_DARKBLUE
+	} else if colortext == "DW_CLR_DARKPINK" {
+		color = dw.CLR_DARKPINK
+	} else if colortext == "DW_CLR_DARKCYAN" {
+		color = dw.CLR_DARKCYAN
+	} else if colortext == "DW_CLR_PALEGRAY" {
+		color = dw.CLR_PALEGRAY
+	} else if colortext == "DW_CLR_DARKGRAY" {
+		color = dw.CLR_DARKGRAY
+	} else if colortext == "DW_CLR_RED" {
+		color = dw.CLR_RED
+	} else if colortext == "DW_CLR_GREEN" {
+		color = dw.CLR_GREEN
+	} else if colortext == "DW_CLR_YELLOW" {
+		color = dw.CLR_YELLOW
+	} else if colortext == "DW_CLR_BLUE" {
+		color = dw.CLR_BLUE
+	} else if colortext == "DW_CLR_PINK" {
+		color = dw.CLR_PINK
+	} else if colortext == "DW_CLR_CYAN" {
+		color = dw.CLR_CYAN
+	} else if colortext == "DW_CLR_WHITE" {
+		color = dw.CLR_WHITE
+	}
+
+	return color
+}
+
+func mle_color_cb(hwnd dw.HLISTBOX, pos int, data dw.POINTER) int {
+	hbox := dw.POINTER_TO_HANDLE(data)
+	mlefore := dw.POINTER_TO_HANDLE(dw.Window_get_data(hbox, "mlefore"))
+	mleback := dw.POINTER_TO_HANDLE(dw.Window_get_data(hbox, "mleback"))
+	fore := dw.CLR_DEFAULT
+	back := dw.CLR_DEFAULT
+
+	if dw.Window_compare(hwnd, mlefore) {
+		colortext := dw.Listbox_get_text(mlefore, pos)
+		fore = combobox_color(colortext)
+	} else {
+		text := dw.Window_get_text(mlefore)
+
+		if text != "" {
+			fore = combobox_color(text)
+		}
+	}
+	if dw.Window_compare(hwnd, mleback) {
+		colortext := dw.Listbox_get_text(mleback, pos)
+		back = combobox_color(colortext)
+	} else {
+		text := dw.Window_get_text(mleback)
+
+		if text != "" {
+			back = combobox_color(text)
+		}
+	}
+
+	dw.Window_set_color(container_mle, fore, back)
+	return FALSE
+}
+
+func mle_font_set(mle dw.HMLE, fontsize int, fontname string) {
+	if fontname != "" {
+		dw.Window_set_font(mle, fmt.Sprintf("%d.%s", fontsize, fontname))
+	} else {
+		dw.Window_set_font(mle, fontname)
+	}
+}
+
+func mle_fontname_cb(hwnd dw.HLISTBOX, pos int, data dw.POINTER) int {
+	hbox := dw.POINTER_TO_HANDLE(data)
+	fontsize := dw.POINTER_TO_HANDLE(dw.Window_get_data(hbox, "fontsize"))
+	fontname := dw.POINTER_TO_HANDLE(dw.Window_get_data(hbox, "fontname"))
+	font := dw.Listbox_get_text(fontname, pos)
+
+	if font == "Default" {
+		font = ""
+	}
+
+	mle_font_set(container_mle, dw.Spinbutton_get_pos(fontsize), font)
+	return FALSE
+}
+
+func mle_fontsize_cb(hwnd dw.HSPINBUTTON, size int, data dw.POINTER) int {
+	hbox := dw.POINTER_TO_HANDLE(data)
+	fontname := dw.POINTER_TO_HANDLE(dw.Window_get_data(hbox, "fontname"))
+	font := dw.Window_get_text(fontname)
+
+	if font != "" {
+		if font == "Default" {
+			font = ""
+		}
+		mle_font_set(container_mle, size, font)
+	} else {
+		mle_font_set(container_mle, size, "")
+	}
+	return FALSE
+}
+
 func item_enter_cb(window dw.HCONTAINER, text string, data dw.POINTER, itemdata dw.POINTER) int {
 	message := fmt.Sprintf("DW_SIGNAL_ITEM_ENTER: Window: %x Text: %s Itemdata: %x", dw.HANDLE_TO_UINTPTR(window), text, uintptr(itemdata))
 	dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message)
@@ -1352,6 +1492,48 @@ func container_add() {
 	containerbox := dw.Box_new(dw.HORZ, 2)
 	dw.Box_pack_start(notebookbox4, containerbox, 500, 200, TRUE, TRUE, 0)
 
+	/* Add a word wrap/font style box */
+	hbox := dw.Box_new(dw.HORZ, 0)
+
+	checkbox := dw.Checkbox_new("Word wrap", 0)
+	dw.Box_pack_start(hbox, checkbox, -1, -1, FALSE, TRUE, 1)
+	text := dw.Text_new("Foreground:", 0)
+	dw.Window_set_style(text, dw.DT_VCENTER, dw.DT_VCENTER)
+	dw.Box_pack_start(hbox, text, -1, -1, FALSE, TRUE, 1)
+	mlefore := color_combobox()
+	dw.Box_pack_start(hbox, mlefore, 150, -1, TRUE, FALSE, 1)
+	text = dw.Text_new("Background:", 0)
+	dw.Window_set_style(text, dw.DT_VCENTER, dw.DT_VCENTER)
+	dw.Box_pack_start(hbox, text, -1, -1, FALSE, TRUE, 1)
+	mleback := color_combobox()
+	dw.Box_pack_start(hbox, mleback, 150, -1, TRUE, FALSE, 1)
+	dw.Checkbox_set(checkbox, TRUE)
+	text = dw.Text_new("Font:", 0)
+	dw.Window_set_style(text, dw.DT_VCENTER, dw.DT_VCENTER)
+	dw.Box_pack_start(hbox, text, -1, -1, FALSE, TRUE, 1)
+	fontsize := dw.Spinbutton_new("9", 0)
+	dw.Box_pack_start(hbox, fontsize, -1, -1, FALSE, FALSE, 1)
+	dw.Spinbutton_set_limits(fontsize, 100, 5)
+	dw.Spinbutton_set_pos(fontsize, 9)
+	fontname := dw.Combobox_new("Default", 0)
+	dw.Listbox_append(fontname, "Default")
+	dw.Listbox_append(fontname, "Arial")
+	dw.Listbox_append(fontname, "Geneva")
+	dw.Listbox_append(fontname, "Verdana")
+	dw.Listbox_append(fontname, "Helvetica")
+	dw.Listbox_append(fontname, "DejaVu Sans")
+	dw.Listbox_append(fontname, "Times New Roman")
+	dw.Listbox_append(fontname, "Times New Roman Bold")
+	dw.Listbox_append(fontname, "Times New Roman Italic")
+	dw.Listbox_append(fontname, "Times New Roman Bold Italic")
+	dw.Box_pack_start(hbox, fontname, 150, -1, TRUE, FALSE, 1)
+	dw.Box_pack_start(notebookbox4, hbox, -1, -1, TRUE, FALSE, 1)
+
+	dw.Window_set_data(hbox, "mlefore", dw.HANDLE_TO_POINTER(mlefore))
+	dw.Window_set_data(hbox, "mleback", dw.HANDLE_TO_POINTER(mleback))
+	dw.Window_set_data(hbox, "fontsize", dw.HANDLE_TO_POINTER(fontsize))
+	dw.Window_set_data(hbox, "fontname", dw.HANDLE_TO_POINTER(fontname))
+
 	/* now a container area under this box */
 	container = dw.Container_new(100, TRUE)
 	dw.Box_pack_start(notebookbox4, container, 500, 200, TRUE, FALSE, 1)
@@ -1411,6 +1593,11 @@ func container_add() {
 	dw.Signal_connect(container, dw.SIGNAL_ITEM_CONTEXT, dw.SIGNAL_FUNC(item_context_cb), dw.HANDLE_TO_POINTER(container_status))
 	dw.Signal_connect(container, dw.SIGNAL_ITEM_SELECT, dw.SIGNAL_FUNC(container_select_cb), dw.HANDLE_TO_POINTER(container_status))
 	dw.Signal_connect(container, dw.SIGNAL_COLUMN_CLICK, dw.SIGNAL_FUNC(column_click_cb), dw.HANDLE_TO_POINTER(container_status))
+	dw.Signal_connect(checkbox, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(word_wrap_click_cb), dw.HANDLE_TO_POINTER(container_mle))
+	dw.Signal_connect(mlefore, dw.SIGNAL_LIST_SELECT, dw.SIGNAL_FUNC(mle_color_cb), dw.HANDLE_TO_POINTER(hbox))
+	dw.Signal_connect(mleback, dw.SIGNAL_LIST_SELECT, dw.SIGNAL_FUNC(mle_color_cb), dw.HANDLE_TO_POINTER(hbox))
+	dw.Signal_connect(fontname, dw.SIGNAL_LIST_SELECT, dw.SIGNAL_FUNC(mle_fontname_cb), dw.HANDLE_TO_POINTER(hbox))
+	dw.Signal_connect(fontsize, dw.SIGNAL_VALUE_CHANGED, dw.SIGNAL_FUNC(mle_fontsize_cb), dw.HANDLE_TO_POINTER(hbox))
 }
 
 // Page 5

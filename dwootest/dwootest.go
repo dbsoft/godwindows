@@ -477,6 +477,105 @@ func resolve_keymodifiers(mask int) string {
 	return "none"
 }
 
+func color_combobox() dw.HLISTBOX {
+	combobox := dw.ComboboxNew("DW_CLR_DEFAULT", 0)
+
+	combobox.Append("DW_CLR_DEFAULT")
+	combobox.Append("DW_CLR_BLACK")
+	combobox.Append("DW_CLR_DARKRED")
+	combobox.Append("DW_CLR_DARKGREEN")
+	combobox.Append("DW_CLR_BROWN")
+	combobox.Append("DW_CLR_DARKBLUE")
+	combobox.Append("DW_CLR_DARKPINK")
+	combobox.Append("DW_CLR_DARKCYAN")
+	combobox.Append("DW_CLR_PALEGRAY")
+	combobox.Append("DW_CLR_DARKGRAY")
+	combobox.Append("DW_CLR_RED")
+	combobox.Append("DW_CLR_GREEN")
+	combobox.Append("DW_CLR_YELLOW")
+	combobox.Append("DW_CLR_BLUE")
+	combobox.Append("DW_CLR_PINK")
+	combobox.Append("DW_CLR_CYAN")
+	combobox.Append("DW_CLR_WHITE")
+	return combobox
+}
+
+func combobox_color(colortext string) dw.COLOR {
+	color := dw.CLR_DEFAULT
+
+	if colortext == "DW_CLR_BLACK" {
+		color = dw.CLR_BLACK
+	} else if colortext == "DW_CLR_DARKRED" {
+		color = dw.CLR_DARKRED
+	} else if colortext == "DW_CLR_DARKGREEN" {
+		color = dw.CLR_DARKGREEN
+	} else if colortext == "DW_CLR_BROWN" {
+		color = dw.CLR_BROWN
+	} else if colortext == "DW_CLR_DARKBLUE" {
+		color = dw.CLR_DARKBLUE
+	} else if colortext == "DW_CLR_DARKPINK" {
+		color = dw.CLR_DARKPINK
+	} else if colortext == "DW_CLR_DARKCYAN" {
+		color = dw.CLR_DARKCYAN
+	} else if colortext == "DW_CLR_PALEGRAY" {
+		color = dw.CLR_PALEGRAY
+	} else if colortext == "DW_CLR_DARKGRAY" {
+		color = dw.CLR_DARKGRAY
+	} else if colortext == "DW_CLR_RED" {
+		color = dw.CLR_RED
+	} else if colortext == "DW_CLR_GREEN" {
+		color = dw.CLR_GREEN
+	} else if colortext == "DW_CLR_YELLOW" {
+		color = dw.CLR_YELLOW
+	} else if colortext == "DW_CLR_BLUE" {
+		color = dw.CLR_BLUE
+	} else if colortext == "DW_CLR_PINK" {
+		color = dw.CLR_PINK
+	} else if colortext == "DW_CLR_CYAN" {
+		color = dw.CLR_CYAN
+	} else if colortext == "DW_CLR_WHITE" {
+		color = dw.CLR_WHITE
+	}
+
+	return color
+}
+
+func mle_color(hwnd dw.HLISTBOX, mlefore dw.HLISTBOX, mleback dw.HLISTBOX, container_mle dw.HMLE, pos int) {
+	fore := dw.CLR_DEFAULT
+	back := dw.CLR_DEFAULT
+
+	if dw.HWND(hwnd).Compare(mlefore) {
+		colortext := mlefore.GetText(pos)
+		fore = combobox_color(colortext)
+	} else {
+		text := dw.HWND(mlefore).GetText()
+
+		if text != "" {
+			fore = combobox_color(text)
+		}
+	}
+	if dw.HWND(hwnd).Compare(mleback) {
+		colortext := mleback.GetText(pos)
+		back = combobox_color(colortext)
+	} else {
+		text := dw.HWND(mleback).GetText()
+
+		if text != "" {
+			back = combobox_color(text)
+		}
+	}
+
+	container_mle.SetColor(fore, back)
+}
+
+func mle_font_set(mle dw.HMLE, fontsize int, fontname string) {
+	if fontname != "" {
+		mle.SetFont(fmt.Sprintf("%d.%s", fontsize, fontname))
+	} else {
+		mle.SetFont(fontname)
+	}
+}
+
 func button_callback(combobox1 dw.HLISTBOX, combobox2 dw.HLISTBOX, spinbutton dw.HSPINBUTTON, cal dw.HCALENDAR) {
 	idx := combobox1.Selected()
 	buf1 := combobox1.GetText(idx)
@@ -946,6 +1045,43 @@ func container_add(notebookbox4 dw.HBOX) {
 	containerbox := dw.BoxNew(dw.HORZ, 2)
 	notebookbox4.PackStart(containerbox, 500, 200, dw.TRUE, dw.TRUE, 0)
 
+	/* Add a word wrap/font style box */
+	hbox := dw.BoxNew(dw.HORZ, 0)
+
+	checkbox := dw.CheckButtonNew("Word wrap", 0)
+	hbox.PackStart(checkbox, -1, -1, dw.FALSE, dw.TRUE, 1)
+	text := dw.TextNew("Foreground:", 0)
+	text.SetStyle(dw.DT_VCENTER, dw.DT_VCENTER)
+	hbox.PackStart(text, -1, -1, dw.FALSE, dw.TRUE, 1)
+	mlefore := color_combobox()
+	hbox.PackStart(mlefore, 150, -1, dw.TRUE, dw.FALSE, 1)
+	text = dw.TextNew("Background:", 0)
+	text.SetStyle(dw.DT_VCENTER, dw.DT_VCENTER)
+	hbox.PackStart(text, -1, -1, dw.FALSE, dw.TRUE, 1)
+	mleback := color_combobox()
+	hbox.PackStart(mleback, 150, -1, dw.TRUE, dw.FALSE, 1)
+	checkbox.Set(dw.TRUE)
+	text = dw.TextNew("Font:", 0)
+	text.SetStyle(dw.DT_VCENTER, dw.DT_VCENTER)
+	hbox.PackStart(text, -1, -1, dw.FALSE, dw.TRUE, 1)
+	fontsize := dw.SpinButtonNew("9", 0)
+	hbox.PackStart(fontsize, -1, -1, dw.FALSE, dw.FALSE, 1)
+	fontsize.SetLimits(100, 5)
+	fontsize.SetPos(9)
+	fontname := dw.ComboboxNew("Default", 0)
+	fontname.Append("Default")
+	fontname.Append("Arial")
+	fontname.Append("Geneva")
+	fontname.Append("Verdana")
+	fontname.Append("Helvetica")
+	fontname.Append("DejaVu Sans")
+	fontname.Append("Times New Roman")
+	fontname.Append("Times New Roman Bold")
+	fontname.Append("Times New Roman Italic")
+	fontname.Append("Times New Roman Bold Italic")
+	hbox.PackStart(fontname, 150, -1, dw.TRUE, dw.FALSE, 1)
+	notebookbox4.PackStart(hbox, -1, -1, dw.TRUE, dw.FALSE, 1)
+
 	/* now a container area under this box */
 	container := dw.ContainerNew(100, dw.TRUE)
 	notebookbox4.PackStart(container, 500, 200, dw.TRUE, dw.FALSE, 1)
@@ -1052,6 +1188,46 @@ func container_add(notebookbox4 dw.HBOX) {
 		}
 		container_status.SetText(fmt.Sprintf("DW_SIGNAL_COLUMN_CLICK: Window: %x Column: %d Type: %s Itemdata: %x",
 			dw.HANDLE_TO_UINTPTR(window), column_num, stype))
+		return dw.FALSE
+	})
+
+	checkbox.ConnectClicked(func(window dw.HBUTTON) int {
+		container_mle.SetWordWrap(checkbox.Get())
+		return dw.TRUE
+	})
+
+	mlefore.ConnectListSelect(func(window dw.HLISTBOX, index int) int {
+		mle_color(window, mlefore, mleback, container_mle, index)
+		return dw.FALSE
+	})
+
+	mleback.ConnectListSelect(func(window dw.HLISTBOX, index int) int {
+		mle_color(window, mlefore, mleback, container_mle, index)
+		return dw.FALSE
+	})
+
+	fontname.ConnectListSelect(func(window dw.HLISTBOX, pos int) int {
+		font := fontname.GetText(pos)
+
+		if font == "Default" {
+			font = ""
+		}
+
+		mle_font_set(container_mle, fontsize.GetPos(), font)
+		return dw.FALSE
+	})
+
+	fontsize.ConnectValueChanged(func(window dw.HSPINBUTTON, size int) int {
+		font := dw.HWND(fontname).GetText()
+
+		if font != "" {
+			if font == "Default" {
+				font = ""
+			}
+			mle_font_set(container_mle, size, font)
+		} else {
+			mle_font_set(container_mle, size, "")
+		}
 		return dw.FALSE
 	})
 }

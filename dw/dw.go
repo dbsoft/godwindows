@@ -1252,8 +1252,13 @@ func Window_redraw(handle HANDLE) {
 }
 
 // Check if two window handles are the same window
-func Window_compare(handle1 HANDLE, handle2 HANDLE) int {
-	return int(C.go_window_compare(handle1.GetHandle(), handle2.GetHandle()))
+func Window_compare(handle1 HANDLE, handle2 HANDLE) bool {
+	return C.go_window_compare(handle1.GetHandle(), handle2.GetHandle()) != 0
+}
+
+// Check if two window handles are the same window
+func (window HWND) Compare(other HANDLE) bool {
+	return Window_compare(window, other)
 }
 
 // Causes entire window to be invalidated and redrawn.

@@ -640,10 +640,11 @@ func menu_add(mainwindow dw.HWND) {
 	menuitem = menu.AppendItem("~About", dw.MENU_AUTO, 0, dw.TRUE, dw.FALSE, dw.NOMENU)
 	menuitem.ConnectClicked(func(window dw.HMENUITEM) int {
 		env := dw.EnvironmentGet()
-		message := fmt.Sprintf("dwindows test\n\nOS: %s %s %s Version: %d.%d.%d.%d\n\ndwindows Version: %d.%d.%d",
+		message := fmt.Sprintf("dwindows test\n\nOS: %s %s %s Version: %d.%d.%d.%d\n\nHTML: %s\n\ndwindows Version: %d.%d.%d\n\nScreen: %dx%d %dbpp",
 			env.OSName, env.BuildDate, env.BuildTime,
 			env.MajorVersion, env.MinorVersion, env.MajorBuild, env.MinorBuild,
-			env.DWMajorVersion, env.DWMinorVersion, env.DWSubVersion)
+			env.HTMLEngine, env.DWMajorVersion, env.DWMinorVersion, env.DWSubVersion,
+			dw.ScreenWidth(), dw.ScreenHeight(), dw.ColorDepthGet())
 		dw.MessageBox("About dwindows", dw.MB_OK|dw.MB_INFORMATION, message)
 		return dw.FALSE
 	})

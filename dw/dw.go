@@ -144,7 +144,7 @@ type POINTER unsafe.Pointer
 type DWFUNC cgo.Handle
 
 type Env struct {
-	OSName, BuildDate, BuildTime                       string
+	OSName, BuildDate, BuildTime, HTMLEngine           string
 	MajorVersion, MinorVersion, MajorBuild, MinorBuild C.short
 	DWMajorVersion, DWMinorVersion, DWSubVersion       C.short
 }
@@ -991,6 +991,7 @@ func Environment_query(env *Env) {
 	env.OSName = C.GoString((*C.char)(unsafe.Pointer(&cenv.osName[0])))
 	env.BuildDate = C.GoString((*C.char)(unsafe.Pointer(&cenv.buildDate[0])))
 	env.BuildTime = C.GoString((*C.char)(unsafe.Pointer(&cenv.buildTime[0])))
+	env.HTMLEngine = C.GoString((*C.char)(unsafe.Pointer(&cenv.htmlEngine[0])))
 	env.MajorVersion = cenv.MajorVersion
 	env.MinorVersion = cenv.MajorVersion
 	env.MajorBuild = cenv.MajorBuild

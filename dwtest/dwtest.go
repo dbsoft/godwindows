@@ -285,7 +285,7 @@ func motion_notify_event(window dw.HRENDER, x int, y int, buttonmask int, data d
 	if uintptr(data) > 0 {
 		which = "motion_notify"
 	}
-	dw.Window_set_text(status2, fmt.Sprintf("%s: %dx%d", which, x, y))
+	dw.Window_set_text(status2, fmt.Sprintf("%s: %dx%d buttons %d", which, x, y, buttonmask))
 	return FALSE
 }
 

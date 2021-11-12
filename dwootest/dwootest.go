@@ -932,11 +932,11 @@ func text_add(notebookbox2 dw.HBOX) {
 		return dw.TRUE
 	})
 	textbox2.ConnectMotion(func(window dw.HRENDER, x int, y int, buttonmask int) int {
-		status2.SetText(fmt.Sprintf("motion_notify: %dx%d", x, y))
+		status2.SetText(fmt.Sprintf("motion_notify: %dx%d buttons %d", x, y, buttonmask))
 		return dw.FALSE
 	})
 	textbox2.ConnectButtonPress(func(window dw.HRENDER, x int, y int, buttonmask int) int {
-		status2.SetText(fmt.Sprintf("button_press: %dx%d", x, y))
+		status2.SetText(fmt.Sprintf("button_press: %dx%d buttons %d", x, y, buttonmask))
 		return dw.FALSE
 	})
 	hscrollbar.ConnectValueChanged(func(hwnd dw.HSCROLLBAR, value int) int {

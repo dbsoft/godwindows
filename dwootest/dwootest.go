@@ -1034,7 +1034,7 @@ func tree_add(notebookbox3 dw.HBOX) {
 }
 
 // Page 4
-func container_add(notebookbox4 dw.HBOX) {
+func container_add(notebookbox4 dw.HBOX, mainwindow dw.HWND) {
 	var z int
 	titles := []string{"Type", "Size", "Time", "Date"}
 	flags := []uint{dw.CFA_BITMAPORICON | dw.CFA_LEFT | dw.CFA_HORZSEPARATOR | dw.CFA_SEPARATOR,
@@ -1143,8 +1143,41 @@ func container_add(notebookbox4 dw.HBOX) {
 		return dw.FALSE
 	})
 	container.ConnectItemContext(func(window dw.HCONTAINER, text string, x int, y int, itemdata dw.POINTER) int {
+		hwndMenu := dw.MenuNew(0)
+		hwndSubMenu := dw.MenuNew(0)
+
 		container_status.SetText(fmt.Sprintf("DW_SIGNAL_ITEM_CONTEXT: Window: %x Text: %s x: %d y: %d Itemdata: %x",
 			dw.HANDLE_TO_UINTPTR(window), text, x, y, uintptr(itemdata)))
+		popupfunc := func(window dw.HMENUITEM) int {
+			container_status.SetText(fmt.Sprintf("DW_SIGNAL_CLICKED: Menu: %x Container context menu clicked", dw.HANDLE_TO_UINTPTR(window)))
+			return dw.FALSE
+		}
+
+		menuitem := hwndSubMenu.AppendItem("File", dw.MENU_POPUP, 0, dw.TRUE, dw.TRUE, dw.NOMENU)
+		menuitem.ConnectClicked(popupfunc)
+		menuitem = hwndSubMenu.AppendItem("Date", dw.MENU_POPUP, 0, dw.TRUE, dw.TRUE, dw.NOMENU)
+		menuitem.ConnectClicked(popupfunc)
+		menuitem = hwndSubMenu.AppendItem("Size", dw.MENU_POPUP, 0, dw.TRUE, dw.TRUE, dw.NOMENU)
+		menuitem.ConnectClicked(popupfunc)
+		menuitem = hwndSubMenu.AppendItem("None", dw.MENU_POPUP, 0, dw.TRUE, dw.TRUE, dw.NOMENU)
+		menuitem.ConnectClicked(popupfunc)
+
+		menuitem = hwndMenu.AppendItem("Sort", dw.MENU_POPUP, 0, dw.TRUE, dw.FALSE, hwndSubMenu)
+
+		menuitem = hwndMenu.AppendItem("Make Directory", dw.MENU_POPUP, 0, dw.TRUE, dw.FALSE, dw.NOMENU)
+		menuitem.ConnectClicked(popupfunc)
+
+		hwndMenu.AppendItem("", 0, 0, dw.TRUE, dw.FALSE, dw.NOMENU)
+		menuitem = hwndMenu.AppendItem("Rename Entry", dw.MENU_POPUP, 0, dw.TRUE, dw.FALSE, dw.NOMENU)
+		menuitem.ConnectClicked(popupfunc)
+
+		menuitem = hwndMenu.AppendItem("Delete Entry", dw.MENU_POPUP, 0, dw.TRUE, dw.FALSE, dw.NOMENU)
+		menuitem.ConnectClicked(popupfunc)
+
+		hwndMenu.AppendItem("", 0, 0, dw.TRUE, dw.FALSE, dw.NOMENU)
+		menuitem = hwndMenu.AppendItem("View File", dw.MENU_POPUP, 0, dw.TRUE, dw.FALSE, dw.NOMENU)
+		menuitem.ConnectClicked(popupfunc)
+		hwndMenu.Popup(mainwindow, x, y)
 		return dw.FALSE
 	})
 
@@ -1693,7 +1726,7 @@ func main() {
 	notebookpage4 := notebook.PageNew(1, dw.FALSE)
 	notebookpage4.Pack(notebookbox4)
 	notebookpage4.SetText("container")
-	container_add(notebookbox4)
+	container_add(notebookbox4, mainwindow)
 
 	notebookbox5 := dw.BoxNew(dw.VERT, 5)
 	notebookpage5 := notebook.PageNew(1, dw.FALSE)

@@ -902,10 +902,50 @@ func item_enter_cb(window dw.HCONTAINER, text string, data dw.POINTER, itemdata 
 	return FALSE
 }
 
+/* Context menus */
+func context_menu_cb(hwnd dw.HMENUITEM, data dw.POINTER) int {
+	statline := dw.POINTER_TO_HANDLE(data)
+
+	dw.Window_set_text(statline, fmt.Sprintf("DW_SIGNAL_CLICKED: Menu: %x Container context menu clicked", dw.HANDLE_TO_UINTPTR(hwnd)))
+	return FALSE;
+}
+
+func item_context_menu_new(text string, data dw.POINTER) dw.HMENUI {
+	hwndMenu := dw.Menu_new(0)
+	hwndSubMenu := dw.Menu_new(0)
+	menuitem := dw.Menu_append_item(hwndSubMenu, "File", dw.MENU_POPUP, 0, TRUE, TRUE, dw.NOMENU)
+	dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(context_menu_cb), data)
+	menuitem = dw.Menu_append_item(hwndSubMenu, "Date", dw.MENU_POPUP, 0, TRUE, TRUE, dw.NOMENU)
+	dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(context_menu_cb), data)
+	menuitem = dw.Menu_append_item(hwndSubMenu, "Size", dw.MENU_POPUP, 0, TRUE, TRUE, dw.NOMENU)
+	dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(context_menu_cb), data)
+	menuitem = dw.Menu_append_item(hwndSubMenu, "None", dw.MENU_POPUP, 0, TRUE, TRUE, dw.NOMENU)
+	dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(context_menu_cb), data)
+
+	menuitem = dw.Menu_append_item(hwndMenu, "Sort", dw.MENU_POPUP, 0, TRUE, FALSE, hwndSubMenu)
+
+	menuitem = dw.Menu_append_item(hwndMenu, "Make Directory", dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU)
+	dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(context_menu_cb), data)
+
+	dw.Menu_append_item(hwndMenu, "", 0, 0, TRUE, FALSE, dw.NOMENU)
+	menuitem = dw.Menu_append_item(hwndMenu, "Rename Entry", dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU)
+	dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(context_menu_cb), data)
+
+	menuitem = dw.Menu_append_item(hwndMenu, "Delete Entry", dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU)
+	dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(context_menu_cb), data)
+
+	dw.Menu_append_item(hwndMenu, "", 0, 0, TRUE, FALSE, dw.NOMENU)
+	menuitem = dw.Menu_append_item(hwndMenu, "View File", dw.MENU_POPUP, 0, TRUE, FALSE, dw.NOMENU)
+	dw.Signal_connect(menuitem, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(context_menu_cb), data)
+
+	return hwndMenu
+}
+
 func item_context_cb(window dw.HCONTAINER, text string, x int, y int, data dw.POINTER, itemdata dw.POINTER) int {
-	message := fmt.Sprintf("DW_SIGNAL_ITEM_CONTEXT: Window: %x Text: %s x: %d y: %d Itemdata: %x", dw.HANDLE_TO_UINTPTR(window),
-		text, x, y, uintptr(itemdata))
+	message := fmt.Sprintf("DW_SIGNAL_ITEM_CONTEXT: Window: %x Text: %s x: %d y: %d Itemdata: %x", dw.HANDLE_TO_UINTPTR(window), text, x, y, uintptr(itemdata))
+	popupmenu := item_context_menu_new(text, data)
 	dw.Window_set_text(dw.POINTER_TO_HANDLE(data), message)
+	dw.Menu_popup(popupmenu, mainwindow, x, y)
 	return FALSE
 }
 

@@ -827,7 +827,7 @@ func text_add(notebookbox2 dw.HBOX) {
 	label.SetStyle(dw.DT_VCENTER|dw.DT_CENTER, dw.DT_VCENTER|dw.DT_CENTER)
 	hbox.PackStart(label, -1, 25, dw.FALSE, dw.TRUE, 0)
 	imageyspin = dw.SpinButtonNew("20", 1021)
-	hbox.PackStart(imageyspin, 25, 25, dw.TRUE, dw.FALSE, 0)
+	hbox.PackStart(imageyspin, 25, 25, dw.TRUE, dw.TRUE, 0)
 	imagexspin.SetLimits(2000, 0)
 	imageyspin.SetLimits(2000, 0)
 	imagexspin.SetPos(20)

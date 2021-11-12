@@ -2866,6 +2866,7 @@ func TimerNew() HTIMER {
 func Timer_disconnect(id HTIMER) {
 	if id.tid > 0 {
 		C.go_timer_disconnect(C.uintptr_t(id.tid))
+		id.tid = 0
 	}
 }
 

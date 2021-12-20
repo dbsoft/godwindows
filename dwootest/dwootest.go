@@ -670,15 +670,15 @@ func archive_add(notebookbox1 dw.HBOX) {
 
 	copypastefield.SetLimit(260)
 
-	browsebox.PackStart(copypastefield, -1, -1, dw.TRUE, dw.FALSE, 4)
+	browsebox.PackStart(copypastefield, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 4)
 
 	copybutton := dw.ButtonNew("Copy", 0)
 
-	browsebox.PackStart(copybutton, -1, -1, dw.FALSE, dw.FALSE, 0)
+	browsebox.PackStart(copybutton, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 0)
 
 	pastebutton := dw.ButtonNew("Paste", 0)
 
-	browsebox.PackStart(pastebutton, -1, -1, dw.FALSE, dw.FALSE, 0)
+	browsebox.PackStart(pastebutton, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 0)
 
 	/* Archive Name */
 	stext := dw.TextNew("File to browse", 0)
@@ -808,9 +808,9 @@ func text_add(notebookbox2 dw.HBOX) {
 	hbox := dw.BoxNew(dw.HORZ, 1)
 	notebookbox2.PackStart(hbox, 100, 20, dw.TRUE, dw.FALSE, 1)
 	status1 = dw.StatusTextNew("", 0)
-	hbox.PackStart(status1, 100, -1, dw.TRUE, dw.FALSE, 1)
+	hbox.PackStart(status1, 100, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 	status2 = dw.StatusTextNew("", 0)
-	hbox.PackStart(status2, 100, -1, dw.TRUE, dw.FALSE, 1)
+	hbox.PackStart(status2, 100, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 	/* a box with combobox and button */
 	hbox = dw.BoxNew(dw.HORZ, 1)
 	notebookbox2.PackStart(hbox, 100, 25, dw.TRUE, dw.FALSE, 1)
@@ -821,12 +821,12 @@ func text_add(notebookbox2 dw.HBOX) {
 	rendcombo.Append("File Display")
 	label := dw.TextNew("Image X:", 100)
 	label.SetStyle(dw.DT_VCENTER|dw.DT_CENTER, dw.DT_VCENTER|dw.DT_CENTER)
-	hbox.PackStart(label, -1, 25, dw.FALSE, dw.TRUE, 0)
+	hbox.PackStart(label, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 	imagexspin = dw.SpinButtonNew("20", 1021)
 	hbox.PackStart(imagexspin, 25, 25, dw.TRUE, dw.TRUE, 0)
 	label = dw.TextNew("Y:", 100)
 	label.SetStyle(dw.DT_VCENTER|dw.DT_CENTER, dw.DT_VCENTER|dw.DT_CENTER)
-	hbox.PackStart(label, -1, 25, dw.FALSE, dw.TRUE, 0)
+	hbox.PackStart(label, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 	imageyspin = dw.SpinButtonNew("20", 1021)
 	hbox.PackStart(imageyspin, 25, 25, dw.TRUE, dw.TRUE, 0)
 	imagexspin.SetLimits(2000, 0)
@@ -834,12 +834,12 @@ func text_add(notebookbox2 dw.HBOX) {
 	imagexspin.SetPos(20)
 	imageyspin.SetPos(20)
 	imagestretchcheck = dw.CheckButtonNew("Stretch", 1021)
-	hbox.PackStart(imagestretchcheck, -1, 25, dw.FALSE, dw.TRUE, 0)
+	hbox.PackStart(imagestretchcheck, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 
 	button1 := dw.ButtonNew("Refresh", 1223)
-	hbox.PackStart(button1, -1, 25, dw.FALSE, dw.TRUE, 0)
+	hbox.PackStart(button1, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 	button2 := dw.ButtonNew("Print", 1224)
-	hbox.PackStart(button2, -1, 25, dw.FALSE, dw.TRUE, 0)
+	hbox.PackStart(button2, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 
 	/* Pre-create the scrollbars so we can query their sizes */
 	vscrollbar = dw.ScrollbarNew(dw.VERT, 50)
@@ -879,11 +879,11 @@ func text_add(notebookbox2 dw.HBOX) {
 	textboxA.PackStart(textbox2, 10, 10, dw.TRUE, dw.TRUE, 0)
 	textbox2.SetFont(FIXEDFONT)
 	/* create horizonal scrollbar */
-	textboxA.PackStart(hscrollbar, -1, -1, dw.TRUE, dw.FALSE, 0)
+	textboxA.PackStart(hscrollbar, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 0)
 
 	/* create vertical scrollbar */
 	vscrollbox = dw.BoxNew(dw.VERT, 0)
-	vscrollbox.PackStart(vscrollbar, -1, -1, dw.FALSE, dw.TRUE, 0)
+	vscrollbox.PackStart(vscrollbar, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.TRUE, 0)
 	/* Pack an area of empty space 14x14 pixels */
 	vscrollbox.PackStart(dw.NOHWND, vscrollbarwidth, hscrollbarheight, dw.FALSE, dw.FALSE, 0)
 	pagebox.PackStart(vscrollbox, 0, 0, dw.FALSE, dw.TRUE, 0)
@@ -1007,7 +1007,7 @@ func tree_add(notebookbox3 dw.HBOX) {
 
 	/* and a status area to see whats going on */
 	tree_status := dw.StatusTextNew("", 0)
-	notebookbox3.PackStart(tree_status, 100, -1, dw.TRUE, dw.FALSE, 1)
+	notebookbox3.PackStart(tree_status, 100, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 
 	/* set up our signal trappers... */
 	tree.ConnectItemContext(func(window dw.HTREE, text string, x int, y int, itemdata dw.POINTER) int {
@@ -1050,23 +1050,23 @@ func container_add(notebookbox4 dw.HBOX, mainwindow dw.HWND) {
 	hbox := dw.BoxNew(dw.HORZ, 0)
 
 	checkbox := dw.CheckButtonNew("Word wrap", 0)
-	hbox.PackStart(checkbox, -1, -1, dw.FALSE, dw.TRUE, 1)
+	hbox.PackStart(checkbox, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.TRUE, 1)
 	text := dw.TextNew("Foreground:", 0)
 	text.SetStyle(dw.DT_VCENTER, dw.DT_VCENTER)
-	hbox.PackStart(text, -1, -1, dw.FALSE, dw.TRUE, 1)
+	hbox.PackStart(text, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.TRUE, 1)
 	mlefore := color_combobox()
-	hbox.PackStart(mlefore, 150, -1, dw.TRUE, dw.FALSE, 1)
+	hbox.PackStart(mlefore, 150, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 	text = dw.TextNew("Background:", 0)
 	text.SetStyle(dw.DT_VCENTER, dw.DT_VCENTER)
-	hbox.PackStart(text, -1, -1, dw.FALSE, dw.TRUE, 1)
+	hbox.PackStart(text, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.TRUE, 1)
 	mleback := color_combobox()
-	hbox.PackStart(mleback, 150, -1, dw.TRUE, dw.FALSE, 1)
+	hbox.PackStart(mleback, 150, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 	checkbox.Set(dw.TRUE)
 	text = dw.TextNew("Font:", 0)
 	text.SetStyle(dw.DT_VCENTER, dw.DT_VCENTER)
-	hbox.PackStart(text, -1, -1, dw.FALSE, dw.TRUE, 1)
+	hbox.PackStart(text, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.TRUE, 1)
 	fontsize := dw.SpinButtonNew("9", 0)
-	hbox.PackStart(fontsize, -1, -1, dw.FALSE, dw.FALSE, 1)
+	hbox.PackStart(fontsize, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 1)
 	fontsize.SetLimits(100, 5)
 	fontsize.SetPos(9)
 	fontname := dw.ComboboxNew("Default", 0)
@@ -1080,8 +1080,8 @@ func container_add(notebookbox4 dw.HBOX, mainwindow dw.HWND) {
 	fontname.Append("Times New Roman Bold")
 	fontname.Append("Times New Roman Italic")
 	fontname.Append("Times New Roman Bold Italic")
-	hbox.PackStart(fontname, 150, -1, dw.TRUE, dw.FALSE, 1)
-	notebookbox4.PackStart(hbox, -1, -1, dw.TRUE, dw.FALSE, 1)
+	hbox.PackStart(fontname, 150, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
+	notebookbox4.PackStart(hbox, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 
 	/* now a container area under this box */
 	container := dw.ContainerNew(100, dw.TRUE)
@@ -1089,7 +1089,7 @@ func container_add(notebookbox4 dw.HBOX, mainwindow dw.HWND) {
 
 	/* and a status area to see whats going on */
 	container_status := dw.StatusTextNew("", 0)
-	notebookbox4.PackStart(container_status, 100, -1, dw.TRUE, dw.FALSE, 1)
+	notebookbox4.PackStart(container_status, 100, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 
 	container.SetColumnTitle("Test")
 	container.FileSystemSetup(flags, titles)
@@ -1305,10 +1305,10 @@ func buttons_add(notebookbox5 dw.HBOX) {
 	notebookbox5.PackStart(combox, 25, 200, dw.TRUE, dw.FALSE, 0)
 	combobox1 := dw.ComboboxNew("fred", 0) /* no point in specifying an initial value */
 	combobox1.Append("fred")
-	combox.PackStart(combobox1, -1, -1, dw.TRUE, dw.FALSE, 0)
+	combox.PackStart(combobox1, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 0)
 
 	combobox2 := dw.ComboboxNew("joe", 0) /* no point in specifying an initial value */
-	combox.PackStart(combobox2, -1, -1, dw.TRUE, dw.FALSE, 0)
+	combox.PackStart(combobox2, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 0)
 	/* add LOTS of items */
 	fmt.Printf("before appending 500 items to combobox using dw_listbox_list_append()\n")
 	text := make([]string, 500)
@@ -1322,16 +1322,16 @@ func buttons_add(notebookbox5 dw.HBOX) {
 	combobox2.Insert("inserted item 5", 5)
 	/* make a spinbutton */
 	spinbutton := dw.SpinButtonNew("", 0) /* no point in specifying text */
-	combox.PackStart(spinbutton, -1, -1, dw.TRUE, dw.FALSE, 0)
+	combox.PackStart(spinbutton, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 0)
 	spinbutton.SetLimits(100, 1)
 	spinbutton.SetPos(30)
 
 	/* make a slider */
 	slider := dw.SliderNew(dw.FALSE, 11, 0) /* no point in specifying text */
-	combox.PackStart(slider, -1, -1, dw.TRUE, dw.FALSE, 0)
+	combox.PackStart(slider, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 0)
 
 	/* Pack the percent */
-	combox.PackStart(percent, -1, -1, dw.TRUE, dw.FALSE, 0)
+	combox.PackStart(percent, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 0)
 
 	/* Connect the handlers */
 	abutton1.ConnectClicked(func(window dw.HBUTTON) int { button_callback(combobox1, combobox2, spinbutton, cal); return dw.TRUE })
@@ -1397,14 +1397,14 @@ func html_add(notebookbox7 dw.HBOX) {
 
 		/* Add navigation buttons */
 		item := dw.ButtonNew("Back", 0)
-		hbox.PackStart(item, -1, -1, dw.FALSE, dw.FALSE, 0)
+		hbox.PackStart(item, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 0)
 		item.ConnectClicked(func(window dw.HBUTTON) int {
 			html.Action(dw.HTML_GOBACK)
 			return dw.FALSE
 		})
 
 		item = dw.ButtonNew("Forward", 0)
-		hbox.PackStart(item, -1, -1, dw.FALSE, dw.FALSE, 0)
+		hbox.PackStart(item, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 0)
 		item.ConnectClicked(func(window dw.HBUTTON) int {
 			html.Action(dw.HTML_GOFORWARD)
 			return dw.FALSE
@@ -1414,7 +1414,7 @@ func html_add(notebookbox7 dw.HBOX) {
 		hbox.PackStart(dw.NOHWND, 5, 1, dw.FALSE, dw.FALSE, 0)
 
 		item = dw.ButtonNew("Reload", 0)
-		hbox.PackStart(item, -1, -1, dw.FALSE, dw.FALSE, 0)
+		hbox.PackStart(item, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 0)
 		item.ConnectClicked(func(window dw.HBUTTON) int {
 			html.Action(dw.HTML_RELOAD)
 			return dw.FALSE
@@ -1422,10 +1422,10 @@ func html_add(notebookbox7 dw.HBOX) {
 
 		/* Put in some extra space */
 		hbox.PackStart(dw.NOHWND, 5, 1, dw.FALSE, dw.FALSE, 0)
-		hbox.PackStart(javascript, -1, -1, dw.TRUE, dw.FALSE, 0)
+		hbox.PackStart(javascript, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 0)
 
 		item = dw.ButtonNew("Run", 0)
-		hbox.PackStart(item, -1, -1, dw.FALSE, dw.FALSE, 0)
+		hbox.PackStart(item, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 0)
 		item.ConnectClicked(func(window dw.HBUTTON) int {
 			script := dw.Window_get_text(javascript)
 			html.JavascriptRun(script, nil)
@@ -1435,7 +1435,7 @@ func html_add(notebookbox7 dw.HBOX) {
 
 		notebookbox7.PackStart(html, 0, 100, dw.TRUE, dw.TRUE, 0)
 		htmlstatus := dw.StatusTextNew("HTML status loading...", 0)
-		notebookbox7.PackStart(htmlstatus, 100, -1, dw.TRUE, dw.FALSE, 1)
+		notebookbox7.PackStart(htmlstatus, 100, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 
 		html.ConnectChanged(func(window dw.HHTML, status int, url string) int {
 			statusnames := []string{"none", "started", "redirect", "loading", "complete"}
@@ -1474,7 +1474,7 @@ func scrollbox_add(notebookbox8 dw.HBOX) {
 	notebookbox8.PackStart(scrollbox, 0, 0, dw.TRUE, dw.TRUE, 1)
 
 	abutton1 := dw.ButtonNew("Show Adjustments", 0)
-	scrollbox.PackStart(abutton1, -1, 30, dw.FALSE, dw.FALSE, 0)
+	scrollbox.PackStart(abutton1, dw.SIZE_AUTO, 30, dw.FALSE, dw.FALSE, 0)
 	abutton1.ConnectClicked(func(window dw.HBUTTON) int {
 		_, pos := scrollbox.GetPos()
 		_, rng := scrollbox.GetRange()
@@ -1511,7 +1511,7 @@ func thread_add(notebookbox9 dw.HBOX) {
 	notebookbox9.PackStart(tmpbox, 0, 0, dw.TRUE, dw.TRUE, 1)
 
 	startbutton = dw.ButtonNew("Start Threads", 0)
-	tmpbox.PackStart(startbutton, -1, 30, dw.FALSE, dw.FALSE, 0)
+	tmpbox.PackStart(startbutton, dw.SIZE_AUTO, 30, dw.FALSE, dw.FALSE, 0)
 	/* Create the base threading components */
 	threadmle = dw.MLENew(0)
 	tmpbox.PackStart(threadmle, 1, 1, dw.TRUE, dw.TRUE, 0)

@@ -237,7 +237,12 @@ var MENU_SEPARATOR = C.DW_MENU_SEPARATOR
 var MENU_AUTO uint = C.DW_MENU_AUTO
 var MENU_POPUP uint = ^uint(0)
 
+/* Miscellanseous constants */
 var PERCENT_INDETERMINATE uint = ^uint(0)
+
+var SIZE_AUTO = C.DW_SIZE_AUTO
+
+var DIR_SEPARATOR = C.DW_DIR_SEPARATOR
 
 /* Return value error codes */
 var ERROR_NONE = C.DW_ERROR_NONE
@@ -483,6 +488,11 @@ func SIGNAL_FUNC(h interface{}) DWFUNC {
 func POINTER_TO_HANDLE(ptr POINTER) HANDLE {
 	h := cgo.Handle(ptr)
 	return h.Value().(HANDLE)
+}
+
+// Convert a uintptr to a HWND (use with care)
+func UINTPTR_TO_HWND(ptr uintptr) HWND {
+	return HWND{C.uintptr_t(ptr)}
 }
 
 // Convert a HANDLE to a UINTPTR, mostly used for display purposes

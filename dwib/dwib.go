@@ -13,14 +13,14 @@ import "C"
 import "unsafe"
 import "hg.code.sf.net/p/godwindows/code.hg/dw"
 
-type DWIB unsafe.Pointer
+type DWIB C.uintptr_t
 
 // Loads a window with the specified name from an XML tree.
 func Load(handle DWIB, name string) dw.HWND {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 
-	return dw.HANDLE_TO_HWND(dw.POINTER_TO_HANDLE(dw.POINTER(C.goib_load(unsafe.Pointer(handle), cname))))
+	return dw.UINTPTR_TO_HWND(uintptr(C.goib_load(C.uintptr_t(handle), cname)))
 }
 
 // Loads a part of a window layout specified by dataname with the specified window name from an XML tree and packs it into box at index.
@@ -30,7 +30,7 @@ func Load_at_index(handle DWIB, name string, dataname string, window dw.HANDLE, 
 	cdataname := C.CString(dataname)
 	defer C.free(unsafe.Pointer(cdataname))
 
-	return int(C.goib_load_at_index(unsafe.Pointer(handle), cname, cdataname, unsafe.Pointer(dw.HANDLE_TO_POINTER(window)), unsafe.Pointer(dw.HANDLE_TO_POINTER(box)), C.int(index)))
+	return int(C.goib_load_at_index(C.uintptr_t(handle), cname, cdataname, C.uintptr_t(dw.HANDLE_TO_UINTPTR(window)), C.uintptr_t(dw.HANDLE_TO_UINTPTR(box)), C.int(index)))
 }
 
 // Loads a part of a window layout specified by dataname with the specified window name from an XML tree and packs it into box at index.
@@ -40,7 +40,7 @@ func LoadAtIndex(handle DWIB, name string, dataname string, window dw.HANDLE, bo
 
 // Shows a window loaded with dwib.Load() using the stored settings.
 func Show(handle dw.HANDLE) {
-	C.goib_show(unsafe.Pointer(dw.HANDLE_TO_POINTER(handle)))
+	C.goib_show(C.uintptr_t(dw.HANDLE_TO_UINTPTR(handle)))
 }
 
 // Loads an XML templates and returns a handle to the XML tree.
@@ -53,7 +53,7 @@ func Open(filename string) DWIB {
 
 // Closes a handle to an XML tree returned by dwib.Open*() and frees the memory associated with the tree.
 func Close(handle DWIB) {
-	C.goib_close(unsafe.Pointer(handle))
+	C.goib_close(C.uintptr_t(handle))
 }
 
 // Update the location of the image root for locating image files.
@@ -87,7 +87,7 @@ func Window_get_handle(handle dw.HANDLE, dataname string) dw.HANDLE {
 	cdataname := C.CString(dataname)
 	defer C.free(unsafe.Pointer(cdataname))
 
-	return dw.POINTER_TO_HANDLE(dw.POINTER(C.goib_window_get_handle(unsafe.Pointer(dw.HANDLE_TO_POINTER(handle)), cdataname)))
+	return dw.UINTPTR_TO_HWND(uintptr(C.goib_window_get_handle(C.uintptr_t(dw.HANDLE_TO_UINTPTR(handle)), cdataname)))
 }
 
 // Gets the window handle for a named widget.

@@ -907,7 +907,7 @@ func context_menu_cb(hwnd dw.HMENUITEM, data dw.POINTER) int {
 	statline := dw.POINTER_TO_HANDLE(data)
 
 	dw.Window_set_text(statline, fmt.Sprintf("DW_SIGNAL_CLICKED: Menu: %x Container context menu clicked", dw.HANDLE_TO_UINTPTR(hwnd)))
-	return FALSE;
+	return FALSE
 }
 
 func item_context_menu_new(text string, data dw.POINTER) dw.HMENUI {
@@ -1290,15 +1290,15 @@ func archive_add() {
 
 	dw.Entryfield_set_limit(copypastefield, 260)
 
-	dw.Box_pack_start(browsebox, copypastefield, -1, -1, dw.TRUE, dw.FALSE, 4)
+	dw.Box_pack_start(browsebox, copypastefield, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 4)
 
 	copybutton := dw.Button_new("Copy", 0)
 
-	dw.Box_pack_start(browsebox, copybutton, -1, -1, dw.FALSE, dw.FALSE, 0)
+	dw.Box_pack_start(browsebox, copybutton, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 0)
 
 	pastebutton := dw.Button_new("Paste", 0)
 
-	dw.Box_pack_start(browsebox, pastebutton, -1, -1, dw.FALSE, dw.FALSE, 0)
+	dw.Box_pack_start(browsebox, pastebutton, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.FALSE, 0)
 
 	/* Archive Name */
 	stext := dw.Text_new("File to browse", 0)
@@ -1375,9 +1375,9 @@ func text_add() {
 	hbox := dw.Box_new(dw.HORZ, 1)
 	dw.Box_pack_start(notebookbox2, hbox, 100, 20, dw.TRUE, dw.FALSE, 1)
 	status1 = dw.Status_text_new("", 0)
-	dw.Box_pack_start(hbox, status1, 100, -1, dw.TRUE, dw.FALSE, 1)
+	dw.Box_pack_start(hbox, status1, 100, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 	status2 = dw.Status_text_new("", 0)
-	dw.Box_pack_start(hbox, status2, 100, -1, dw.TRUE, dw.FALSE, 1)
+	dw.Box_pack_start(hbox, status2, 100, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 1)
 	/* a box with combobox and button */
 	hbox = dw.Box_new(dw.HORZ, 1)
 	dw.Box_pack_start(notebookbox2, hbox, 100, 25, dw.TRUE, dw.FALSE, 1)
@@ -1388,12 +1388,12 @@ func text_add() {
 	dw.Listbox_append(rendcombo, "File Display")
 	label := dw.Text_new("Image X:", 100)
 	dw.Window_set_style(label, dw.DT_VCENTER|dw.DT_CENTER, dw.DT_VCENTER|dw.DT_CENTER)
-	dw.Box_pack_start(hbox, label, -1, 25, dw.FALSE, dw.TRUE, 0)
+	dw.Box_pack_start(hbox, label, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 	imagexspin = dw.Spinbutton_new("20", 1021)
 	dw.Box_pack_start(hbox, imagexspin, 25, 25, dw.TRUE, dw.TRUE, 0)
 	label = dw.Text_new("Y:", 100)
 	dw.Window_set_style(label, dw.DT_VCENTER|dw.DT_CENTER, dw.DT_VCENTER|dw.DT_CENTER)
-	dw.Box_pack_start(hbox, label, -1, 25, dw.FALSE, dw.TRUE, 0)
+	dw.Box_pack_start(hbox, label, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 	imageyspin = dw.Spinbutton_new("20", 1021)
 	dw.Box_pack_start(hbox, imageyspin, 25, 25, dw.TRUE, dw.TRUE, 0)
 	dw.Spinbutton_set_limits(imagexspin, 2000, 0)
@@ -1401,12 +1401,12 @@ func text_add() {
 	dw.Spinbutton_set_pos(imagexspin, 20)
 	dw.Spinbutton_set_pos(imageyspin, 20)
 	imagestretchcheck = dw.Checkbox_new("Stretch", 1021)
-	dw.Box_pack_start(hbox, imagestretchcheck, -1, 25, dw.FALSE, dw.TRUE, 0)
+	dw.Box_pack_start(hbox, imagestretchcheck, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 
 	button1 := dw.Button_new("Refresh", 1223)
-	dw.Box_pack_start(hbox, button1, -1, 25, dw.FALSE, dw.TRUE, 0)
+	dw.Box_pack_start(hbox, button1, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 	button2 := dw.Button_new("Print", 1224)
-	dw.Box_pack_start(hbox, button2, -1, 25, dw.FALSE, dw.TRUE, 0)
+	dw.Box_pack_start(hbox, button2, dw.SIZE_AUTO, 25, dw.FALSE, dw.TRUE, 0)
 
 	/* Pre-create the scrollbars so we can query their sizes */
 	vscrollbar = dw.Scrollbar_new(dw.VERT, 50)
@@ -1446,11 +1446,11 @@ func text_add() {
 	dw.Box_pack_start(textboxA, textbox2, 10, 10, dw.TRUE, dw.TRUE, 0)
 	dw.Window_set_font(textbox2, FIXEDFONT)
 	/* create horizonal scrollbar */
-	dw.Box_pack_start(textboxA, hscrollbar, -1, -1, dw.TRUE, dw.FALSE, 0)
+	dw.Box_pack_start(textboxA, hscrollbar, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.TRUE, dw.FALSE, 0)
 
 	/* create vertical scrollbar */
 	vscrollbox = dw.Box_new(dw.VERT, 0)
-	dw.Box_pack_start(vscrollbox, vscrollbar, -1, -1, dw.FALSE, dw.TRUE, 0)
+	dw.Box_pack_start(vscrollbox, vscrollbar, dw.SIZE_AUTO, dw.SIZE_AUTO, dw.FALSE, dw.TRUE, 0)
 	/* Pack an area of empty space 14x14 pixels */
 	dw.Box_pack_start(vscrollbox, dw.NOHWND, vscrollbarwidth, hscrollbarheight, dw.FALSE, dw.FALSE, 0)
 	dw.Box_pack_start(pagebox, vscrollbox, 0, 0, dw.FALSE, dw.TRUE, 0)
@@ -1502,7 +1502,7 @@ func tree_add() {
 
 	/* and a status area to see whats going on */
 	tree_status := dw.Status_text_new("", 0)
-	dw.Box_pack_start(notebookbox3, tree_status, 100, -1, TRUE, FALSE, 1)
+	dw.Box_pack_start(notebookbox3, tree_status, 100, dw.SIZE_AUTO, TRUE, FALSE, 1)
 
 	/* set up our signal trappers... */
 	dw.Signal_connect(tree, dw.SIGNAL_ITEM_CONTEXT, dw.SIGNAL_FUNC(item_context_cb), dw.HANDLE_TO_POINTER(tree_status))
@@ -1537,23 +1537,23 @@ func container_add() {
 	hbox := dw.Box_new(dw.HORZ, 0)
 
 	checkbox := dw.Checkbox_new("Word wrap", 0)
-	dw.Box_pack_start(hbox, checkbox, -1, -1, FALSE, TRUE, 1)
+	dw.Box_pack_start(hbox, checkbox, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, TRUE, 1)
 	text := dw.Text_new("Foreground:", 0)
 	dw.Window_set_style(text, dw.DT_VCENTER, dw.DT_VCENTER)
-	dw.Box_pack_start(hbox, text, -1, -1, FALSE, TRUE, 1)
+	dw.Box_pack_start(hbox, text, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, TRUE, 1)
 	mlefore := color_combobox()
-	dw.Box_pack_start(hbox, mlefore, 150, -1, TRUE, FALSE, 1)
+	dw.Box_pack_start(hbox, mlefore, 150, dw.SIZE_AUTO, TRUE, FALSE, 1)
 	text = dw.Text_new("Background:", 0)
 	dw.Window_set_style(text, dw.DT_VCENTER, dw.DT_VCENTER)
-	dw.Box_pack_start(hbox, text, -1, -1, FALSE, TRUE, 1)
+	dw.Box_pack_start(hbox, text, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, TRUE, 1)
 	mleback := color_combobox()
-	dw.Box_pack_start(hbox, mleback, 150, -1, TRUE, FALSE, 1)
+	dw.Box_pack_start(hbox, mleback, 150, dw.SIZE_AUTO, TRUE, FALSE, 1)
 	dw.Checkbox_set(checkbox, TRUE)
 	text = dw.Text_new("Font:", 0)
 	dw.Window_set_style(text, dw.DT_VCENTER, dw.DT_VCENTER)
-	dw.Box_pack_start(hbox, text, -1, -1, FALSE, TRUE, 1)
+	dw.Box_pack_start(hbox, text, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, TRUE, 1)
 	fontsize := dw.Spinbutton_new("9", 0)
-	dw.Box_pack_start(hbox, fontsize, -1, -1, FALSE, FALSE, 1)
+	dw.Box_pack_start(hbox, fontsize, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, FALSE, 1)
 	dw.Spinbutton_set_limits(fontsize, 100, 5)
 	dw.Spinbutton_set_pos(fontsize, 9)
 	fontname := dw.Combobox_new("Default", 0)
@@ -1567,8 +1567,8 @@ func container_add() {
 	dw.Listbox_append(fontname, "Times New Roman Bold")
 	dw.Listbox_append(fontname, "Times New Roman Italic")
 	dw.Listbox_append(fontname, "Times New Roman Bold Italic")
-	dw.Box_pack_start(hbox, fontname, 150, -1, TRUE, FALSE, 1)
-	dw.Box_pack_start(notebookbox4, hbox, -1, -1, TRUE, FALSE, 1)
+	dw.Box_pack_start(hbox, fontname, 150, dw.SIZE_AUTO, TRUE, FALSE, 1)
+	dw.Box_pack_start(notebookbox4, hbox, dw.SIZE_AUTO, dw.SIZE_AUTO, TRUE, FALSE, 1)
 
 	dw.Window_set_data(hbox, "mlefore", dw.HANDLE_TO_POINTER(mlefore))
 	dw.Window_set_data(hbox, "mleback", dw.HANDLE_TO_POINTER(mleback))
@@ -1581,7 +1581,7 @@ func container_add() {
 
 	/* and a status area to see whats going on */
 	container_status := dw.Status_text_new("", 0)
-	dw.Box_pack_start(notebookbox4, container_status, 100, -1, TRUE, FALSE, 1)
+	dw.Box_pack_start(notebookbox4, container_status, 100, dw.SIZE_AUTO, TRUE, FALSE, 1)
 
 	dw.Filesystem_set_column_title(container, "Test")
 	dw.Filesystem_setup(container, flags, titles)
@@ -1678,14 +1678,14 @@ func buttons_add() {
 	dw.Box_pack_start(notebookbox5, combox, 25, 200, TRUE, FALSE, 0)
 	combobox1 = dw.Combobox_new("fred", 0) /* no point in specifying an initial value */
 	dw.Listbox_append(combobox1, "fred")
-	dw.Box_pack_start(combox, combobox1, -1, -1, TRUE, FALSE, 0)
+	dw.Box_pack_start(combox, combobox1, dw.SIZE_AUTO, dw.SIZE_AUTO, TRUE, FALSE, 0)
 	/*
 	   dw_window_set_text( combobox, "initial value");
 	*/
 	dw.Signal_connect(combobox1, dw.SIGNAL_LIST_SELECT, dw.SIGNAL_FUNC(combobox_select_event_callback), nil)
 
 	combobox2 = dw.Combobox_new("joe", 0) /* no point in specifying an initial value */
-	dw.Box_pack_start(combox, combobox2, -1, -1, TRUE, FALSE, 0)
+	dw.Box_pack_start(combox, combobox2, dw.SIZE_AUTO, dw.SIZE_AUTO, TRUE, FALSE, 0)
 	/*
 	   dw_window_set_text( combobox, "initial value");
 	*/
@@ -1703,17 +1703,17 @@ func buttons_add() {
 	dw.Listbox_insert(combobox2, "inserted item 5", 5)
 	/* make a spinbutton */
 	spinbutton = dw.Spinbutton_new("", 0) /* no point in specifying text */
-	dw.Box_pack_start(combox, spinbutton, -1, -1, TRUE, FALSE, 0)
+	dw.Box_pack_start(combox, spinbutton, dw.SIZE_AUTO, dw.SIZE_AUTO, TRUE, FALSE, 0)
 	dw.Spinbutton_set_limits(spinbutton, 100, 1)
 	dw.Spinbutton_set_pos(spinbutton, 30)
 	dw.Signal_connect(spinbutton, dw.SIGNAL_VALUE_CHANGED, dw.SIGNAL_FUNC(spinbutton_valuechanged_callback), nil)
 	/* make a slider */
 	slider = dw.Slider_new(FALSE, 11, 0) /* no point in specifying text */
-	dw.Box_pack_start(combox, slider, -1, -1, TRUE, FALSE, 0)
+	dw.Box_pack_start(combox, slider, dw.SIZE_AUTO, dw.SIZE_AUTO, TRUE, FALSE, 0)
 	dw.Signal_connect(slider, dw.SIGNAL_VALUE_CHANGED, dw.SIGNAL_FUNC(slider_valuechanged_callback), nil)
 	/* make a percent */
 	percent = dw.Percent_new(0)
-	dw.Box_pack_start(combox, percent, -1, -1, TRUE, FALSE, 0)
+	dw.Box_pack_start(combox, percent, dw.SIZE_AUTO, dw.SIZE_AUTO, TRUE, FALSE, 0)
 }
 
 func create_button(redraw bool) {
@@ -1761,34 +1761,34 @@ func html_add() {
 
 		/* Add navigation buttons */
 		item := dw.Button_new("Back", 0)
-		dw.Box_pack_start(hbox, item, -1, -1, FALSE, FALSE, 0)
+		dw.Box_pack_start(hbox, item, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, FALSE, 0)
 		dw.Signal_connect(item, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(web_back_clicked), dw.HANDLE_TO_POINTER(html))
 
 		item = dw.Button_new("Forward", 0)
-		dw.Box_pack_start(hbox, item, -1, -1, FALSE, FALSE, 0)
+		dw.Box_pack_start(hbox, item, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, FALSE, 0)
 		dw.Signal_connect(item, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(web_forward_clicked), dw.HANDLE_TO_POINTER(html))
 
 		/* Put in some extra space */
 		dw.Box_pack_start(hbox, dw.NOHWND, 5, 1, FALSE, FALSE, 0)
 
 		item = dw.Button_new("Reload", 0)
-		dw.Box_pack_start(hbox, item, -1, -1, FALSE, FALSE, 0)
+		dw.Box_pack_start(hbox, item, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, FALSE, 0)
 		dw.Signal_connect(item, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(web_reload_clicked), dw.HANDLE_TO_POINTER(html))
 
 		/* Put in some extra space */
 		dw.Box_pack_start(hbox, dw.NOHWND, 5, 1, FALSE, FALSE, 0)
-		dw.Box_pack_start(hbox, javascript, -1, -1, TRUE, FALSE, 0)
+		dw.Box_pack_start(hbox, javascript, dw.SIZE_AUTO, dw.SIZE_AUTO, TRUE, FALSE, 0)
 
 		item = dw.Button_new("Run", 0)
 		dw.Window_set_data(item, "javascript", dw.HANDLE_TO_POINTER(javascript))
-		dw.Box_pack_start(hbox, item, -1, -1, FALSE, FALSE, 0)
+		dw.Box_pack_start(hbox, item, dw.SIZE_AUTO, dw.SIZE_AUTO, FALSE, FALSE, 0)
 		dw.Signal_connect(item, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(web_run_clicked), dw.HANDLE_TO_POINTER(html))
 		dw.Window_click_default(javascript, item)
 
 		dw.Box_pack_start(notebookbox7, html, 0, 100, TRUE, TRUE, 0)
 		dw.Html_url(html, "https://dbsoft.org/dw_help.php")
 		htmlstatus := dw.Status_text_new("HTML status loading...", 0)
-		dw.Box_pack_start(notebookbox7, htmlstatus, 100, -1, TRUE, FALSE, 1)
+		dw.Box_pack_start(notebookbox7, htmlstatus, 100, dw.SIZE_AUTO, TRUE, FALSE, 1)
 		dw.Signal_connect(html, dw.SIGNAL_HTML_CHANGED, dw.SIGNAL_FUNC(web_html_changed), dw.HANDLE_TO_POINTER(htmlstatus))
 		dw.Signal_connect(html, dw.SIGNAL_HTML_RESULT, dw.SIGNAL_FUNC(web_html_result), dw.HANDLE_TO_POINTER(javascript))
 	} else {
@@ -1806,7 +1806,7 @@ func scrollbox_add() {
 	dw.Box_pack_start(notebookbox8, scrollbox, 0, 0, TRUE, TRUE, 1)
 
 	abutton1 := dw.Button_new("Show Adjustments", 0)
-	dw.Box_pack_start(scrollbox, abutton1, -1, 30, FALSE, FALSE, 0)
+	dw.Box_pack_start(scrollbox, abutton1, dw.SIZE_AUTO, 30, FALSE, FALSE, 0)
 	dw.Signal_connect(abutton1, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(scrollbox_button_callback), nil)
 
 	for i = 0; i < MAX_WIDGETS; i++ {
@@ -1838,7 +1838,7 @@ func thread_add() {
 	dw.Box_pack_start(notebookbox9, tmpbox, 0, 0, dw.TRUE, dw.TRUE, 1)
 
 	startbutton = dw.Button_new("Start Threads", 0)
-	dw.Box_pack_start(tmpbox, startbutton, -1, 30, dw.FALSE, dw.FALSE, 0)
+	dw.Box_pack_start(tmpbox, startbutton, dw.SIZE_AUTO, 30, dw.FALSE, dw.FALSE, 0)
 	dw.Signal_connect(startbutton, dw.SIGNAL_CLICKED, dw.SIGNAL_FUNC(start_threads_button_callback), nil)
 
 	/* Create the base threading components */

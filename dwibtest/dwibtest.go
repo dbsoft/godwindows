@@ -39,12 +39,12 @@ func main() {
 
 	/* Load the interface XML file */
 	handle := dwib.Open("example.xml")
-	if handle == nil && len(SRCROOT) > 0 {
+	if handle == 0 && len(SRCROOT) > 0 {
 		handle = dwib.Open(fmt.Sprintf("%s/example.xml", SRCROOT))
 	}
 
 	/* Show an error if it fails to load */
-	if handle == nil {
+	if handle == 0 {
 		dw.MessageBox(APP_NAME, dw.MB_OK|dw.MB_ERROR, "Unable to load the interface XML.")
 		return
 	}
